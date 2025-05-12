@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import '../css/notemate.css';
-
+import querymateImage from '../../images/querymate-image.png';
+import notemateImage from '../../images/notemate-image.png';
+import logoImage from '../../images/logo-image.png';
+import callbotImage from '../../images/callbot-image.png';
+import chatbotImage from '../../images/chatbot-image.png';
+import beforemeetingImage from '../../images/before-meeting.png';
 const Notemate = () => {
   const [filterType, setFilterType] = useState('이름');
   const [name, setName] = useState('');
@@ -21,11 +26,7 @@ const Notemate = () => {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (filterType === '이름') {
-      setName(value);
-    } else {
-      setEmail(value);
-    }
+    filterType === '이름' ? setName(value) : setEmail(value);
 
     if (value.length === 0) {
       setSuggestions([]);
@@ -40,11 +41,7 @@ const Notemate = () => {
   };
 
   const handleSelectSuggestion = (value) => {
-    if (filterType === '이름') {
-      setName(value);
-    } else {
-      setEmail(value);
-    }
+    filterType === '이름' ? setName(value) : setEmail(value);
     setSuggestions([]);
   };
 
@@ -53,9 +50,7 @@ const Notemate = () => {
       alert('이름 또는 이메일 중 하나 이상 입력하세요.');
       return;
     }
-
-    const newUser = { name, email };
-    setUsers([...users, newUser]);
+    setUsers([...users, { name, email }]);
     setName('');
     setEmail('');
     setSuggestions([]);
@@ -71,24 +66,29 @@ const Notemate = () => {
 
   return (
     <div className="notemate-page">
+      {/* 헤더 */}
       <header className="notemate-header">
-        <div className="logo-area">🏢 WLBMATE</div>
+        <div className="logo-area">
+          <img src={logoImage} alt="로고" />
+          WLBMATE
+        </div>
+
         <nav className="nav-links">
-          <a href="#">🗂 QUERYMATE</a>
-          <a href="#">📝 NOTEMATE</a>
-          <a href="#">💬 CHATMATE</a>
-          <a href="#">📞 CALLMATE</a>
+          <a href="#"><img src={querymateImage} alt="querymate" />QUERYMATE</a>
+          <a href="#"><img src={notemateImage} alt="notemate" />NOTEMATE</a>
+          <a href="#"><img src={chatbotImage} alt="chatbot" />CHATMATE</a>
+          <a href="#"><img src={callbotImage} alt="callbot" />CALLMATE</a>
         </nav>
+
         <div className="header-actions">
-          <button className="info-btn">내 정보</button>
-          <button className="logout-btn">로그아웃</button>
+          <button>내 정보</button>
+          <button>로그아웃</button>
         </div>
       </header>
 
+      {/* 메인 */}
       <main className="notemate-main">
         <div className="logo-title">
-          <img src="/notemate-logo.png" alt="NOTEMATE" className="logo-img" />
-          <h2>NOTEMATE</h2>
         </div>
 
         <div className="notemate-wrapper">
@@ -128,23 +128,27 @@ const Notemate = () => {
                   <div className="table-row" key={index}>
                     <span>{user.name}</span>
                     <span>{user.email}</span>
-                    <button onClick={() => handleDelete(index)} className="delete-btn">
-                      ✕
-                    </button>
+                    <button onClick={() => handleDelete(index)} className="delete-btn">✕</button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="mic-icon">🎤</div>
+            <div className="mic-icon">
+              <img src={beforemeetingImage} alt="mic" />
+            </div>
           </div>
         </div>
       </main>
 
+      {/* 푸터 */}
       <footer className="notemate-footer">
         <div>DEVELOPER</div>
         <div>
-          GITHUB: <a href="https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team" target="_blank" rel="noreferrer">https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team</a>
+          GITHUB:{' '}
+          <a href="https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team" target="_blank" rel="noreferrer">
+            https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team
+          </a>
         </div>
       </footer>
     </div>
