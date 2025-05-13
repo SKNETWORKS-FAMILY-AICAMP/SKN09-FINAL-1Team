@@ -72,21 +72,23 @@
 // export default Login;
 
 import React, { useState } from 'react';
-import '../css/login.css'; // 위치 주의
+import '../css/login.css'; 
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (id && password) {
-      alert('로그인 성공!'); // 임시 로직
+      navigate('/main');
     }
   };
 
   return (
-    <div className="login-container">
+        <div className="login-container">
       <div className="login-logo-section">
         <div className="icon-curve">
           <div className="icon-item" style={{ top: '40px', left: '0' }}>
@@ -108,7 +110,7 @@ const Login = () => {
         </div>
 
         <img src="/images/wlbmate_logo.png" alt="WLB MATE" className="main-logo" />
-        <h1 className="logo-text">WLB MATE</h1>
+          <h1 className="logo-text">WLB MATE</h1>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
