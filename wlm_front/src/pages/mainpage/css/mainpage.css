@@ -8,11 +8,11 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     padding: 0;
     gap: 25px;
     position: relative;
-    width: 1440px;
+    width: 1280px;
     min-height: 1339px;
     background: #fffff9;
     border: 1px solid #000;
@@ -20,7 +20,7 @@ body {
   }
 
   .main-logo-wrapper {
-    width: 1440px;
+    width: 1280px;
     height: 250px;
     display: flex;
     align-items: center;
@@ -28,51 +28,32 @@ body {
     position: relative;
   }
 
-  .main-logo {
-    position: absolute;
-    width: 250px;
-    height: 250px;
-    background: url('wlb_logo.png') no-repeat center/cover;
-  }
-  
   .body-section {
     position: relative;
-    width: 1440px;
+    display: flex;
+    flex-direction: row;
+    width: 1280px;
     height: 836px;
+    justify-content: space-between;
     background: #fffff9;
     border: 1px solid #000;
     margin-top: 0px;
   }
   
   .card {
-    position: absolute;
-    width: 600px;
-    height: 300px;
+    position: relative;
+    width: 315px;
+    height: 700px;
     border-radius: 30px;
     box-sizing: border-box;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     overflow: hidden;
     padding: 0;
     gap: 0;
-  }
-  
-  .card-left {
-    left: 70px;
-    top: 94px;
-  }
-  .card-right {
-    left: 770px;
-    top: 91px;
-  }
-  .card-bottom-left {
-    left: 70px;
-    top: 439px;
-  }
-  .card-bottom-right {
-    left: 770px;
-    top: 439px;
+    border: 1px solid #000;
+    cursor: pointer;
   }
   
   .card-bg {
@@ -89,7 +70,7 @@ body {
   .note-bg,
   .call-bg,
   .query-bg {
-    background: #d7f2e8;
+    background: #fffff9;
     transition: background 0.3s;
   }
 
@@ -97,6 +78,8 @@ body {
     position: relative;
     width: 300px;
     height: 300px;
+    top: 50%;
+    transform: translateY(-100%);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -107,7 +90,7 @@ body {
   }
 
   .card:hover .card-bg {
-    background: #7fbfbc;
+    background: #d8d8d8;
     box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
   }
 
@@ -129,10 +112,9 @@ body {
   }
   
   .card-title {
-    width: 300px;
+    position: absolute;
     display: flex;
-    top: 25%;
-    transform: translateY(-25%);
+    top: 60%;
     align-items: center;
     justify-content: center;
     font-family: 'Inter', sans-serif;
@@ -142,4 +124,5 @@ body {
     z-index: 3;
     text-align: center;
     width: 80%;
+    opacity: 0.7;
   }
