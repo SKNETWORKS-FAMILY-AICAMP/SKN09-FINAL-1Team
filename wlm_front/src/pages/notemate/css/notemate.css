@@ -1,0 +1,241 @@
+/* 전체 페이지 레이아웃 */
+.notemate-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f9f9f0;
+}
+
+/* 헤더 */
+.notemate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+  height: 60px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  gap: 0.5rem;
+  color: #111;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex: 1;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #111;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.header-actions button {
+  background-color: #222;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.header-actions button:hover {
+  background-color: #000;
+}
+
+
+/* 메인 */
+.notemate-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+.logo-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo-img {
+  width: 70px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+/* 노트메이트 박스 */
+.notemate-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.notemate-box {
+  background-color: #e6f0db;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 700px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* 검색 입력 + 드롭다운 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-bar select {
+  height: 2.5rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  padding: 0 1rem;
+  background: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.search-bar input {
+  flex: 1;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 1rem;
+}
+
+/* 등록 버튼 */
+.register-btn {
+  background-color: black;
+  color: white;
+  border: none;
+  height: 2.5rem;
+  padding: 0 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.register-btn:hover {
+  background-color: #222;
+}
+
+/* 자동완성 리스트 */
+.suggestion-list {
+  position: absolute;
+  top: 3.2rem;
+  left: 8rem;
+  right: 1rem;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-list li {
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.suggestion-list li:hover {
+  background-color: #f1f1f1;
+}
+
+/* 사용자 테이블 */
+.user-table {
+  margin-top: 2rem;
+}
+
+.table-header,
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.table-header {
+  background-color: #d6e8b4;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.table-row span {
+  flex: 1;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: red;
+}
+
+/* 마이크 아이콘 */
+.mic-icon {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 2rem;
+  color: #555;
+}
+
+/* 푸터 */
+.notemate-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 2rem;
+  border-top: 1px solid #ccc;
+  background-color: white;
+  font-size: 0.85rem;
+  color: #222;
+}
+
+.notemate-footer a {
+  color: #0044cc;
+  text-decoration: none;
+}
+
+.notemate-footer a:hover {
+  text-decoration: underline;
+}
