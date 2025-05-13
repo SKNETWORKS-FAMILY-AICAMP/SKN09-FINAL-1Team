@@ -24,80 +24,7 @@ html, body {
   overflow: hidden; 
 }
 
-/* 헤더 */
-.notemate-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: white;
-  border-bottom: 1px solid #ccc;
-  height: 60px;
-  width: 100%;
-}
 
-.logo-area {
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-  gap: 0.5rem;
-  color: #111;
-}
-
-.logo-area img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  flex: 1;
-}
-
-.nav-links a {
-  text-decoration: none;
-  font-weight: 600;
-  color: #111;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: color 0.3s ease;
-}
-
-.nav-links a:hover {
-  color: #0077cc;
-}
-
-.nav-links img {
-  width: 16px;
-  height: 16px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.7rem;
-}
-
-.header-actions button {
-  background-color: #222;
-  color: #fff;
-  border: none;
-  padding: 0.4rem 1.1rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.header-actions button:hover {
-  background-color: #000;
-}
 
 /* 메인 */
 .notemate-main {
@@ -276,26 +203,73 @@ html, body {
   height: 70px;
   object-fit: contain;
 }
-
-/* 푸터 */
-.notemate-footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.8rem 1rem 0.5rem;
-  border-top: 1px solid #ccc;
-  background-color: white;
-  font-size: 0.85rem;
-  color: #222;
-  width: 100%;
+.mic-button {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
 }
 
-.notemate-footer a {
-  color: #0044cc;
-  text-decoration: none;
+.mic-button .mic-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: rgba(255, 0, 0, 0.4);
+  animation: pulseAnim 1.4s infinite ease-in-out;
+  z-index: 0;
 }
 
-.notemate-footer a:hover {
-  text-decoration: underline;
+
+.custom-modal {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff0f0;
+  border: 2px solid #e18a8a;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  z-index: 9999;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.custom-modal .highlight {
+  color: red;
+  font-weight: bold;
+}
+
+.custom-modal button {
+  margin: 1rem 0.5rem 0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.custom-modal button:first-of-type {
+  background-color: #7fd67f;
+}
+
+.custom-modal button:last-of-type {
+  background-color: #e88282;
+  color: white;
+}
+
+.timer-text {
+  margin-top: 0.7rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #e74c3c;
+  text-align: center;
 }
 
 /* 반응형 */
@@ -319,5 +293,16 @@ html, body {
   .mic-icon img {
     width: 18px;
     height: 18px;
+  }
+}
+
+@keyframes pulseAnim {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
   }
 }

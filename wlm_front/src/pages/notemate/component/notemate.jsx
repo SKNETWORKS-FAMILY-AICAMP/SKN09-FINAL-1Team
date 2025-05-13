@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import '../css/notemate.css';
-import querymateImage from '../../images/querymate-image.png';
-import notemateImage from '../../images/notemate-image.png';
-import logoImage from '../../images/logo-image.png';
-import callbotImage from '../../images/callbot-image.png';
-import chatbotImage from '../../images/chatbot-image.png';
+import Header from '../../../statics/component/header.jsx';
+import Footer from '../../../statics/component/footer.jsx';
 import beforemeetingImage from '../../images/before-meeting.png';
+
 const Notemate = () => {
   const [filterType, setFilterType] = useState('이름');
   const [name, setName] = useState('');
@@ -18,6 +16,11 @@ const Notemate = () => {
     { name: '이재희', email: 'qwerqwer@naver.com' },
     { name: '이재상', email: 'qienviona@gmail.com' },
   ]);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [modalStep, setModalStep] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [timerInterval, setTimerInterval] = useState(null);
 
   const handleSelectChange = (e) => {
     setFilterType(e.target.value);
@@ -64,33 +67,35 @@ const Notemate = () => {
 
   const inputValue = filterType === '이름' ? name : email;
 
+  const formatTime = (seconds) => {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  };
+
+  const startMeeting = () => {
+    const now = Date.now();
+    setIsRecording(true);
+
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - now) / 1000));
+    }, 1000);
+    setTimerInterval(interval);
+  };
+
+  const stopMeeting = () => {
+    clearInterval(timerInterval);
+    setIsRecording(false);
+    setElapsed(0);
+    setTimerInterval(null);
+  };
+
   return (
     <div className="notemate-page">
-      {/* 헤더 */}
-      <header className="notemate-header">
-        <div className="logo-area">
-          <img src={logoImage} alt="로고" />
-          WLBMATE
-        </div>
+      <Header />
 
-        <nav className="nav-links">
-          <a href="#"><img src={querymateImage} alt="querymate" />QUERYMATE</a>
-          <a href="#"><img src={notemateImage} alt="notemate" />NOTEMATE</a>
-          <a href="#"><img src={chatbotImage} alt="chatbot" />CHATMATE</a>
-          <a href="#"><img src={callbotImage} alt="callbot" />CALLMATE</a>
-        </nav>
-
-        <div className="header-actions">
-          <button>내 정보</button>
-          <button>로그아웃</button>
-        </div>
-      </header>
-
-      {/* 메인 */}
       <main className="notemate-main">
-        <div className="logo-title">
-        </div>
-
         <div className="notemate-wrapper">
           <div className="notemate-box">
             <div className="search-bar">
@@ -135,22 +140,65 @@ const Notemate = () => {
             </div>
 
             <div className="mic-icon">
-              <img src={beforemeetingImage} alt="mic" />
+              <button
+                className="mic-button"
+                onClick={() =>
+                  isRecording ? setModalStep('stopConfirm') : setModalStep('startConfirm')
+                }
+              >
+                {isRecording && <div className="mic-pulse" />}
+                <img src={beforemeetingImage} alt="mic" />
+              </button>
+
+              {isRecording && (
+                <div className="timer-text">⏱ {formatTime(elapsed)}</div>
+              )}
             </div>
           </div>
         </div>
       </main>
 
-      {/* 푸터 */}
-      <footer className="notemate-footer">
-        <div>DEVELOPER</div>
-        <div>
-          GITHUB:{' '}
-          <a href="https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team" target="_blank" rel="noreferrer">
-            https://github.com/SKNETWORKS-FAMILY-AICAMP/SKNO9-FINAL-1Team
-          </a>
+      {modalStep && (
+        <div className="custom-modal">
+          {modalStep === 'startConfirm' && (
+            <>
+              <p>
+                🟡 회의를 시작하겠습니까?<br />
+                <small>(강제 종료 등 비정상적으로 종료되면 회의가 종료되지 않습니다.)</small>
+              </p>
+              <button onClick={() => setModalStep('startNotice')}>네</button>
+              <button onClick={() => setModalStep(null)}>아니요</button>
+            </>
+          )}
+          {modalStep === 'startNotice' && (
+            <>
+              <p>🟢 회의를 시작합니다.</p>
+              <button onClick={() => {
+                startMeeting();
+                setModalStep(null);
+              }}>확인</button>
+            </>
+          )}
+          {modalStep === 'stopConfirm' && (
+            <>
+              <p>🛑 회의를 종료하시겠습니까?</p>
+              <button onClick={() => setModalStep('stopNotice')}>네</button>
+              <button onClick={() => setModalStep(null)}>아니요</button>
+            </>
+          )}
+          {modalStep === 'stopNotice' && (
+            <>
+              <p>회의를 종료합니다.</p>
+              <button onClick={() => {
+                stopMeeting();
+                setModalStep(null);
+              }}>확인</button>
+            </>
+          )}
         </div>
-      </footer>
+      )}
+
+      <Footer />
     </div>
   );
 };
