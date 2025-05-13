@@ -1,0 +1,7 @@
+*.container {
+  display: flex;       /* 🔥 핵심! */
+  width: 100vw;
+  height: 100vh;
+}
+  
+  
