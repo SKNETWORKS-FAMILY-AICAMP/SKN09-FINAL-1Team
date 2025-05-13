@@ -1,0 +1,17 @@
+.mainContent {
+  flex: 1;
+  padding: 32px;
+}
+
+.answerBox {
+  margin-top: 24px;
+  background: #fffbe6;
+  padding: 16px;
+  border-radius: 8px;
+  min-height: 120px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+} 

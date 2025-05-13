@@ -1,0 +1,14 @@
+.sideBar {
+  width: 250px;
+  background: #f4f4f4;
+  padding: 16px;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+}
+
+.title {
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  font-weight: bold;
+} 

@@ -1,17 +1,12 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import ChatPage from './pages/chatbot/component/chatPage'
-import './App.css'
+import React from 'react';
+import Base from './pages/chatbot/base/base.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <ChatPage />
+      <Base />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
