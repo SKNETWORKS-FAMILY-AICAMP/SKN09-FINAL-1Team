@@ -1,32 +1,44 @@
 import React from 'react';
-import '../../statics/css/header.css';
+import '../css/header.css';
 
-import querymateImage from '../../../src/pages/images/querymate-image.png';
-import notemateImage from '../../../src/pages/images/notemate-image.png';
 import logoImage from '../../../src/pages/images/logo-image.png';
-import callbotImage from '../../../src/pages/images/callbot-image.png';
-import chatbotImage from '../../../src/pages/images/chatbot-image.png';
 
 const Header = () => {
   return (
-    <header className="notemate-header">
-      <div className="logo-area">
-        <img src={logoImage} alt="로고" />
-        WLBMATE
+    <div className="header">
+      {/* 로고 */}
+      <div className="logo" style={{ backgroundImage: `url(${logoImage})` }} />
+
+      {/* 메뉴바 */}
+      <div className="menubar">
+        <a href="/querymate" className="menu-group">
+          <div className="menu-icon chat"></div>
+          <div className="menu-label">QUERYMATE</div>
+        </a>
+        <a href="/" className="menu-group">
+          <div className="menu-icon note"></div>
+          <div className="menu-label">NOTEMATE</div>
+        </a>
+        <a href="#" className="menu-group">
+          <div className="menu-icon claim"></div>
+          <div className="menu-label">CHATMATE</div>
+        </a>
+        <a href="#" className="menu-group">
+          <div className="menu-icon call"></div>
+          <div className="menu-label">CALLMATE</div>
+        </a>
       </div>
 
-      <nav className="nav-links">
-        <a href="#"><img src={querymateImage} alt="querymate" />QUERYMATE</a>
-        <a href="#"><img src={notemateImage} alt="notemate" />NOTEMATE</a>
-        <a href="#"><img src={chatbotImage} alt="chatbot" />CHATMATE</a>
-        <a href="#"><img src={callbotImage} alt="callbot" />CALLMATE</a>
-      </nav>
-
-      <div className="header-actions">
-        <button>내 정보</button>
-        <button>로그아웃</button>
+      {/* 버튼 영역 */}
+      <div className="header-buttons">
+        <div className="header-btn-wrap">
+          <button className="header-btn">로그인</button>
+        </div>
+        <div className="header-btn-wrap">
+          <button className="header-btn">회원가입</button>
+        </div>
       </div>
-    </header>
+    </div>
   );
 };
 

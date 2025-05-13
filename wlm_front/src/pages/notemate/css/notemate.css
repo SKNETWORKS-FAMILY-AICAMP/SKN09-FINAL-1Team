@@ -1,33 +1,35 @@
 /* 전체 페이지 레이아웃 */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 80%;
-  width: 100%;
+html,body {
+  height: 75%;
+  width: 1440px;
   font-family: 'Noto Sans KR', sans-serif;
-  box-sizing: border-box;
   font-size: 14px;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  background-color: #f9f9f0;
+  display: flex;
+  justify-content: center;
+
 }
+
 
 *, *::before, *::after {
   box-sizing: inherit;
 }
 
 .notemate-page {
+  width: 1440px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  width: 80vw;
-  height: 100vh;
   background-color: #f9f9f0;
-  overflow: hidden; 
+  overflow: hidden;
 }
+
 
 
 
 /* 메인 */
 .notemate-main {
+  padding-top: 2rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -146,7 +148,7 @@ html, body {
 
 /* 사용자 테이블 */
 .user-table {
-  max-height: 400%;
+  max-height: 300px;
   overflow-y: auto;
   border-radius: 12px;
   background: white;
