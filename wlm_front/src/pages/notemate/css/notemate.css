@@ -1,0 +1,310 @@
+/* 전체 페이지 레이아웃 */
+html,body {
+  height: 75%;
+  width: 1440px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  background-color: #f9f9f0;
+  display: flex;
+  justify-content: center;
+
+}
+
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+.notemate-page {
+  width: 1440px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f0;
+  overflow: hidden;
+}
+
+
+
+
+/* 메인 */
+.notemate-main {
+  padding-top: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 0;
+  margin-left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.logo-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo-img {
+  width: 50px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+/* 노트메이트 박스 */
+.notemate-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 90%
+}
+
+.notemate-box {
+  background-color: #e6f0db;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden; 
+  margin-left: 0;
+}
+
+/* 검색 입력 + 드롭다운 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-bar select {
+  height: 2.1rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  padding: 0 1rem;
+  background: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  
+}
+
+.search-bar input {
+  flex: 1;
+  height: 2.1rem;
+  padding: 0 1rem;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 1rem;
+}
+
+.register-btn {
+  background-color: black;
+  color: white;
+  border: none;
+  height: 2.1rem;
+  padding: 0 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  font-size: 1rem;
+}
+
+.register-btn:hover {
+  background-color: #333;
+}
+
+/* 자동완성 리스트 */
+.suggestion-list {
+  position: absolute;
+  top: 3.2rem;
+  left: 8rem;
+  right: 1rem;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-list li {
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.suggestion-list li:hover {
+  background-color: #f1f1f1;
+}
+
+/* 사용자 테이블 */
+.user-table {
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: white;
+}
+
+.table-header,
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.8rem;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  font-size: 0.8;
+}
+
+.table-header {
+  background-color: #d6e8b4;
+  border-radius: 12px;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-row span {
+  flex: 1;
+  text-align: center;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: red;
+}
+
+/* 마이크 아이콘 */
+.mic-icon {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 2rem;
+  color: #555;
+}
+
+.mic-icon img {
+  padding-top: 1.5rem;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+.mic-button {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+}
+
+.mic-button .mic-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: rgba(255, 0, 0, 0.4);
+  animation: pulseAnim 1.4s infinite ease-in-out;
+  z-index: 0;
+}
+
+
+.custom-modal {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff0f0;
+  border: 2px solid #e18a8a;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  z-index: 9999;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.custom-modal .highlight {
+  color: red;
+  font-weight: bold;
+}
+
+.custom-modal button {
+  margin: 1rem 0.5rem 0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.custom-modal button:first-of-type {
+  background-color: #7fd67f;
+}
+
+.custom-modal button:last-of-type {
+  background-color: #e88282;
+  color: white;
+}
+
+.timer-text {
+  margin-top: 0.7rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #e74c3c;
+  text-align: center;
+}
+
+/* 반응형 */
+@media screen and (max-width: 768px) {
+  .notemate-box {
+    padding: 1.2rem;
+    max-width: 95%;
+  }
+  .search-bar input,
+  .register-btn,
+  .search-bar select {
+    font-size: 0.9rem;
+    height: 2.2rem;
+  }
+  .nav-links {
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+  .logo-area img,
+  .nav-links img,
+  .mic-icon img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@keyframes pulseAnim {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  background: #f5f5f5;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 2px;
+  gap: 1px;
+  position: relative;
+  width: 1440px;
+  height: 90px;
+  background: #fff;
+  margin: 0 auto;
+}
+
+.logo {
+  margin: 0 auto;
+  width: 50px;
+  height: 50px;
+  background: url('logo.png') no-repeat center/cover;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 50px;
+  margin: 0 auto;
+  width: 804px;
+  height: 62px;
+  position: relative;
+}
+
+.menu-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+}
+.menu-icon.chat {
+  background: url('../../pages/images/chatbot-image.png') no-repeat center/contain;
+}
+.menu-icon.note {
+  background: url('../../pages/images/notemate-image.png') no-repeat center/contain;
+}
+.menu-icon.claim {
+  background: url('../../pages/images/querymate-image.png') no-repeat center/contain;
+}
+.menu-icon.call {
+  background: url('../../pages/images/callbot-image.png') no-repeat center/contain;
+}
+
+.menu-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin-left: 36px;
+  position: relative;
+}
+
+.header-buttons {
+  margin: 0 auto;
+  width: 220px;
+  height: 62px;
+  background: #fff;
+  display: flex;
+  flex-direction: row;
+  gap: 11px;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-btn-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 104px;
+  height: 62px;
+  background: #fff;
+  position: relative;
+}
+
+.header-btn {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  gap: 8px;
+  width: 103px;
+  height: 40px;
+  background: #2c2c2c;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  color: #f5f5f5;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.header-btn:hover {
+  background: #444;
+}
