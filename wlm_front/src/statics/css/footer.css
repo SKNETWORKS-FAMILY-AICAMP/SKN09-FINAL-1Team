@@ -1,0 +1,18 @@
+.notemate-footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ccc;
+  background-color: white;
+  font-size: 0.85rem;
+  color: #222;
+  width: 1440px;
+}
+
+.notemate-footer a {
+  color: #0044cc;
+  text-decoration: none;
+}
+
+.notemate-footer a:hover {
+  text-decoration: underline;
+}
