@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from '../css/ChatArea.module.css';
+import ReactMarkdown from 'react-markdown';
 
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() && !file) return;
 
     // 사용자 메시지 추가
     const userMessage = { text: input, isUser: true };
@@ -15,22 +18,46 @@ const ChatArea = () => {
     // 입력 초기화
     setInput('');
 
-    // 모의 AI 응답 추가 (실제 API 연동 가능)
-    const aiResponse = {
-      text: `AI 응답: "${input}"에 대한 답변입니다.`,
-      isUser: false,
-    };
+    try {
+      const formData = new FormData();
+      formData.append('question', input);
+      if (file) {
+        formData.append('file', file);
+      }
 
-    // 응답 메시지 추가 (약간의 지연 포함 시 realistic)
-    setTimeout(() => {
+      const res = await fetch('http://localhost:8000/ask', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      const aiResponse = {
+        text: data.answer,
+        isUser: false,
+      };
       setMessages(prev => [...prev, aiResponse]);
-    }, 500);
+    } catch (error) {
+      const errorMsg = {
+        text: 'AI 서버와 통신 중 오류가 발생했습니다.',
+        isUser: false,
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    }
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
     }
   };
 
@@ -42,7 +69,11 @@ const ChatArea = () => {
             key={index}
             className={`${styles.message} ${msg.isUser ? styles.userMessage : styles.aiMessage}`}
           >
-            {msg.text}
+            {msg.isUser ? (
+              msg.text
+            ) : (
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
+            )}
           </div>
         ))}
       </div>
@@ -56,8 +87,25 @@ const ChatArea = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+        <input
+          type="file"
+          accept="application/pdf"
+          style={{ display: 'none' }}
+          id="pdf-upload"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+        />
+        <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
+          📎
+        </label>
         <button className={styles.sendButton} onClick={handleSend}>⬆️</button>
       </div>
+
+      {file && (
+        <div className={styles.selectedFile}>
+          {file.name}
+        </div>
+      )}
     </div>
   );
 };
