@@ -2,7 +2,7 @@
 name: PR template
 about: Request Pull Request [your_branch] -> [other branch]
 title: ''
-labels: ''
+labels: enhancement
 assignees: ''
 
 ---
