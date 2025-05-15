@@ -20,7 +20,7 @@ async def ask(
             tmp.write(await file.read())
             tmp_path = tmp.name
         pdf_extraction = PDFExtraction(tmp_path)
-        pages = pdf_extraction.extract_text(tmp_path)
+        pages = pdf_extraction.extract_text()
         # 여러 페이지면 합쳐서 사용 (길면 일부만 사용 권장)
         document_text = "\n\n".join([p['text'] for p in pages])
         os.remove(tmp_path)
