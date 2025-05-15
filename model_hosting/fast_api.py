@@ -30,7 +30,7 @@ async def ask(
     prompt_extraction = PromptExtraction()
     prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
     
-    ollama_hosting = OllamaHosting('qwen3:30b-a3b',prompt)
+    ollama_hosting = OllamaHosting('qwen2.5',prompt)
     response = ollama_hosting.get_model_response()
     
     return {"answer": response}
