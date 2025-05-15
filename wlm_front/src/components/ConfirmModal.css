@@ -1,0 +1,37 @@
+.custom-modal {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff0f0;
+  border: 2px solid #e18a8a;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  z-index: 9999;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.custom-modal .highlight {
+  color: red;
+  font-weight: bold;
+}
+
+.custom-modal button {
+  margin: 1rem 0.5rem 0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.custom-modal button:first-of-type {
+  background-color: #7fd67f;
+}
+
+.custom-modal button:last-of-type {
+  background-color: #e88282;
+  color: white;
+}
