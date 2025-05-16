@@ -103,12 +103,8 @@ const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
       <div className="table-header">
         <span>이름</span>
         <span>이메일</span>
-        {!isRecording && elapsed > 0 && (
-          <>
-            <span>선택</span>
-            <span>삭제</span>
-          </>
-        )}
+        <span>선택</span>
+        <span>삭제</span>
       </div>
 
       {/* 참가자 리스트 */}
@@ -117,16 +113,12 @@ const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
           <li key={idx}>
             <span>{user.name}</span>
             <span>{user.email}</span>
-            {!isRecording && elapsed > 0 && (
-              <>
-                <input
-                  type="checkbox"
-                  checked={user.selected || false}
-                  onChange={() => handleCheck(idx)}
-                />
-                <button onClick={() => handleDelete(idx)}>✕</button>
-              </>
-            )}
+            <input
+              type="checkbox"
+              checked={user.selected || false}
+              onChange={() => handleCheck(idx)}
+            />
+            <button onClick={() => handleDelete(idx)}>✕</button>
           </li>
         ))}
       </ul>

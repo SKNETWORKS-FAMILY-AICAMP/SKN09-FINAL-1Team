@@ -72,6 +72,26 @@ body {
   position: relative;
 }
 
+/* 메뉴 그룹 hover 효과 */
+.menu-group:hover .menu-icon,
+.menu-group:hover .menu-label {
+  transform: scale(1.1);
+  color: #00bfa6;
+}
+
+.menu-icon,
+.menu-label {
+  transition: all 0.3s ease;
+}
+
+/* 버튼 hover 효과 추가 */
+.header-btn:hover {
+  background: #00bfa6;
+  color: #fff;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
 .header-buttons {
   margin: 0 auto;
   width: 220px;
