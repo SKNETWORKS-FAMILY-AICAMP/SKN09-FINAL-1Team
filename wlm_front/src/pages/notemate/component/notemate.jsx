@@ -44,7 +44,7 @@ const NoteMate = () => {
 
   return (
     <div className="record-page">
-      <Header />
+      {/* <Header /> */}
 
       <div className="record-body">
         <ParticipantList
