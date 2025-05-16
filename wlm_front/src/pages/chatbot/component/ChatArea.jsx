@@ -96,9 +96,12 @@ const ChatArea = () => {
           ref={fileInputRef}
         />
         <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
-          📎
+          💾
         </label>
-        <button className={styles.sendButton} onClick={handleSend}>⬆️</button>
+        {/* <button className={styles.sendButton} onClick={handleSend}>⬆️</button>
+         */}
+         <button className={styles.sendButton} onClick={handleSend}>Send</button>
+
       </div>
 
       {file && (

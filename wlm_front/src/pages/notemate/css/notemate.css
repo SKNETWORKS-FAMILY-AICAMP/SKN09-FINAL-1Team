@@ -1,36 +1,37 @@
-/* ==== 기본 구조 ==== */
+/* === Global Reset & Base === */
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: linear-gradient(to bottom, #f3f4f6, #ffffff);
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
 .record-page {
   display: flex;
   flex-direction: column;
-  width: 100vw;
-  background: #f9f9f0;
+  height: 100vh;
+  background: #f8f9fa;
 }
 
 .record-body {
   display: flex;
-  height: calc(100vh - 90px - 50px); /* header + footer 제외 */
-}
-
-/* ==== 왼쪽 영역 (참가자 목록) ==== */
-.record-left {
-  width: 30%;
-  background: #f0f4eb;
+  flex: 1;
   padding: 1rem;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
+  gap: 1rem;
 }
 
-.table-header {
+/* === Left Panel (Participants) === */
+.record-left {
+  flex: 1;
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0.8rem;
-  font-weight: bold;
-  font-size: 0.85rem;
-  border-bottom: 1px solid #ccc;
-  background-color: #f0f0f0;
+  flex-direction: column;
 }
 
-/* 검색 바 */
 .search-bar {
   display: flex;
   align-items: center;
@@ -39,48 +40,71 @@
 }
 
 .search-bar select,
-.search-input,
-.register-btn {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 8px;
+.search-input {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
   border: 1px solid #ccc;
 }
 
+.search-input:focus {
+  outline: none;
+  border-color: #00bfa6;
+  box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.15);
+}
+
 .register-btn {
-  margin-left: 0.5rem;
-  background: #2c2c2c;
+  background: #00bfa6;
   color: white;
   border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
-/* 자동완성 리스트 */
+.register-btn:hover {
+  background: #009e91;
+}
+
 .suggestion-list {
-  position: absolute;
   background: white;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 12px;
+  padding: 0.3rem;
   list-style: none;
-  padding: 0;
   margin: 0.3rem 0;
-  max-height: 180px;
+  max-height: 160px;
   overflow-y: auto;
-  z-index: 10;
-  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 100;
 }
 
 .suggestion-list li {
-  padding: 0.5rem 0.8rem;
+  padding: 0.6rem 0.8rem;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* 참가자 리스트 */
+.suggestion-list li:hover {
+  background: #f1f5f9;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #ddd;
+  margin-top: 0.5rem;
+}
+
 .user-list {
   list-style: none;
-  padding-left: 0;
-  margin-top: 0.5rem;
-  max-height: 250px;
+  padding: 0;
+  margin: 0.5rem 0;
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -88,19 +112,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.3rem 0.2rem;
-  font-size: 0.82rem;
-  border-bottom: 1px solid #ddd;
+  padding: 0.5rem 0.3rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #eee;
 }
 
-.user-list span {
-  flex: 1;
-}
-
-/* 버튼 영역 */
 .participant-actions {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-top: 1rem;
 }
 
@@ -108,58 +128,74 @@
 .send-btn {
   padding: 0.6rem 1rem;
   font-size: 0.9rem;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .select-all-btn {
-  background: #dcdcdc;
+  background: #e2e8f0;
+  color: #333;
 }
 
 .send-btn {
-  background: #2c2c2c;
+  background: #00bfa6;
   color: white;
-  width: 100%;
-  margin-top: 1rem;
 }
 
-/* ==== 오른쪽 영역 (녹음 및 텍스트) ==== */
+.send-btn:hover {
+  background: #00a091;
+}
+
+/* === Right Panel (Transcript) === */
 .record-right {
-  width: 70%;
+  flex: 2;
+  background: white;
+  border-radius: 16px;
   padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.transcript-box textarea {
-  width: 100%;
-  height: 220px;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  resize: none;
-  background: white;
-  font-size: 0.95rem;
-}
-
 .transcript-actions {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.transcript-actions input[type="file"] {
+  font-size: 0.85rem;
 }
 
 .transcript-actions button {
   padding: 0.5rem 1rem;
   border: none;
-  background: #2c2c2c;
+  background: #2d3748;
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
-/* 마이크 버튼 */
+.transcript-actions button:hover {
+  background: #1a202c;
+}
+
+.transcript-box textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.95);
+  resize: none;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* === Mic Button === */
 .mic-icon {
   text-align: center;
 }
@@ -174,9 +210,10 @@
 .mic-icon img {
   width: 70px;
   height: 70px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* 녹음 중 애니메이션 */
 .mic-pulse {
   position: absolute;
   top: 50%;
@@ -187,6 +224,7 @@
   border-radius: 50%;
   transform: translate(-50%, -50%);
   animation: pulseAnim 1.4s infinite ease-in-out;
+  z-index: -1;
 }
 
 @keyframes pulseAnim {
@@ -205,4 +243,9 @@
   font-weight: bold;
   font-size: 1rem;
   color: #e74c3c;
+}
+
+/* === Footer/Header spacing if needed === */
+.footer, .header {
+  height: 50px;
 }

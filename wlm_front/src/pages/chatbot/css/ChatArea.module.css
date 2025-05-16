@@ -20,24 +20,38 @@
 .inputWrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 10px;
+  gap: 20px;
+  padding-top: 150px;
 }
 
 .input {
   flex-grow: 1;
   padding: 10px;
+  height: 50px;  /* 높이 설정 */
+  padding: 10px; /* 여백 설정 */
+  font-size: 16px; /* 글자 크기 조정 */
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
 .sendButton {
-  padding: 10px;
+  padding: 20px;
   border: none;
   background-color: black;
   color: white;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.uploadButton {
+  font-size: 30px; /* 기본 크기보다 크게 */
+  cursor: pointer;
+  margin-right: 10px; /* 버튼 간격 조정 */
+  transition: transform 0.3s ease; /* 크기 변경 애니메이션 추가 */
+}
+
+.uploadButton:hover {
+  transform: scale(1.2); /* 호버 시 이미지 확대 */
 }
 
 /* 메시지 공통 스타일 */
