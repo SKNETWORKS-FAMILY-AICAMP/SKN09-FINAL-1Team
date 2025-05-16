@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import '../css/login.css'; 
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 
 const Login = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (id === '201710393' && password === '1234') {
-      navigate('/chatbot');
+      login();
+      navigate('/main');
     } else {
     setErrorMessage('아이디 또는 비밀번호가 올바르지 않습니다.');
     }
