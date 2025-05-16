@@ -12,7 +12,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (id === '201710393' && password === '1234') {
+    if (id === 'final' && password === '1234') {
       login();
       navigate('/main');
     } else {

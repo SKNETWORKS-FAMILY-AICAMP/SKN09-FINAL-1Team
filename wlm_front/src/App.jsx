@@ -8,6 +8,7 @@ import NoteMate from './pages/notemate/component/notemate.jsx';
 import Base  from './pages/chatbot/chatbot_con/Base.jsx';
 import Login     from './pages/login/component/login.jsx';
 import Mainpage from './pages/mainpage/component/mainpage.jsx';
+import Footer from './statics/component/footer';
 
 
 
@@ -15,10 +16,10 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Header />
-    
+        <Header />    
         <Routes>
-          <Route path="/main"                element={<Mainpage />} />
+          <Route path="/"                element={<Login />} />
+          <Route path="/main"            element={<Mainpage />} />
           <Route path="/login"           element={<Login />} />
           {/* <Route path="/signup"          element={<Signup />} /> */}
           {/* <Route path="/querymate"       element={<QueryMate />} /> */}
@@ -26,38 +27,10 @@ function App() {
           <Route path="/notemate"        element={<NoteMate />} />
           <Route path="/chatmate"        element={<Base />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </AuthProvider>
   );
 }
 
 export default App;
-
-
-
-
-
-// function App() {
-//   return (
-//     <>
-//       {/* <Base/> */}
-//       <NoteMate/>
-//     </>
-//   );
-// }
-
-// export default App;
-
-// function App() {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<Login />} />
-//         <Route path="/chatbot" element={<Base />} />
-
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;
