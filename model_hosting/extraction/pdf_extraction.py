@@ -36,7 +36,3 @@ class PDFExtraction:
         rows = ["| " + " | ".join([str(cell) for cell in row]) + " |" for row in table[1:]]
         # rows = ["| " + " | ".join(row) + " |" for row in table[1:]]
         return "\n".join([header, separator] + rows)
-
-
-pdf_extraction = PDFExtraction("./data/bigdata.pdf")
-print(pdf_extraction.extract_text())
