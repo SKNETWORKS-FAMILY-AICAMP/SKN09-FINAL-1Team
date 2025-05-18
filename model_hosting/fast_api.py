@@ -6,14 +6,16 @@ import re
 from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
+from data_loader.qdrant_loader import load_qdrant_db
 
 router = APIRouter()
-
+prompt_extraction = PromptExtraction()
 def clean_korean_only(text: str) -> str:
     """
     결과 텍스트에서 한글, 숫자, 공백, 일부 구두점만 남기고 모두 제거
     """
     return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
+
 
 @router.post("/ask")
 async def ask(
@@ -24,17 +26,19 @@ async def ask(
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             tmp.write(await file.read())
             tmp_path = tmp.name
+
         pdf_extraction = PDFExtraction(tmp_path)
-        pages = pdf_extraction.extract_text()
+        pages = pdf_extraction.extract_text()  # ✅ 수정된 부분
         document_text = "\n\n".join([p['text'] for p in pages])
         os.remove(tmp_path)
+
+        prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
+
     else:
-        document_text = ""
-    
-    prompt_extraction = PromptExtraction()
-    prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
-    
-    ollama_hosting = OllamaHosting('qwen2.5',prompt)
+        document_text = load_qdrant_db(question)
+        prompt = prompt_extraction.make_prompt_to_rag(document_text, question)
+
+    ollama_hosting = OllamaHosting('qwen2.5', prompt)
     response = ollama_hosting.get_model_response()
     
     return {"answer": response}
