@@ -17,31 +17,66 @@ def clean_korean_only(text: str) -> str:
     return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
 
 
+# @router.post("/ask")
+# async def ask(
+#     question: str = Form(...),
+#     file: UploadFile = File(None)
+# ):
+#     if file:
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+#             tmp.write(await file.read())
+#             tmp_path = tmp.name
+
+#         pdf_extraction = PDFExtraction(tmp_path)
+#         pages = pdf_extraction.extract_text()  # ✅ 수정된 부분
+#         document_text = "\n\n".join([p['text'] for p in pages])
+#         os.remove(tmp_path)
+
+#         prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
+
+#     else:
+#         document_text = load_qdrant_db(question)
+#         prompt = prompt_extraction.make_prompt_to_rag(document_text, question)
+
+#     ollama_hosting = OllamaHosting('qwen2.5', prompt)
+#     response = ollama_hosting.get_model_response()
+    
+#     return {"answer": response}
 @router.post("/ask")
 async def ask(
     question: str = Form(...),
-    file: UploadFile = File(None)
+    file: UploadFile = File(...)
 ):
-    if file:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(await file.read())
-            tmp_path = tmp.name
+    import os, tempfile
 
-        pdf_extraction = PDFExtraction(tmp_path)
-        pages = pdf_extraction.extract_text()  # ✅ 수정된 부분
-        document_text = "\n\n".join([p['text'] for p in pages])
-        os.remove(tmp_path)
+    # 1. PDF 임시 저장 및 텍스트 추출
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
 
-        prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
+    pdf_extraction = PDFExtraction(tmp_path)
+    pages = pdf_extraction.extract_text()
+    document_text = "\n\n".join([p['text'] for p in pages])
+    os.remove(tmp_path)
 
-    else:
-        document_text = load_qdrant_db(question)
-        prompt = prompt_extraction.make_prompt_to_rag(document_text, question)
+    # 2. 평가요소 추출 (LLM)
+    prompt_extraction = PromptExtraction()
+    criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
+    criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+    evaluation_criteria = criteria_ollama.get_model_response().strip()
 
-    ollama_hosting = OllamaHosting('qwen2.5', prompt)
-    response = ollama_hosting.get_model_response()
-    
-    return {"answer": response}
+    # 3. 질의응답 프롬프트 생성
+    qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
+
+    # 4. 답변 생성
+    qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
+    answer = qa_ollama.get_model_response().strip()
+
+    return {
+        "answer": answer,
+        "evaluation_criteria": evaluation_criteria
+    }
+
 
 @router.post("/transcribe_audio")
 async def transcribe_audio(file: UploadFile = File(...)):
