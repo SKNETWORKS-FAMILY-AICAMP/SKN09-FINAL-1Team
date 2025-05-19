@@ -2,7 +2,6 @@ from fastapi import File, UploadFile, Form, APIRouter
 import tempfile
 import os
 import re
-from duckduckgo_search import DDGS  
 
 from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
@@ -11,123 +10,71 @@ from data_loader.qdrant_loader import load_qdrant_db
 
 router = APIRouter()
 prompt_extraction = PromptExtraction()
-
 def clean_korean_only(text: str) -> str:
+    """
+    결과 텍스트에서 한글, 숫자, 공백, 일부 구두점만 남기고 모두 제거
+    """
     return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
 
-def classify_question_mode(question: str) -> str:
-    keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색","검색해줘"]
-    if any(k in question.lower() for k in keywords):
-        return "web_search"
-    return "document"
 
-# DuckDuckGo 웹 검색 함수
-def search_web_duckduckgo(query: str):
-    with DDGS() as ddgs:
-        results = ddgs.text(query, region='kr-kr', max_results=3)
-        return list(results)
+# @router.post("/ask")
+# async def ask(
+#     question: str = Form(...),
+#     file: UploadFile = File(None)
+# ):
+#     if file:
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+#             tmp.write(await file.read())
+#             tmp_path = tmp.name
 
-# 검색 결과 본문 길이 줄이기용 간단 함수
-def summarize_body(body: str, max_len=150) -> str:
-    body = body.strip().replace("\n", " ")
-    if len(body) > max_len:
-        return body[:max_len].rstrip() + "..."
-    return body
+#         pdf_extraction = PDFExtraction(tmp_path)
+#         pages = pdf_extraction.extract_text()  # ✅ 수정된 부분
+#         document_text = "\n\n".join([p['text'] for p in pages])
+#         os.remove(tmp_path)
 
+#         prompt = prompt_extraction.make_prompt_to_query_mate(document_text, question)
+
+#     else:
+#         document_text = load_qdrant_db(question)
+#         prompt = prompt_extraction.make_prompt_to_rag(document_text, question)
+
+#     ollama_hosting = OllamaHosting('qwen2.5', prompt)
+#     response = ollama_hosting.get_model_response()
+    
+#     return {"answer": response}
 @router.post("/ask")
 async def ask(
     question: str = Form(...),
-    file: UploadFile = File(None)
+    file: UploadFile = File(...)
 ):
-    mode = classify_question_mode(question)
 
-    if file is not None:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(await file.read())
-            tmp_path = tmp.name
+    # 1. PDF 임시 저장 및 텍스트 추출
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
 
-        pdf_extraction = PDFExtraction(tmp_path)
-        pages = pdf_extraction.extract_text()
-        document_text = "\n\n".join([p['text'] for p in pages])
-        os.remove(tmp_path)
+    pdf_extraction = PDFExtraction(tmp_path)
+    pages = pdf_extraction.extract_text()
+    document_text = "\n\n".join([p['text'] for p in pages])
+    os.remove(tmp_path)
 
-        # 문서 업로드 + 웹 검색 의도 질의 (ex. 유사 사업 찾아줘)
-        if mode == "web_search":
-            first_page_text = pages[0]['text'] if pages else ""
-            keyword_prompt = f"""
-다음은 어떤 사업 계획에 대한 문서입니다. 이 사업과 유사한 다른 사업들을 검색하고자 합니다.
+    # 2. 평가요소 추출 (LLM)
+    prompt_extraction = PromptExtraction()
+    criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
+    criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+    evaluation_criteria = criteria_ollama.get_model_response().strip()
 
-문서 내용 중 핵심 주제, 산업 분야, 기술 키워드, 목적 등을 1~2줄로 요약해 주세요. 이 내용을 바탕으로 웹에서 유사 사업을 검색할 것입니다.
+    # 3. 질의응답 프롬프트 생성
+    qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
 
-문서 내용:
-{first_page_text}
-"""
-            ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
-            search_query = ollama_extract_keywords.get_model_response().strip()
+    # 4. 답변 생성
+    qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
+    answer = qa_ollama.get_model_response().strip()
 
-            results = search_web_duckduckgo(search_query)
-
-            # 결과를 제목/내용 요약/사이트주소로 보기 좋게 가공
-            results_text = "\n\n".join(
-                [
-                    f"제목: {res.get('title','(제목없음)')}\n"
-                    f"내용: {summarize_body(res.get('body',''))}\n"
-                    f"사이트 주소: {res.get('href','(주소없음)')}"
-                    for res in results
-                ]
-            )
-
-            return {
-                "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
-                "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
-            }
-
-        # 일반 문서 질문 응답
-        criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
-        criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
-        evaluation_criteria = criteria_ollama.get_model_response().strip()
-
-        qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
-        qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
-        answer = qa_ollama.get_model_response().strip()
-
-        return {
-            "answer": answer,
-            "evaluation_criteria": evaluation_criteria
-        }
-
-    # 문서 없음 + 웹 검색
-    elif mode == "web_search":
-        search_query = question.strip()
-        results = search_web_duckduckgo(search_query)
-        results_text = "\n\n".join(
-            [
-                f"제목: {res.get('title','(제목없음)')}\n"
-                f"내용: {summarize_body(res.get('body',''))}\n"
-                f"사이트 주소: {res.get('href','(주소없음)')}"
-                for res in results
-            ]
-        )
-
-        return {
-            "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
-            "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
-        }
-
-    # 문서 없음 + 일반 질문
-    else:
-        general_prompt = f"""
-다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
-
-질문: {question}
-"""
-        ollama_general = OllamaHosting("qwen2.5", general_prompt)
-        response = ollama_general.get_model_response().strip()
-
-        return {
-            "answer": response,
-            "evaluation_criteria": "이 모드에서는 평가 기준이 필요하지 않습니다."
-        }
+    return {
+        "answer": answer,
+        "evaluation_criteria": evaluation_criteria
+    }
 
 
 @router.post("/transcribe_audio")
@@ -179,7 +126,6 @@ async def transcribe_audio(file: UploadFile = File(...)):
     lightly_cleaned = response["response"]
 
     return {"transcription": lightly_cleaned}
-
 from pydantic import BaseModel
 
 class TextRequest(BaseModel):
@@ -245,3 +191,5 @@ async def summarize_text(request: TextRequest):
     summary_clean = clean_korean_only(summary_raw)
 
     return {"summary": summary_clean}
+
+# uvicorn main:app --reload  cmd 창에서 실행
