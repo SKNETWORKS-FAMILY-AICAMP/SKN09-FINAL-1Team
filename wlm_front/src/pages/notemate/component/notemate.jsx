@@ -12,6 +12,10 @@ const NoteMate = () => {
   const [elapsed, setElapsed] = useState(0);
   const [modalStep, setModalStep] = useState(null);
   const [timerInterval, setTimerInterval] = useState(null);
+  const [meetingDate, setMeetingDate] = useState('');
+  const [hostName, setHostName] = useState('');
+  const [participantsInfo, setParticipantsInfo] = useState('');
+  const [isFormComplete, setIsFormComplete] = useState(false);
   const [users, setUsers] = useState([
     { name: '드무', email: 'dwuyoe@gmail.com', selected: false },
     { name: 'dwuq', email: 'dwuq@gmail.com', selected: false },
@@ -25,6 +29,14 @@ const NoteMate = () => {
     if (!isRecording) clearInterval(timerInterval);
     // eslint-disable-next-line
   }, [isRecording]);
+
+    useEffect(() => {
+    if (meetingDate && hostName && participantsInfo) {
+      setIsFormComplete(true);
+    } else {
+      setIsFormComplete(false);
+    }
+  }, [meetingDate, hostName, participantsInfo]);
 
   const startMeeting = () => {
     const now = Date.now();
@@ -42,19 +54,59 @@ const NoteMate = () => {
     setShowSendButton(true);
   };
 
-  return (
+ return (
     <div className="record-page">
-      {/* <Header /> */}
-
       <div className="record-body">
-        <ParticipantList
-          users={users}
-          onUpdateUsers={setUsers}
-          isRecording={isRecording}
-          elapsed={elapsed}
-          showSendButton={showSendButton}
-        />
+        <div className="record-left">
+          {/* ✅ 회의 정보 입력 영역 */}
+          <div className="meeting-info">
+            <div className="form-block">
+              <label>회의 일자</label>
+              <input
+                type="date"
+                value={meetingDate}
+                onChange={(e) => setMeetingDate(e.target.value)}
+              />
+            </div>
+            <div className="form-block">
+              <label>주최자</label>
+              <input
+                type="text"
+                placeholder="이름 입력"
+                value={hostName}
+                onChange={(e) => setHostName(e.target.value)}
+              />
+            </div>
+            <div className="form-block">
+              <label>참석자</label>
+              <input
+                type="text"
+                placeholder="예: 5명"
+                value={participantsInfo}
+                onChange={(e) => setParticipantsInfo(e.target.value)}
+              />
+            </div>
+          </div>
+        
+            <button
+              className="confirm-btn"
+              disabled={!isFormComplete}
+              onClick={() => alert('회의 정보가 확인되었습니다!')}
+            >
+              확인
+            </button>
 
+          {/* 기존 참가자 컴포넌트 */}
+          <ParticipantList
+            users={users}
+            onUpdateUsers={setUsers}
+            isRecording={isRecording}
+            elapsed={elapsed}
+            showSendButton={showSendButton}
+          />
+        </div>
+
+        {/* 기존 Mic/Transcript */}
         <div className="record-right">
           <MicButton
             isRecording={isRecording}
@@ -71,6 +123,7 @@ const NoteMate = () => {
         </div>
       </div>
 
+      {/* 모달 */}
       {modalStep && (
         <ConfirmModal
           modalStep={modalStep}
@@ -79,8 +132,7 @@ const NoteMate = () => {
           stopMeeting={stopMeeting}
         />
       )}
-
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

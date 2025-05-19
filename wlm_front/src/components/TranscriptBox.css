@@ -1,0 +1,44 @@
+/* TranscriptBox.css */
+
+.transcript-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  width: 100%;
+  max-width: 1000px; /* 원하는 최대 폭 지정 */
+  margin: 0 auto;
+}
+
+.form-item {
+  margin-bottom: 20px;
+  width: 100%; /* 화면 구성에 맞춰 꽉 차도록 */
+  box-sizing: border-box;
+  font-size: 16px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+button {
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 400px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+textarea {
+  min-height: 160px;
+}

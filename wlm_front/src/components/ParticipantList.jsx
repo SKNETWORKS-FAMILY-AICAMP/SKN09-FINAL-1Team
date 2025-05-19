@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../pages/notemate/css/notemate.css';
+import './ParticipantList.css';
 
 const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
   const [filterType, setFilterType] = useState('이름');
@@ -69,7 +70,7 @@ const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
 
   return (
     <div className="record-left">
-      <h3>참가자 목록</h3>
+      <h2>참가자 목록</h2>
 
       {/* 검색 + 등록 */}
       <div className="search-bar">
