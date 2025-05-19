@@ -1,0 +1,53 @@
+/* participantList.css */
+
+.record-left {
+  padding-top: 2rem; /* 요청사항 2: 전체적으로 아래로 내리기 */
+}
+
+/* 헤더와 리스트 정렬 구조 */
+.table-header,
+.user-list li {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr 1fr;
+  align-items: center;
+  justify-items: start; /* ✅ 요청사항 1: 왼쪽 정렬 */
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.table-header {
+  font-weight: bold;
+}
+
+/* 리스트 스타일 */
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-list li {
+  gap: 0.5rem;
+}
+
+/* 내부 요소 스타일 */
+.user-list li span,
+.user-list li input,
+.user-list li button {
+  text-align: left; /* ✅ 텍스트 내부도 왼쪽 정렬 */
+}
+
+/* 검색 바 */
+.search-bar {
+  margin: 1rem 0 2rem 0; /* 위 아래 여백으로 좀 더 아래로 내리기 */
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* 하단 버튼 */
+.participant-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}

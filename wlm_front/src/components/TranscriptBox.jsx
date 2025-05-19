@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+// import './TranscriptBox.css';
+
 
 const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
   const [transcript, setTranscript] = useState("");
@@ -62,15 +64,16 @@ const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
 
   return (
     <div className="transcript-box">
-      <input type="file" accept="audio/mp3" onChange={handleLoadAudio} />
+      <input type="file" accept="audio/mp3" onChange={handleLoadAudio} className="form-item"  />
 
-      <div style={{ margin: '10px 0' }}>
+      {/* <div style={{ margin: '10px 0' }}>
         <input type="text" placeholder="회의 일자" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} />
         <input type="text" placeholder="주최자" value={host} onChange={(e) => setHost(e.target.value)} />
         <input type="text" placeholder="참석자" value={participants} onChange={(e) => setParticipants(e.target.value)} />
-      </div>
+      </div> */}
 
       <textarea
+        className="form-item"
         value={transcript}
         onChange={(e) => setTranscript(e.target.value)}
         placeholder="변환된 텍스트"
@@ -80,9 +83,12 @@ const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
         원본 다운로드
       </button>
 
-      <button onClick={handleSummarize}>요약</button>
+        <button className="form-item" onClick={handleSummarize}>
+            요약
+        </button>
 
       <textarea
+        className="form-item"
         value={summary}
         onChange={(e) => setSummary(e.target.value)}
         placeholder="요약 결과"
