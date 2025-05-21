@@ -8,7 +8,7 @@ from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db
-from data_loader.qdrant_loader import search_civil_law  # 위에 추가한 함수
+from data_loader.qdrant_loader import search_wlmmate_law  # 위에 추가한 함수
 
 
 
@@ -246,13 +246,15 @@ async def summarize_text(request: TextRequest):
 
 @router.post("/civil_ask")
 async def civil_ask(question: str = Form(...)):
-    search_results = search_civil_law(question)
+    search_results = search_wlmmate_law(question)
 
     if not search_results:
         return {
             "answer": "관련된 민원 데이터가 없습니다.",
             "evaluation_criteria": "민원 데이터 검색 결과가 없습니다."
         }
+    
+    print(search_results)
 
     # 유사도 가장 높은 하나만 반환
     top_hit = search_results[0]
