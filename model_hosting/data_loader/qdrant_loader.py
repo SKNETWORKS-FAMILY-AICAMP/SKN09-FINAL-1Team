@@ -21,10 +21,9 @@ def get_embedding(text: str):
         outputs = model(**inputs)
     return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
 
-# Qdrant 초기화 함수
+# 일반 JSON 폴더 처리 함수
 def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="pdf_vectors"):
     client = QdrantClient(path=qdrant_path)
-
     embedding_dim = 384  # for MiniLM-L6-v2
 
     if not client.collection_exists(collection_name=collection_name):
@@ -59,8 +58,65 @@ def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="pdf_vec
                 )
                 file_idx += 1
 
+# 정제 함수 (civil_data 전용)
+def clean_doc(doc):
+    질문 = doc.get("질문", "")
+    답변 = doc.get("답변", "")
 
-# 질문 기반으로 RAG 검색 실행
+    질문 = 질문.split("\n")[0].strip()
+
+    unwanted_keywords = ["담당부서", "관련법령", "첨부파일"]
+    lines = 답변.split("\n")
+    cleaned_lines = [line for line in lines if not any(keyword in line for keyword in unwanted_keywords)]
+    답변 = "\n".join(cleaned_lines).strip()
+
+    return f"질문: {질문}\n답변: {답변}"
+
+
+def search_civil_law(question: str, collection_name="civil_vectors", qdrant_path=qdrant_path):
+    client = QdrantClient(path=qdrant_path)
+    query_vector = get_embedding(question)
+
+    results = client.search(
+        collection_name=collection_name,
+        query_vector=query_vector,
+        limit=5
+    )
+
+    return results
+# civil_data.json 전용 함수
+def init_qdrant_from_file(json_file_path, collection_name="civil_vectors"):
+    client = QdrantClient(path=qdrant_path)
+    embedding_dim = 384
+
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    with open(json_file_path, 'r', encoding='utf-8') as file:
+        documents = json.load(file)
+
+    file_idx = 0
+    for doc in documents:
+        if not isinstance(doc, dict):
+            continue
+
+        embedding_input = clean_doc(doc)
+        embedding = get_embedding(embedding_input)
+
+        payload = {
+            "content": embedding_input
+        }
+
+        client.upsert(
+            collection_name=collection_name,
+            points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+        )
+        file_idx += 1
+
+# 질문 기반 검색
 def load_qdrant_db(question, collection_name="pdf_vectors", qdrant_path=qdrant_path):
     client = QdrantClient(path=qdrant_path)
     query_vector = get_embedding(question)
@@ -81,7 +137,11 @@ def load_qdrant_db(question, collection_name="pdf_vectors", qdrant_path=qdrant_p
 
     return response
 
-
-
+# 메인 실행
 if __name__ == "__main__":
-    init_qdrant_from_folder()
+    # 1. 일반 문서 폴더 처리
+    # init_qdrant_from_folder()
+
+    # 2. civil_data.json 처리
+    civil_path = os.path.join(BASE_DIR, "..", "data", "civil_data.json")
+    init_qdrant_from_file(civil_path, collection_name="civil_vectors")

@@ -1,4 +1,4 @@
-from fastapi import File, UploadFile, Form, APIRouter
+from fastapi import File, UploadFile, Form, APIRouter, Request
 import tempfile
 import os
 import re
@@ -8,6 +8,10 @@ from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db
+from data_loader.qdrant_loader import search_civil_law  # 위에 추가한 함수
+
+
+
 
 router = APIRouter()
 prompt_extraction = PromptExtraction()
@@ -16,18 +20,16 @@ def clean_korean_only(text: str) -> str:
     return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
 
 def classify_question_mode(question: str) -> str:
-    keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색","검색해줘"]
+    keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색", "검색해줘"]
     if any(k in question.lower() for k in keywords):
         return "web_search"
     return "document"
 
-# DuckDuckGo 웹 검색 함수
 def search_web_duckduckgo(query: str):
     with DDGS() as ddgs:
         results = ddgs.text(query, region='kr-kr', max_results=3)
         return list(results)
 
-# 검색 결과 본문 길이 줄이기용 간단 함수
 def summarize_body(body: str, max_len=150) -> str:
     body = body.strip().replace("\n", " ")
     if len(body) > max_len:
@@ -35,10 +37,7 @@ def summarize_body(body: str, max_len=150) -> str:
     return body
 
 @router.post("/ask")
-async def ask(
-    question: str = Form(...),
-    file: UploadFile = File(None)
-):
+async def ask(question: str = Form(...), file: UploadFile = File(None)):
     mode = classify_question_mode(question)
 
     if file is not None:
@@ -51,7 +50,6 @@ async def ask(
         document_text = "\n\n".join([p['text'] for p in pages])
         os.remove(tmp_path)
 
-        # 문서 업로드 + 웹 검색 의도 질의 (ex. 유사 사업 찾아줘)
         if mode == "web_search":
             first_page_text = pages[0]['text'] if pages else ""
             keyword_prompt = f"""
@@ -67,7 +65,6 @@ async def ask(
 
             results = search_web_duckduckgo(search_query)
 
-            # 결과를 제목/내용 요약/사이트주소로 보기 좋게 가공
             results_text = "\n\n".join(
                 [
                     f"제목: {res.get('title','(제목없음)')}\n"
@@ -82,7 +79,7 @@ async def ask(
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 일반 문서 질문 응답
+        # 문서 내 질문 일반 모드
         criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
         criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
         evaluation_criteria = criteria_ollama.get_model_response().strip()
@@ -96,7 +93,7 @@ async def ask(
             "evaluation_criteria": evaluation_criteria
         }
 
-    # 문서 없음 + 웹 검색
+    # 문서 없음 + 웹 검색 모드
     elif mode == "web_search":
         search_query = question.strip()
         results = search_web_duckduckgo(search_query)
@@ -114,7 +111,7 @@ async def ask(
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
-    # 문서 없음 + 일반 질문
+    # 문서 없음 + 일반 질문 모드
     else:
         general_prompt = f"""
 다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
@@ -179,6 +176,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     lightly_cleaned = response["response"]
 
     return {"transcription": lightly_cleaned}
+
 
 from pydantic import BaseModel
 
@@ -245,3 +243,26 @@ async def summarize_text(request: TextRequest):
     summary_clean = clean_korean_only(summary_raw)
 
     return {"summary": summary_clean}
+
+@router.post("/civil_ask")
+async def civil_ask(question: str = Form(...)):
+    search_results = search_civil_law(question)
+
+    if not search_results:
+        return {
+            "answer": "관련된 민원 데이터가 없습니다.",
+            "evaluation_criteria": "민원 데이터 검색 결과가 없습니다."
+        }
+
+    # 유사도 가장 높은 하나만 반환
+    top_hit = search_results[0]
+    payload = top_hit.payload or {}
+    content = payload.get("content", "(내용없음)")
+    score = top_hit.score
+
+    answer_text = f"유사도: {score:.3f}\n내용: {content}"
+
+    return {
+        "answer": answer_text,
+        "evaluation_criteria": "민원 데이터 검색 결과 중 유사도 1위 항목입니다."
+    }
