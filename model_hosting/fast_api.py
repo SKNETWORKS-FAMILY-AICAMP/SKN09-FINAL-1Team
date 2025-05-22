@@ -7,7 +7,7 @@ from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db
-from lg_ollama.lg_ms import ChatBotGraph
+from lg_ollama.lg_ms import StartChatBot
 
 
 router = APIRouter()
@@ -44,6 +44,18 @@ def clean_korean_only(text: str) -> str:
 #     response = ollama_hosting.get_model_response()
     
 #     return {"answer": response}
+chatbot_graphs = {}
+
+@router.get("/chatmate")
+async def chatmate():
+    # 챗봇 그래프 초기화 부분 들어간 key값은 db의 user_id값으로 대체해야 한다.
+    # api 호출 시 유저의 번호(user_id)를 키값으로 불러오는 방식으로 변경해야 한다.
+    # 추가로 채팅방이 여러개 만들어진다면 api 호출 시 채팅방의 번호(chat_id)를 키값으로 불러오는 방식으로 변경해야 한다.
+    chatbot_graphs[1] = StartChatBot(1) # 인자는 thread_id의 value값
+    chatbot_graphs[1].start_chat()
+    print('chatmate 실행: ')
+    return {"message": "Chatbot started"}
+
 @router.post("/ask")
 async def ask(
     question: str = Form(...),
@@ -62,27 +74,33 @@ async def ask(
 
     # 2. 평가요소 추출 (LLM)
     prompt_extraction = PromptExtraction()
-    criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
+    # criteria_prompt = prompt_extraction.test_make_prompt_to_extract_criteria(document_text)
     # criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
     # evaluation_criteria = criteria_ollama.get_model_response().strip()
 
-    # ohdyo code
-    chatbot = ChatBotGraph()
-    graph = chatbot.build_graph()
+    # ohdyo code---
+    # chatbot_graph = StartChatBot(1) # 인자는 thread_id의 value값
+    # chatbot_graph.start_chat()
+
+    # 불러오는 부분 또한 get 메서드로 유저의 번호(user_id)를 키값으로 불러오는 방식으로 변경해야 한다.
+    chatbot_graph = chatbot_graphs.get(1)
+    if not chatbot_graph:
+        return {"error": "Chatbot not found"}
+    evaluation_criteria = chatbot_graph.send_message(document_text)
     
-    thread1 = {'configurable': {'thread_id': 1}}
-    sys_msg = SystemMessage(content="너는 사용자의 이름을 물어보고 기억해야 해.")
     
+    
+    #----
 
     # 3. 질의응답 프롬프트 생성
-    qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
+    # qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
 
     # 4. 답변 생성
-    qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
-    answer = qa_ollama.get_model_response().strip()
+    # qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
+    # answer = qa_ollama.get_model_response().strip()
 
     return {
-        "answer": answer,
+        # "answer": answer,
         "evaluation_criteria": evaluation_criteria
     }
 
