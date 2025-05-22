@@ -3,6 +3,7 @@ import tempfile
 import os
 import re
 
+
 from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
@@ -220,4 +221,72 @@ async def summarize_text(request: TextRequest):
 
     return {"summary": summary_clean}
 
-# uvicorn main:app --reload cmd 창에서 실행
+
+from fastapi.responses import JSONResponse
+import whisperx
+import ollama
+import json
+
+# router = APIRouter()
+
+@router.post("/distinct_speaker_audio")
+async def distinct_speaker_audio():
+    # 1. 오디오 파일 경로
+    audio_path = "./call_data/05.mp3"
+
+    # 2. WhisperX 모델 로드 및 전사
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    # 3. 한국어 전사 텍스트 추출
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    # 4. LLM 프롬프트 구성
+    prompt = f"""
+다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다. 질문과 답변을 구분해 JSON 배열 형태로 만들어 주세요.
+반드시 JSON 형식만 출력해 주세요.
+
+형식:
+[
+  {{ "question": "질문 내용", "answer": "답변 내용" }},
+  ...
+]
+
+텍스트:
+\"\"\"{transcript}\"\"\"
+"""
+
+    # 5. Ollama Qwen2.5 모델로 Q&A 분리 요청
+    try:
+        response = ollama.generate(
+            model="qwen2.5",
+            prompt=prompt
+        )
+        result_text = response['response'].strip()
+
+        # 6. JSON 파싱 시도
+        try:
+            qna_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            # JSON 파싱 실패 시, fallback: 단순 텍스트 파싱 (질문/답변 구분)
+            qna_data = []
+            lines = result_text.splitlines()
+            for i in range(0, len(lines), 2):
+                if i+1 < len(lines):
+                    question = lines[i].replace("질문:", "").strip()
+                    answer = lines[i+1].replace("답변:", "").strip()
+                    qna_data.append({"question": question, "answer": answer})
+
+        return JSONResponse(content={"qna": qna_data})
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+### uvicorn main:app --reload
+ 
