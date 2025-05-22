@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import '../pages/notemate/css/notemate.css';
 import './ParticipantList.css';
 
-const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
+const ParticipantList = ({
+  users,
+  isRecording,
+  elapsed,
+  onUpdateUsers,
+  getTranscriptData,
+  meetingDate,
+  hostName,
+  participantsInfo }) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -68,6 +76,39 @@ const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
     onUpdateUsers(updated);
   };
 
+  const handleSendEmail = async () => {
+    const selectedEmails = users.filter(user => user.selected).map(user => user.email);
+    if (selectedEmails.length === 0) {
+      alert("수신자를 선택해주세요.");
+      return;
+    }
+
+    const { transcript, summary } = getTranscriptData?.() || {};
+
+    const formData = new FormData();
+    selectedEmails.forEach(email => formData.append("recipients", email));
+    formData.append("subject", `Notemate에서 ${meetingDate} 회의록 전달드립니다`);
+    formData.append(
+      "body",
+      `📅 회의 일자: ${meetingDate}\n👤 주최자: ${hostName}\n👥 참석자: ${participantsInfo}`
+    );
+    formData.append("transcript_file", new File([transcript], `${meetingDate}_회의록_전문.txt`, { type: "text/plain" }));
+    formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
+
+    try {
+      const res = await fetch('http://localhost:8000/send-email', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await res.json();
+      alert(result.message || result.error);
+    } catch (err) {
+      alert("에러 발생: " + err.message);
+    }
+  };
+
+
   return (
     <div className="record-left">
       <h2>참가자 목록</h2>
@@ -128,7 +169,7 @@ const ParticipantList = ({ users, isRecording, elapsed, onUpdateUsers }) => {
       {!isRecording && elapsed > 0 && (
         <div className="participant-actions">
           <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
-          <button className="send-btn">📩 전송</button>
+          <button className="send-btn" onClick={handleSendEmail}>📩 전송</button>
         </div>
       )}
     </div>

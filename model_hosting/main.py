@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fast_api import router
+from email_api.email_api import email_router
 
 app = FastAPI()
 origins = [
@@ -15,4 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
-    
+app.include_router(email_router)
+
+
+### uvicorn main:app --reload
