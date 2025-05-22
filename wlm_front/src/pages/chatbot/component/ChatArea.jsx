@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 
@@ -9,58 +9,76 @@ const ChatArea = () => {
   const [sending, setSending] = useState(false);  // 추가
   const fileInputRef = useRef(null);
 
-const handleSend = async () => {
-  if (sending) return;
-  setSending(true);
+  useEffect(() => {
+    // 페이지가 처음 열릴 때 MemorySaver 초기화 요청
+    const fetchChatmate = async () => {
+    try{  
+      const response = await fetch('http://localhost:8000/chatmate')
+        if(!response.ok){
+          console.log('chatmate 실행 실패')
+        }
+        const data = await response.json()
+        console.log(data)
+    } catch (error) {
+      console.error('chatmate 실행 실패:', error);
+    }
+  };
+  fetchChatmate();
+    
+  }, []); // 빈 배열: 마운트 시 1회만 실행
 
-  const currentInput = input.trim();
+  const handleSend = async () => {
+    if (sending) return;
+    setSending(true);
 
-  // 입력 없고 파일도 없으면 종료
-  if (!currentInput && !file) {
-    setSending(false);
-    return;
-  }
+    const currentInput = input.trim();
 
-  console.log('handleSend called with input:', currentInput);
-
-  const userMessage = { text: currentInput, isUser: true };
-  setMessages(prev => [...prev, userMessage]);
-  setInput('');
-
-  try {
-    const formData = new FormData();
-    formData.append('question', currentInput);
-    if (file) {
-      formData.append('file', file);
+    // 입력 없고 파일도 없으면 종료
+    if (!currentInput && !file) {
+      setSending(false);
+      return;
     }
 
-    const res = await fetch('http://localhost:8000/ask', {
-      method: 'POST',
-      body: formData,
-    });
+    console.log('handleSend called with input:', currentInput);
 
-    const data = await res.json();
+    const userMessage = { text: currentInput, isUser: true };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
 
-    const aiResponse = {
-      text: data.answer || data.error || '응답이 없습니다.',
-      isUser: false,
-    };
-    setMessages(prev => [...prev, aiResponse]);
-  } catch (error) {
-    const errorMsg = {
-      text: 'AI 서버와 통신 중 오류가 발생했습니다.',
-      isUser: false,
-    };
-    setMessages(prev => [...prev, errorMsg]);
-  }
+    try {
+      const formData = new FormData();
+      formData.append('question', currentInput);
+      if (file) {
+        formData.append('file', file);
+      }
 
-  setFile(null);
-  if (fileInputRef.current) {
-    fileInputRef.current.value = '';
-  }
+      const res = await fetch('http://localhost:8000/ask', {
+        method: 'POST',
+        body: formData,
+      });
 
-  setSending(false);
-};
+      const data = await res.json();
+
+      const aiResponse = {
+        text: data.answer || data.error || '응답이 없습니다.',
+        isUser: false,
+      };
+      setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      const errorMsg = {
+        text: 'AI 서버와 통신 중 오류가 발생했습니다.',
+        isUser: false,
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    }
+
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    setSending(false);
+  };
 
 
   const handleKeyDown = (e) => {
