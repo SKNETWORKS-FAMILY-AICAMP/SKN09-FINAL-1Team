@@ -9,7 +9,8 @@ import Base  from './pages/chatbot/chatbot_con/Base.jsx';
 import Login     from './pages/login/component/login.jsx';
 import Mainpage from './pages/mainpage/component/mainpage.jsx';
 import Footer from './statics/component/footer';
-
+import Createuser from './pages/createuser/component/createuser.jsx';
+import Userlist from './pages/userlist/component/userlist.jsx';
 
 
 function App() {
@@ -21,6 +22,8 @@ function App() {
           <Route path="/"                element={<Login />} />
           <Route path="/main"            element={<Mainpage />} />
           <Route path="/login"           element={<Login />} />
+          <Route path="/createuser"           element={<Createuser />} />
+          <Route path="/userlist"           element={<Userlist />} />
           {/* <Route path="/signup"          element={<Signup />} /> */}
           {/* <Route path="/querymate"       element={<QueryMate />} /> */}
           {/* <Route path="/callmate"        element={<CallMate />} /> */}

@@ -27,3 +27,8 @@ dist-ssr
 __pycache__/
 **/__pycache__/
 *.pyc
+
+package.json
+package-lock.json
+eslint.config.js
+vite.config.js

@@ -1,0 +1,106 @@
+.user-list-container {
+  padding: 40px;
+  font-family: 'Inter', sans-serif;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.controls input {
+  padding: 6px 10px;
+  width: 350px;
+}
+
+.controls select {
+  padding: 6px 10px;
+}
+
+.create-user-button {
+  margin-left: auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  gap: 8px;
+  width: 103px;
+  height: 40px;
+  background: #2c2c2c;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  color: #f5f5f5;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.create-user-button:hover {
+  background: #444;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.user-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #000000;
+  color: #ffffff;
+  z-index: 2;
+}
+
+.user-table th {
+  cursor: pointer;
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.user-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+
+.user-table th:hover {
+  background-color: #f0f0f0;
+  color: #000000;
+}
+
+.pagination {
+  margin-top: 15px;
+}
+
+.pagination button {
+  margin-right: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #b4b4b4;
+  color: #ffffff;
+  border: 1px solid #ccc;
+}
+
+.pagination .active {
+  font-weight: bold;
+  background-color: #ddd;
+  color: #000000;
+}

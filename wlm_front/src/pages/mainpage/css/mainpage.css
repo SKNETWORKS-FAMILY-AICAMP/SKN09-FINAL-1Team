@@ -34,7 +34,8 @@ body {
     flex-direction: row;
     width: 1280px;
     height: 836px;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     background: #fffff9;
     border: 1px solid #ffffff;
     margin-top: 0px;
