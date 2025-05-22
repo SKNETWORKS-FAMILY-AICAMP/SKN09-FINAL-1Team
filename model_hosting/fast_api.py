@@ -1,4 +1,5 @@
 from fastapi import File, UploadFile, Form, APIRouter
+from typing import List
 import tempfile
 import os
 import re
@@ -34,46 +35,49 @@ def summarize_body(body: str, max_len=150) -> str:
     if len(body) > max_len:
         return body[:max_len].rstrip() + "..."
     return body
-
 @router.post("/ask")
 async def ask(
     question: str = Form(...),
-    file: UploadFile = File(None)
+    files: List[UploadFile] = File(None)
 ):
     mode = classify_question_mode(question)
 
-    if file is not None:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(await file.read())
-            tmp_path = tmp.name
+    if files:
+        document_texts = []
+        filenames = []
 
-        pdf_extraction = PDFExtraction(tmp_path)
-        pages = pdf_extraction.extract_text()
-        document_text = "\n\n".join([p['text'] for p in pages])
-        os.remove(tmp_path)
+        for file in files[:5]:  # 최대 5개 처리
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(await file.read())
+                tmp_path = tmp.name
 
-        # 문서 업로드 + 웹 검색 의도 질의 (ex. 유사 사업 찾아줘)
+            pdf_extraction = PDFExtraction(tmp_path)
+            pages = pdf_extraction.extract_text()
+            os.remove(tmp_path)
+
+            text = "\n\n".join([p['text'] for p in pages])
+            document_texts.append((file.filename, text))
+            filenames.append(file.filename)
+
+        # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
-            first_page_text = pages[0]['text'] if pages else ""
+            first_text = document_texts[0][1]
             keyword_prompt = f"""
-다음은 어떤 사업 계획에 대한 문서입니다. 이 사업과 유사한 다른 사업들을 검색하고자 합니다.
-
-문서 내용 중 핵심 주제, 산업 분야, 기술 키워드, 목적 등을 1~2줄로 요약해 주세요. 이 내용을 바탕으로 웹에서 유사 사업을 검색할 것입니다.
+다음은 어떤 사업 계획 문서의 내용입니다. 이 사업과 유사한 사업들을 찾고자 합니다.
+핵심 키워드, 산업 분야, 목적을 1~2줄로 요약해 주세요.
 
 문서 내용:
-{first_page_text}
+{first_text}
 """
             ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
             search_query = ollama_extract_keywords.get_model_response().strip()
-
             results = search_web_duckduckgo(search_query)
 
-            # 결과를 제목/내용 요약/사이트주소로 보기 좋게 가공
             results_text = "\n\n".join(
                 [
-                    f"제목: {res.get('title','(제목없음)')}\n"
-                    f"내용: {summarize_body(res.get('body',''))}\n"
-                    f"사이트 주소: {res.get('href','(주소없음)')}"
+                    f"제목: {res.get('title', '(제목없음)')}\n"
+                    f"내용: {summarize_body(res.get('body', ''))}\n"
+                    f"사이트 주소: {res.get('href', '(주소없음)')}"
                     for res in results
                 ]
             )
@@ -83,17 +87,25 @@ async def ask(
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 일반 문서 질문 응답
-        criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
-        criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
-        evaluation_criteria = criteria_ollama.get_model_response().strip()
+        # 일반 문서 질의 응답 모드
+        answers = []
+        evaluation_criteria = None
 
-        qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
-        qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
-        answer = qa_ollama.get_model_response().strip()
+        for filename, text in document_texts:
+            # 한 번만 추출
+            if evaluation_criteria is None:
+                criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(text)
+                criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+                evaluation_criteria = criteria_ollama.get_model_response().strip()
+
+            qa_prompt = prompt_extraction.make_prompt_to_query_document(text, question)
+            qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
+            answer = qa_ollama.get_model_response().strip()
+
+            answers.append(f" **{filename}** 에서의 응답:\n{answer}")
 
         return {
-            "answer": answer,
+            "answer": "\n\n---\n\n".join(answers),
             "evaluation_criteria": evaluation_criteria
         }
 
@@ -129,6 +141,102 @@ async def ask(
             "answer": response,
             "evaluation_criteria": "이 모드에서는 평가 기준이 필요하지 않습니다."
         }
+
+
+# @router.post("/ask")
+# async def ask(
+#     question: str = Form(...),
+#     file: UploadFile = File(None)
+# ):
+#     mode = classify_question_mode(question)
+
+#     if file is not None:
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+#             tmp.write(await file.read())
+#             tmp_path = tmp.name
+
+#         pdf_extraction = PDFExtraction(tmp_path)
+#         pages = pdf_extraction.extract_text()
+#         document_text = "\n\n".join([p['text'] for p in pages])
+#         os.remove(tmp_path)
+
+#         # 문서 업로드 + 웹 검색 의도 질의 (ex. 유사 사업 찾아줘)
+#         if mode == "web_search":
+#             first_page_text = pages[0]['text'] if pages else ""
+#             keyword_prompt = f"""
+# 다음은 어떤 사업 계획에 대한 문서입니다. 이 사업과 유사한 다른 사업들을 검색하고자 합니다.
+
+# 문서 내용 중 핵심 주제, 산업 분야, 기술 키워드, 목적 등을 1~2줄로 요약해 주세요. 이 내용을 바탕으로 웹에서 유사 사업을 검색할 것입니다.
+
+# 문서 내용:
+# {first_page_text}
+# """
+#             ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
+#             search_query = ollama_extract_keywords.get_model_response().strip()
+
+#             results = search_web_duckduckgo(search_query)
+
+#             # 결과를 제목/내용 요약/사이트주소로 보기 좋게 가공
+#             results_text = "\n\n".join(
+#                 [
+#                     f"제목: {res.get('title','(제목없음)')}\n"
+#                     f"내용: {summarize_body(res.get('body',''))}\n"
+#                     f"사이트 주소: {res.get('href','(주소없음)')}"
+#                     for res in results
+#                 ]
+#             )
+
+#             return {
+#                 "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
+#                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+#             }
+
+#         # 일반 문서 질문 응답
+#         criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
+#         criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+#         evaluation_criteria = criteria_ollama.get_model_response().strip()
+
+#         qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
+#         qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
+#         answer = qa_ollama.get_model_response().strip()
+
+#         return {
+#             "answer": answer,
+#             "evaluation_criteria": evaluation_criteria
+#         }
+
+#     # 문서 없음 + 웹 검색
+#     elif mode == "web_search":
+#         search_query = question.strip()
+#         results = search_web_duckduckgo(search_query)
+#         results_text = "\n\n".join(
+#             [
+#                 f"제목: {res.get('title','(제목없음)')}\n"
+#                 f"내용: {summarize_body(res.get('body',''))}\n"
+#                 f"사이트 주소: {res.get('href','(주소없음)')}"
+#                 for res in results
+#             ]
+#         )
+
+#         return {
+#             "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
+#             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+#         }
+
+#     # 문서 없음 + 일반 질문
+#     else:
+#         general_prompt = f"""
+# 다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
+
+# 질문: {question}
+# """
+#         ollama_general = OllamaHosting("qwen2.5", general_prompt)
+#         response = ollama_general.get_model_response().strip()
+
+#         return {
+#             "answer": response,
+#             "evaluation_criteria": "이 모드에서는 평가 기준이 필요하지 않습니다."
+#         }
 
 
 @router.post("/transcribe_audio")
