@@ -7,6 +7,8 @@ from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db
+from lg_ollama.lg_ms import ChatBotGraph
+
 
 router = APIRouter()
 prompt_extraction = PromptExtraction()
@@ -61,8 +63,16 @@ async def ask(
     # 2. 평가요소 추출 (LLM)
     prompt_extraction = PromptExtraction()
     criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
-    criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
-    evaluation_criteria = criteria_ollama.get_model_response().strip()
+    # criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+    # evaluation_criteria = criteria_ollama.get_model_response().strip()
+
+    # ohdyo code
+    chatbot = ChatBotGraph()
+    graph = chatbot.build_graph()
+    
+    thread1 = {'configurable': {'thread_id': 1}}
+    sys_msg = SystemMessage(content="너는 사용자의 이름을 물어보고 기억해야 해.")
+    
 
     # 3. 질의응답 프롬프트 생성
     qa_prompt = prompt_extraction.make_prompt_to_query_document(document_text, question)
@@ -192,4 +202,4 @@ async def summarize_text(request: TextRequest):
 
     return {"summary": summary_clean}
 
-# uvicorn main:app --reload  cmd 창에서 실행
+# uvicorn main:app --reload cmd 창에서 실행
