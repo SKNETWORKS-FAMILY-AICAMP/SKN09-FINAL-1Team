@@ -1,17 +1,14 @@
-from fastapi import File, UploadFile, Form, APIRouter, Request
+from fastapi import File, UploadFile, Form, APIRouter
 import tempfile
 import os
 import re
 from duckduckgo_search import DDGS  
 
+
 from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db
-from data_loader.qdrant_loader import search_wlmmate_law  # 위에 추가한 함수
-
-
-
 
 router = APIRouter()
 prompt_extraction = PromptExtraction()
@@ -20,16 +17,18 @@ def clean_korean_only(text: str) -> str:
     return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
 
 def classify_question_mode(question: str) -> str:
-    keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색", "검색해줘"]
+    keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색","검색해줘"]
     if any(k in question.lower() for k in keywords):
         return "web_search"
     return "document"
 
+# DuckDuckGo 웹 검색 함수
 def search_web_duckduckgo(query: str):
     with DDGS() as ddgs:
         results = ddgs.text(query, region='kr-kr', max_results=3)
         return list(results)
 
+# 검색 결과 본문 길이 줄이기용 간단 함수
 def summarize_body(body: str, max_len=150) -> str:
     body = body.strip().replace("\n", " ")
     if len(body) > max_len:
@@ -37,7 +36,10 @@ def summarize_body(body: str, max_len=150) -> str:
     return body
 
 @router.post("/ask")
-async def ask(question: str = Form(...), file: UploadFile = File(None)):
+async def ask(
+    question: str = Form(...),
+    file: UploadFile = File(None)
+):
     mode = classify_question_mode(question)
 
     if file is not None:
@@ -50,6 +52,7 @@ async def ask(question: str = Form(...), file: UploadFile = File(None)):
         document_text = "\n\n".join([p['text'] for p in pages])
         os.remove(tmp_path)
 
+        # 문서 업로드 + 웹 검색 의도 질의 (ex. 유사 사업 찾아줘)
         if mode == "web_search":
             first_page_text = pages[0]['text'] if pages else ""
             keyword_prompt = f"""
@@ -65,6 +68,7 @@ async def ask(question: str = Form(...), file: UploadFile = File(None)):
 
             results = search_web_duckduckgo(search_query)
 
+            # 결과를 제목/내용 요약/사이트주소로 보기 좋게 가공
             results_text = "\n\n".join(
                 [
                     f"제목: {res.get('title','(제목없음)')}\n"
@@ -79,7 +83,7 @@ async def ask(question: str = Form(...), file: UploadFile = File(None)):
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 문서 내 질문 일반 모드
+        # 일반 문서 질문 응답
         criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(document_text)
         criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
         evaluation_criteria = criteria_ollama.get_model_response().strip()
@@ -93,7 +97,7 @@ async def ask(question: str = Form(...), file: UploadFile = File(None)):
             "evaluation_criteria": evaluation_criteria
         }
 
-    # 문서 없음 + 웹 검색 모드
+    # 문서 없음 + 웹 검색
     elif mode == "web_search":
         search_query = question.strip()
         results = search_web_duckduckgo(search_query)
@@ -111,7 +115,7 @@ async def ask(question: str = Form(...), file: UploadFile = File(None)):
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
-    # 문서 없음 + 일반 질문 모드
+    # 문서 없음 + 일반 질문
     else:
         general_prompt = f"""
 다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
@@ -176,7 +180,6 @@ async def transcribe_audio(file: UploadFile = File(...)):
     lightly_cleaned = response["response"]
 
     return {"transcription": lightly_cleaned}
-
 
 from pydantic import BaseModel
 
@@ -244,27 +247,71 @@ async def summarize_text(request: TextRequest):
 
     return {"summary": summary_clean}
 
-@router.post("/civil_ask")
-async def civil_ask(question: str = Form(...)):
-    search_results = search_wlmmate_law(question)
+from fastapi.responses import JSONResponse
+import whisperx
+import ollama
+import json
 
-    if not search_results:
-        return {
-            "answer": "관련된 민원 데이터가 없습니다.",
-            "evaluation_criteria": "민원 데이터 검색 결과가 없습니다."
-        }
-    
-    print(search_results)
+# router = APIRouter()
 
-    # 유사도 가장 높은 하나만 반환
-    top_hit = search_results[0]
-    payload = top_hit.payload or {}
-    content = payload.get("content", "(내용없음)")
-    score = top_hit.score
+@router.post("/distinct_speaker_audio")
+async def distinct_speaker_audio():
+    # 1. 오디오 파일 경로
+    audio_path = "./call_data/05.mp3"
 
-    answer_text = f"유사도: {score:.3f}\n내용: {content}"
+    # 2. WhisperX 모델 로드 및 전사
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
 
-    return {
-        "answer": answer_text,
-        "evaluation_criteria": "민원 데이터 검색 결과 중 유사도 1위 항목입니다."
-    }
+    # 3. 한국어 전사 텍스트 추출
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    # 4. LLM 프롬프트 구성
+    prompt = f"""
+다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다. 질문과 답변을 구분해 JSON 배열 형태로 만들어 주세요.
+반드시 JSON 형식만 출력해 주세요.
+
+형식:
+[
+  {{ "question": "질문 내용", "answer": "답변 내용" }},
+  ...
+]
+
+텍스트:
+\"\"\"{transcript}\"\"\"
+"""
+
+    # 5. Ollama Qwen2.5 모델로 Q&A 분리 요청
+    try:
+        response = ollama.generate(
+            model="qwen2.5",
+            prompt=prompt
+        )
+        result_text = response['response'].strip()
+
+        # 6. JSON 파싱 시도
+        try:
+            qna_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            # JSON 파싱 실패 시, fallback: 단순 텍스트 파싱 (질문/답변 구분)
+            qna_data = []
+            lines = result_text.splitlines()
+            for i in range(0, len(lines), 2):
+                if i+1 < len(lines):
+                    question = lines[i].replace("질문:", "").strip()
+                    answer = lines[i+1].replace("답변:", "").strip()
+                    qna_data.append({"question": question, "answer": answer})
+
+        return JSONResponse(content={"qna": qna_data})
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+### uvicorn main:app --reload
+ 
