@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
 // import './TranscriptBox.css';
 
 
-const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
+const TranscriptBox = forwardRef(( props, ref ) => {
+  const { isRecording, elapsed, onSave, onSummary } = props;
   const [transcript, setTranscript] = useState("");
   const [summary, setSummary] = useState("");
 
@@ -62,6 +63,13 @@ const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
     URL.revokeObjectURL(url);
   };
 
+  useImperativeHandle(ref, () => ({
+    getTextData: () => ({
+      transcript,
+      summary,
+    })
+  }));
+
   return (
     <div className="transcript-box">
       <input type="file" accept="audio/mp3" onChange={handleLoadAudio} className="form-item"  />
@@ -99,6 +107,6 @@ const TranscriptBox = ({ isRecording, elapsed, onSave, onSummary }) => {
       </button>
     </div>
   );
-};
+});
 
 export default TranscriptBox;

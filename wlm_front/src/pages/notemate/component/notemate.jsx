@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../../../statics/component/header';
 import Footer from '../../../statics/component/footer';
 import MicButton from '../../../components/MicButton.jsx';
@@ -54,7 +54,10 @@ const NoteMate = () => {
     setShowSendButton(true);
   };
 
- return (
+  const transcriptRef = useRef();
+
+
+  return (
     <div className="record-page">
       <div className="record-body">
         <div className="record-left">
@@ -103,6 +106,10 @@ const NoteMate = () => {
             isRecording={isRecording}
             elapsed={elapsed}
             showSendButton={showSendButton}
+            getTranscriptData={() => transcriptRef.current?.getTextData()}
+            meetingDate={meetingDate}
+            hostName={hostName}
+            participantsInfo={participantsInfo}
           />
         </div>
 
@@ -119,6 +126,7 @@ const NoteMate = () => {
             elapsed={elapsed}
             onSave={() => console.log('Save Clicked')}
             onSummary={() => console.log('Summary Clicked')}
+            ref={transcriptRef}
           />
         </div>
       </div>
