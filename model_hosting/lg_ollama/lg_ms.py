@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, trim_messages,filter_messages
@@ -20,8 +24,10 @@ class ChatBotGraph:
         # self.model = Ollama(model=model_name)
         
     def chatbot(self, state: State):
-        answer = self.model.invoke(state['messages'])
-        return {'messages': [answer]}
+        messages = state['messages']
+        answer = self.model.invoke(messages)
+        messages.append(AIMessage(content=answer))
+        return {'messages': messages}
     
     def build_graph(self):
         builder = StateGraph(State)
@@ -42,18 +48,30 @@ class StartChatBot:
     def start_chat(self):
         prompt_extraction = PromptExtraction()
         prompt = prompt_extraction.test_make_prompt_to_extract_criteria()
-        messages = [SystemMessage(content=prompt)]
-        return self.graph.invoke({'messages': messages}, self.thread)
-
-    
-    def send_message(self, message: str):
         
-        return self.graph.invoke({'messages': [HumanMessage(content=message)]}, self.thread)
+        result = self.graph.invoke({'messages': SystemMessage(content=prompt)}, self.thread)
+        return result
+    
+    def load_chat_history(self, thread_id: int):
+        """이전 채팅 내역 불러오기 (DB 구현 전 임시 함수)"""
+        #  DB 구현 후 실제 히스토리 불러오기 구현
+        pass
 
-# 모듈 실행 테스트 확인
+    def send_message(self, message: str):
+        result = self.graph.invoke({'messages': HumanMessage(content=message)}, self.thread)
+        return result
+
+    def get_chat_history(self):
+    
+        return self.messages
+
+
+
+# 테스트
 # chatbot = StartChatBot(1)
 # result = chatbot.start_chat()
 # print(result)
 # print()
-# result = chatbot.add_message("내 이름이 뭐야?")
+# result = chatbot.send_message("너는 어떤 AI야?")
 # print(result['messages'][-1].content)
+
