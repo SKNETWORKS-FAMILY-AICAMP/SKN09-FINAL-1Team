@@ -1,17 +1,22 @@
-/* src/pages/component/chatbot/css/FilterPanel.module.css */
-
 .filterSection {
-    background-color: #ddd;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border-radius: 8px;
-  }
-  
-  .searchInput {
-    margin-top: 0.5rem;
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #bbb;
-    border-radius: 4px;
-  }
-  
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.filterSection label {
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.searchInput {
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}

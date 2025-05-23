@@ -10,9 +10,10 @@ const formatTime = (seconds) => {
 
 const MicButton = ({ isRecording, elapsed, onStart, onStop }) => (
   <div className="mic-icon">
-    <button className="mic-button" onClick={isRecording ? onStop : onStart}>
+    <button className={`mic-button learn-more-style`} onClick={isRecording ? onStop : onStart}>
       {isRecording && <div className="mic-pulse" />}
       <img src={beforeMeetingImage} alt="mic" />
+      <span className="mic-label">{isRecording ? 'Stop' : 'Start'}</span>
     </button>
     {isRecording && <div className="timer-text">⏱ {formatTime(elapsed)}</div>}
   </div>

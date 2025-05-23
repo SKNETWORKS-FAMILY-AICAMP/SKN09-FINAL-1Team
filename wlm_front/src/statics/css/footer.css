@@ -1,11 +1,12 @@
 .notemate-footer {
   display: flex;
+  position: relative;
   justify-content: space-between;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #ffffff;
   background-color: white;
   font-size: 0.85rem;
   color: #222;
-  width: 1440px;
+  width: 100%;
 }
 
 .notemate-footer a {

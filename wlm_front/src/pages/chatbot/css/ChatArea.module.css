@@ -1,102 +1,169 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik:700&display=swap');
+
 .chatArea {
   flex: 7;
-  background-color: #d4d3e3;
+  background: linear-gradient(to bottom, #b3e4f3, #f4f3fb);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  padding: 1rem;
-  position: relative;
+  height: 100%;
+  padding: 1.2rem;
   box-sizing: border-box;
 }
 
-/* .chatContent {
-  flex-grow: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-} */
 .chatContent {
-  max-height: 80vh;
+  flex-grow: 1;
   overflow-y: auto;
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
+  padding-right: 6px;
+  scroll-behavior: smooth;
 }
-/* .inputWrapper {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding-top: 150px;
-} */
+
 .inputWrapper {
+  padding-top: 14px;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-top: auto; /* 입력창을 아래로 밀어내기 */
-  padding-top: 1rem; /* 약간의 여백만 남기기 */
+  background: transparent;
+  gap: 10px;
 }
+
+/* 텍스트 입력창 */
 .input {
-  flex-grow: 1;
-  padding: 10px;
-  height: 50px;  /* 높이 설정 */
-  padding: 10px; /* 여백 설정 */
-  font-size: 16px; /* 글자 크기 조정 */
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.sendButton {
-  padding: 20px;
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 1rem;
   border: none;
-  background-color: black;
-  color: white;
-  border-radius: 50%;
+  border-radius: 20px;
+  outline: none;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.input:focus {
+  box-shadow: 0 0 0 4px rgba(86, 170, 255, 0.2);
+}
+
+/* 공통 버튼 스타일: 하늘색 계열로 변경 */
+.uploadButton,
+.sendButton {
+  font-family: 'Rubik', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  padding: 0.75em 1.5em;
+  background: #d0ecff;
+  color: #1d3b57;
+  border: 2px solid #96c9f7;
+  border-radius: 0.75em;
   cursor: pointer;
+  position: relative;
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+              background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
-.uploadButton {
-  font-size: 30px; /* 기본 크기보다 크게 */
-  cursor: pointer;
-  margin-right: 10px; /* 버튼 간격 조정 */
-  transition: transform 0.3s ease; /* 크기 변경 애니메이션 추가 */
+.uploadButton::before,
+.sendButton::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #addcff;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px #96c9f7, 0 0.625em 0 0 #d2ebff;
+  transform: translate3d(0, 0.75em, -1em);
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+              box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
+  z-index: -1;
 }
 
-.uploadButton:hover {
-  transform: scale(1.2); /* 호버 시 이미지 확대 */
+.uploadButton:hover,
+.sendButton:hover {
+  background: #c1e3ff;
+  transform: translate(0, 0.25em);
 }
 
-/* 메시지 공통 스타일 */
-/* .message {
-  max-width: 70%;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  word-break: break-word;
-} */
+.uploadButton:hover::before,
+.sendButton:hover::before {
+  box-shadow: 0 0 0 2px #96c9f7, 0 0.5em 0 0 #d2ebff;
+  transform: translate3d(0, 0.5em, -1em);
+}
+
+.uploadButton:active,
+.sendButton:active {
+  background: #b3dbff;
+  transform: translate(0, 0.75em);
+}
+
+.uploadButton:active::before,
+.sendButton:active::before {
+  box-shadow: 0 0 0 2px #96c9f7, 0 0 #d2ebff;
+  transform: translate3d(0, 0, -1em);
+}
+
+.sendButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 메시지 말풍선 */
 .message {
-  white-space: pre-wrap; /* 줄바꿈 보존 */
-  word-break: break-word; /* 너무 긴 단어도 줄바꿈 */
-  overflow-wrap: break-word;
-  padding: 1rem;
-  border-radius: 10px;
-  max-width: 100%;
+  max-width: 75%;
+  padding: 14px 18px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
-/* 사용자 메시지 - 오른쪽 */
 .userMessage {
-  background-color: #333;
-  color: white;
   align-self: flex-end;
-  border-bottom-right-radius: 0;
+  background-color: #2b99dd;
+  color: white;
+  border-bottom-right-radius: 4px;
 }
 
-
-/* AI 메시지 - 왼쪽 */
 .aiMessage {
-  background-color: #fff;
-  color: #000;
   align-self: flex-start;
-  border-bottom-left-radius: 0;
+  background-color: #ffffff;
+  color: #111;
+  border-bottom-left-radius: 4px;
+}
+
+/* 파일명 출력 */
+.selectedFile {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* 로딩 애니메이션 */
+.typing {
+  display: flex;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  padding-left: 1rem;
+}
+
+.typing span {
+  animation: blink 1.4s infinite;
+  display: inline-block;
+  transform: translateY(0);
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; transform: translateY(0); }
+  20% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 0.2; transform: translateY(0); }
 }

@@ -1,9 +1,15 @@
-*.container {
-  display: flex;       /* 🔥 핵심! */
-  width: 100vw;
-  height: 100vh;
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
 }
-  
 
+.chatArea {
+  flex-grow: 1;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
 
-  
+.full {
+  width: 100%;
+}

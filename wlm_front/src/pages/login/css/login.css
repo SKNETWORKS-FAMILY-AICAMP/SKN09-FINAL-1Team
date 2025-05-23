@@ -1,106 +1,157 @@
-body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #fff;
-  }
-  
-  .login-container {
-    width: 100%;
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 30px;
-    text-align: center;
-  }
-  
-  .login-logo-section {
-    position: relative;
-    margin-bottom: 40px;
-  }
-  
-  .icon-curve {
-    position: relative;
-    width: 100%;
-    height: 80px;
-    margin-bottom: 20px;
-  }
-  
-  .icon-item {
-    position: absolute;
-    text-align: center;
-    width: 70px;
-  }
-  
-  .icon-img {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .icon-label {
-    font-size: 12px;
-    margin-top: 5px;
-    color: #222;
-    font-weight: bold;
-  }
-  
-  .main-logo {
-    width: 100px;
-    margin: 10px auto;
-  }
-  
-  .logo-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #111;
-    margin-top: 10px;
-  }
-  
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 30px;
-  }
-  
-  .login-input {
-    padding: 12px;
-    border-radius: 25px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    text-align: center;
-  }
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
 
-  .error-message {
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Raleway', sans-serif;
+  background-color: #e0f7ff; /* 하늘색 테마 */
+}
+
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.container:hover .top:before,
+.container:active .top:before,
+.container:hover .top:after,
+.container:active .top:after,
+.container:hover .bottom:before,
+.container:active .bottom:before,
+.container:hover .bottom:after,
+.container:active .bottom:after {
+  margin-left: 200px;
+  transform-origin: -200px 50%;
+  transition-delay: 0s;
+}
+
+.container:hover .center,
+.container:active .center {
+  opacity: 1;
+  transition-delay: 0.2s;
+}
+
+.top:before,
+.top:after,
+.bottom:before,
+.bottom:after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 200vmax;
+  height: 200vmax;
+  top: 50%;
+  left: 50%;
+  margin-top: -100vmax;
+  transform-origin: 0 50%;
+  transition: all 0.5s cubic-bezier(0.445, 0.05, 0, 1);
+  z-index: 10;
+  opacity: 0.8;
+  transition-delay: 0.2s;
+  background-color: #d0ecff; /* 단색으로 */
+}
+
+.top:before { transform: rotate(45deg); }
+.top:after  { transform: rotate(135deg); }
+.bottom:before { transform: rotate(-45deg); }
+.bottom:after  { transform: rotate(-135deg); }
+
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.445, 0.05, 0, 1);
+  transition-delay: 0s;
+  z-index: 20;
+}
+
+.center img.login-logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 10px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.container:hover .center img.login-logo,
+.container:active .center img.login-logo {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.center h2 {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #007acc;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+}
+
+.container:hover .center h2,
+.container:active .center h2 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.center form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
+}
+
+.center input[type='text'],
+.center input[type='password'],
+.center input[type='submit'] {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.center input[type='submit'] {
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.center input[type='submit']:hover {
+  background-color: #1e80d0;
+}
+
+.center .forgot-password {
+  margin-top: 10px;
+  color: #007acc;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.center .forgot-password:hover {
+  color: #005b9f;
+}
+
+.error-message {
   color: red;
   font-size: 14px;
-  margin-bottom: 10px;
-  text-align: center;
+  margin-top: 10px;
 }
-  
-  .forgot-password {
-    color: #ec4899;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s;
-  }
-  
-  .forgot-password:hover {
-    text-decoration: underline;
-  }
-  
-  .login-button {
-    padding: 12px;
-    background-color: #000;
-    color: #fff;
-    font-size: 16px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: 0.3s ease;
-  }
-  
-  .login-button:hover {
-    background-color: #333;
-  }
-  
-  
-  
