@@ -1,0 +1,10 @@
+.querymate-container {
+  display: flex;
+  background: #f0f8ff;
+  font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
