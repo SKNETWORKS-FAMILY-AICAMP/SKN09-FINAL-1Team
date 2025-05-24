@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import '../pages/notemate/css/notemate.css';
-import './ParticipantList.css';
+import '../css/notemate.css';
+import '../css/ParticipantList.css';
 
 const ParticipantList = ({
   users,

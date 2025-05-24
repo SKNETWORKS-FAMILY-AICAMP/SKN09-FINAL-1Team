@@ -1,0 +1,117 @@
+.question-item {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2c2c2c;
+}
+
+.question-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-dot.승인 {
+  background-color: #00BFFF;
+}
+
+.status-dot.거부 {
+  background-color: #FF4C4C;
+}
+
+.status-dot.수정 {
+  background-color: #FFA500;
+}
+
+.answer-box {
+  margin-top: 1rem;
+  background: #f5faff;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.svg-button-group {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* SVG 버튼 공통 스타일 */
+.svg-wrapper {
+  position: relative;
+  width: 150px;
+  height: 40px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.shape {
+  stroke-width: 6px;
+  fill: transparent;
+  stroke: #009FFD;
+  stroke-dasharray: 85 400;
+  stroke-dashoffset: -220;
+  transition: 1s all ease;
+  rx: 5px;
+}
+
+.svg-wrapper:hover .shape {
+  stroke-dasharray: 50 0;
+  stroke-width: 3px;
+  stroke-dashoffset: 0;
+  stroke: #06D6A0;
+}
+
+/* 텍스트 내부 */
+.text {
+  font-size: 1.1em;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  line-height: 40px;
+  background-color: transparent;
+}
+
+/* 개별 색상 변경 */
+.shape-reject {
+  stroke: #FF4C4C;
+}
+.shape-edit {
+  stroke: #FFA500;
+}
+.edit-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
