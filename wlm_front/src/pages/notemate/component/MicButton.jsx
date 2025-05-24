@@ -1,5 +1,5 @@
 import React from 'react';
-import beforeMeetingImage from '../pages/images/before-meeting.png';
+import beforeMeetingImage from '../../images/before-meeting.png';
 
 const formatTime = (seconds) => {
   const h = String(Math.floor(seconds / 3600)).padStart(2, '0');

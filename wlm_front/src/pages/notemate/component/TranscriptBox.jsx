@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
-// import './TranscriptBox.css';
+// import '../css/TranscriptBox.css';
 
 
 const TranscriptBox = forwardRef(( props, ref ) => {

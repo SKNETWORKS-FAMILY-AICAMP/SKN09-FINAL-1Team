@@ -1,5 +1,5 @@
 import React from 'react';
-import './ConfirmModal.css';
+import '../css/ConfirmModal.css';
 
 const ConfirmModal = ({ modalStep, setModalStep, startMeeting, stopMeeting }) => {
   if (!modalStep) return null;

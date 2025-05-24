@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Header from '../../../statics/component/header';
-import Footer from '../../../statics/component/footer';
-import MicButton from '../../../components/MicButton.jsx';
-import ParticipantList from '../../../components/ParticipantList.jsx';
-import TranscriptBox from '../../../components/TranscriptBox.jsx';
-import ConfirmModal from '../../../components/ConfirmModal.jsx';
+// import Header from '../../../statics/component/header';
+// import Footer from '../../../statics/component/footer';
+import MicButton from './MicButton.jsx';
+import ParticipantList from './ParticipantList.jsx';
+import TranscriptBox from './TranscriptBox.jsx';
+import ConfirmModal from './ConfirmModal.jsx';
 import '../css/notemate.css';  
 
 const NoteMate = () => {
