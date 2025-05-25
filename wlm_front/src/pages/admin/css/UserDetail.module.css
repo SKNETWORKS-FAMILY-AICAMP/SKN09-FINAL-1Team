@@ -1,0 +1,23 @@
+.detailTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.detailTable th,
+.detailTable td {
+    border-bottom: 1px solid #eee;
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+.detailTable th {
+    background: #f7fafd;
+    color: #007acc;
+    width: 120px;
+    font-weight: 600;
+}
+
+.detailTable td {
+    color: #333;
+}

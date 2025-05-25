@@ -1,0 +1,214 @@
+/** 전체 배경 및 기본 폰트 */
+body {
+    overflow-x: hidden;
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #f4faff;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
+}
+
+.adminContainer {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0.25rem 0.5rem;
+    min-height: 100vh;
+    background: #f4faff;
+    font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
+}
+
+.title {
+    color: #007acc;
+    margin-bottom: 2rem;
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.createButtonTop {
+    padding: 0.85rem 2.2rem;
+    background-color: #007acc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-left: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.08);
+}
+
+.createButtonTop:hover {
+    background-color: #005999;
+    box-shadow: 0 4px 16px rgba(0, 122, 204, 0.13);
+}
+
+.content {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    min-height: 80vh;
+}
+
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+}
+
+.searchForm {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.searchSelect {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: 1.5px solid #cce6fa;
+    font-size: 1rem;
+    background: #f7fbff;
+    color: #007acc;
+    font-weight: 500;
+    transition: border 0.2s;
+}
+
+.searchSelect:focus {
+    border: 1.5px solid #007acc;
+    outline: none;
+}
+
+.searchInput {
+    width: 170px;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: 1.5px solid #cce6fa;
+    font-size: 1rem;
+    background: #f7fbff;
+    transition: border 0.2s;
+}
+
+.searchInput:focus {
+    border: 1.5px solid #007acc;
+    outline: none;
+}
+
+.searchButton {
+    padding: 0.6rem 1.5rem;
+    background-color: #007acc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.searchButton:hover {
+    background-color: #005999;
+    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.13);
+}
+
+.userList {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
+    padding-bottom: 0.5rem;
+}
+
+.listTitle {
+    padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+    margin: 0;
+    border-bottom: 2px solid #e3f1fb;
+    color: #007acc;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: #f7fbff;
+    border-radius: 12px 12px 0 0;
+}
+
+.list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.userItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.2rem;
+    border-bottom: 1px solid #f0f4fa;
+    cursor: pointer;
+    transition: background-color 0.18s;
+}
+
+.userItem:hover {
+    background-color: #eaf6ff;
+}
+
+.userInfo {
+    flex-grow: 1;
+}
+
+.userName {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.18rem;
+    color: #222;
+    font-size: 1.08rem;
+}
+
+.userId {
+    display: block;
+    font-size: 0.97rem;
+    color: #007acc;
+    font-weight: 500;
+}
+
+.deleteButton {
+    padding: 0.5rem 1.1rem;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.deleteButton:hover {
+    background-color: #cc0000;
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.13);
+}
+
+.mainContent {
+    flex-grow: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.placeholder {
+    text-align: center;
+    color: #666;
+    padding: 2.5rem;
+    font-size: 1.15rem;
+}

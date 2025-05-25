@@ -1,0 +1,82 @@
+.userList {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
+    padding-bottom: 0.5rem;
+}
+
+.listTitle {
+    padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+    margin: 0;
+    border-bottom: 2px solid #e3f1fb;
+    color: #007acc;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: #f7fbff;
+    border-radius: 12px 12px 0 0;
+}
+
+.list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.userItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.2rem 1.1rem 1.2rem;
+    border-bottom: 1px solid #f0f4fa;
+    cursor: pointer;
+    transition: background-color 0.18s;
+    box-sizing: border-box;
+}
+
+.userItem:hover {
+    background-color: #eaf6ff;
+}
+
+.userInfo {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.userName {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.18rem;
+    color: #222;
+    font-size: 1.08rem;
+    word-break: break-all;
+}
+
+.userId {
+    display: block;
+    font-size: 0.97rem;
+    color: #007acc;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.deleteButton {
+    padding: 0.45rem 1.1rem;
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-left: 1rem;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.08);
+    white-space: nowrap;
+    min-width: 56px;
+    max-width: 80px;
+}
+
+.deleteButton:hover {
+    background-color: #c0392b;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.13);
+}
