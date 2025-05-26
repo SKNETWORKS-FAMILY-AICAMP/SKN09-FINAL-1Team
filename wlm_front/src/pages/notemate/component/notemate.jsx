@@ -80,15 +80,6 @@ const NoteMate = () => {
                 onChange={(e) => setHostName(e.target.value)}
               />
             </div>
-            <div className="form-block">
-              <label>참석자</label>
-              <input
-                type="text"
-                placeholder="예: 5명"
-                value={participantsInfo}
-                onChange={(e) => setParticipantsInfo(e.target.value)}
-              />
-            </div>
           </div>
         
             <button
