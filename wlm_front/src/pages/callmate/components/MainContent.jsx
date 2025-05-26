@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import styles from '../css/MainContent.module.css';
 
-const MainContent = ({ qaList, onApprove, onDelete }) => {
+const MainContent = ({ qaList, onApprove, onDelete, onFeedback }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const fileInputRef = useRef(null);
@@ -118,6 +118,14 @@ const MainContent = ({ qaList, onApprove, onDelete }) => {
                         </button>
                       </div>
                     </div>
+                    {qa.feedback && (
+                      <div className={styles.feedbackSection}>
+                        <div className={styles.feedbackHeader}>
+                          <span className={styles.feedbackLabel}>F: 피드백</span>
+                        </div>
+                        <p className={styles.feedbackText}>{qa.feedback}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className={styles.qaActions}>

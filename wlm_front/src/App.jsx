@@ -10,6 +10,7 @@ import Login from './pages/login/component/login.jsx';
 import Mainpage from './pages/mainpage/component/mainpage.jsx';
 import Footer from './statics/component/footer';
 import MyPage from './pages/mypage/component/mypage.jsx';
+import CallMate from './pages/callmate/Callmate.jsx';
 // import Signup from './pages/signup/component/signup.jsx'
 
 function AppRoutes() {
@@ -30,6 +31,7 @@ function AppRoutes() {
         <Route path="/notemate"        element={<NoteMate />} />
         <Route path="/chatmate"        element={<Base />} />
         <Route path="/mypage"          element={<MyPage />} />
+        <Route path="/callmate"        element={<CallMate />} />
       </Routes>
       <Footer />
     </>
