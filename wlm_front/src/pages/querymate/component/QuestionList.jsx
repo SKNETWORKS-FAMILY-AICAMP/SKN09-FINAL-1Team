@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import QuestionItem from './questionitem';
 import Pagination from './Pagination';
 
-const QuestionList = () => {
+const QuestionList = ({ searchParams }) => {
   const [questions, setQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+
 
   // 이 부분을 DB 연동 시 fetch 또는 axios 요청으로 대체
   useEffect(() => {
@@ -22,17 +23,32 @@ const QuestionList = () => {
     setQuestions(dummyData);
   }, []);
 
+  const filtered = questions
+    .filter((q) =>
+      q.question.toLowerCase().includes(searchParams.keyword.toLowerCase())
+    )
+    .filter((q) =>
+      searchParams.date ? q.date === searchParams.date : true
+    )
+    .sort((a, b) => {
+      if (searchParams.sort === '최근순') return b.date.localeCompare(a.date);
+      if (searchParams.sort === '오래된순') return a.date.localeCompare(b.date);
+      return 0;
+    });
+
   const startIdx = (currentPage - 1) * itemsPerPage;
-  const currentItems = questions.slice(startIdx, startIdx + itemsPerPage);
+  const currentItems = filtered.slice(startIdx, startIdx + itemsPerPage);
 
   return (
     <>
-      {currentItems.map((item) => (
-        <QuestionItem key={item.id} data={item} />
-      ))}
+      {currentItems.length > 0 ? (
+        currentItems.map((item) => <QuestionItem key={item.id} data={item} />)
+      ) : (
+        <p style={{ color: '#888' }}>🔍 검색 결과가 없습니다.</p>
+      )}
       <Pagination
         currentPage={currentPage}
-        totalItems={questions.length}
+        totalItems={filtered.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />

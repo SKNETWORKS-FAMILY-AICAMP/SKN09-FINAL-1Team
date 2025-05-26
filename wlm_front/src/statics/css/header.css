@@ -189,3 +189,25 @@
 .menu-group.active .menu-icon {
   background-image: var(--icon-light);
 }
+
+/* 가운데 문구 (main 전용) */
+.header-center-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.header {
+  width: 100vw;   /* 또는 width: 100%; */
+  min-width: 1280px; /* 필요시 최소 너비 지정 */
+  box-sizing: border-box;
+  position: relative; /* 필요에 따라 fixed, sticky 등 */
+}
+
+

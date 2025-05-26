@@ -3,8 +3,8 @@ import '../css/questionitem.css';
 
 const QuestionItem = ({ data }) => {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState(data.status); // '승인' | '거부' | '수정'
-  const [editing, setEditing] = useState(false); // textarea 표시 여부
+  const [status, setStatus] = useState(data.status);
+  const [editing, setEditing] = useState(false);
   const [answer, setAnswer] = useState(data.answer || '');
   const [tempAnswer, setTempAnswer] = useState(data.answer || '');
 
@@ -13,8 +13,8 @@ const QuestionItem = ({ data }) => {
       setEditing(true);
       setStatus('수정');
     } else if (newStatus === '승인') {
-      setAnswer(tempAnswer);     // 저장
-      setEditing(false);         // 수정 종료
+      setAnswer(tempAnswer);
+      setEditing(false);
       setStatus('승인');
     } else if (newStatus === '거부') {
       setEditing(false);
@@ -46,33 +46,10 @@ const QuestionItem = ({ data }) => {
             <p>{answer || '아직 답변이 작성되지 않았습니다.'}</p>
           )}
 
-          <div className="svg-button-group">
-            <div className="svg-wrapper" onClick={() => handleClick('승인')}>
-              <svg height="40" width="150">
-                <rect className="shape" height="40" width="150" />
-                <foreignObject x="0" y="0" width="150" height="40">
-                  <div className="text">승인</div>
-                </foreignObject>
-              </svg>
-            </div>
-
-            <div className="svg-wrapper" onClick={() => handleClick('거부')}>
-              <svg height="40" width="150">
-                <rect className="shape shape-reject" height="40" width="150" />
-                <foreignObject x="0" y="0" width="150" height="40">
-                  <div className="text">거부</div>
-                </foreignObject>
-              </svg>
-            </div>
-
-            <div className="svg-wrapper" onClick={() => handleClick('수정')}>
-              <svg height="40" width="150">
-                <rect className="shape shape-edit" height="40" width="150" />
-                <foreignObject x="0" y="0" width="150" height="40">
-                  <div className="text">수정</div>
-                </foreignObject>
-              </svg>
-            </div>
+          <div className="btn-group">
+            <a onClick={() => handleClick('승인')} className="btn green rounded">승인</a>
+            <a onClick={() => handleClick('거부')} className="btn red rounded">거부</a>
+            <a onClick={() => handleClick('수정')} className="btn yellow rounded">수정</a>
           </div>
         </div>
       )}
