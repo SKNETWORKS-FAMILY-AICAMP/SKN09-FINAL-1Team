@@ -5,10 +5,11 @@ import { AuthProvider } from './context/AuthContext.jsx';
 // import Login from './pages/login/component/login.jsx'  
 import Header from './statics/component/header.jsx';
 import NoteMate from './pages/notemate/component/notemate.jsx';
-import Base  from './pages/chatbot/chatbot_con/Base.jsx';
+import Base from './pages/chatbot/chatbot_con/Base.jsx';
 import Login from './pages/login/component/login.jsx';
 import Mainpage from './pages/mainpage/component/mainpage.jsx';
 import Footer from './statics/component/footer';
+import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'
 import CallMate from './pages/callmate/Callmate.jsx'
 // import Signup from './pages/signup/component/signup.jsx'
@@ -22,10 +23,11 @@ function AppRoutes() {
     <>
       {!hideHeader && <Header />}
       <Routes>
-        <Route path="/"                element={<Login />} />
-        <Route path="/main"            element={<Mainpage />} />
-        <Route path="/login"           element={<Login />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/main" element={<Mainpage />} />
+        <Route path="/login" element={<Login />} />
         {/* <Route path="/signup"          element={<Signup />} /> */}
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/querymate"       element={<QueryMate />} />
         <Route path="/callmate"        element={<CallMate />} />
         <Route path="/notemate"        element={<NoteMate />} />

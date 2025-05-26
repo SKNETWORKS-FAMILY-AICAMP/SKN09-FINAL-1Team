@@ -1,0 +1,119 @@
+.createForm {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+}
+
+.formTitle {
+    color: #007acc;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.formGroup {
+    margin-bottom: 0;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+    outline: none;
+    border-color: #007acc;
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.formGroup select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+.passwordGroup {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.passwordGroup input {
+    flex: 1;
+}
+
+.generateButton {
+    padding: 0.65rem 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.generateButton:hover {
+    background-color: #218838;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 0;
+}
+
+.submitButton,
+.cancelButton {
+    padding: 0.65rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submitButton {
+    background-color: #007acc;
+    color: white;
+}
+
+.submitButton:hover {
+    background-color: #005999;
+}
+
+.cancelButton {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.cancelButton:hover {
+    background-color: #e0e0e0;
+}

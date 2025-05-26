@@ -1,0 +1,159 @@
+.userList {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
+    padding-bottom: 1rem;
+}
+
+.listTitle {
+    padding: 1.2rem 1.2rem 0.7rem 1.2rem;
+    margin: 0;
+    border-bottom: 2px solid #e3f1fb;
+    color: #007acc;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: #f7fbff;
+    border-radius: 12px 12px 0 0;
+}
+
+.list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.userItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.2rem;
+    border-bottom: 1px solid #f0f4fa;
+    cursor: pointer;
+    transition: background-color 0.18s;
+    box-sizing: border-box;
+}
+
+.userItem:hover {
+    background-color: #eaf6ff;
+}
+
+.userInfo {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.userName {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.18rem;
+    color: #222;
+    font-size: 1.08rem;
+    word-break: break-all;
+}
+
+.userDetails {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.userId, .userEmail {
+    font-size: 0.97rem;
+    color: #007acc;
+    font-weight: 500;
+}
+
+.userId::after {
+    content: '|';
+    margin-left: 1rem;
+    color: #ddd;
+}
+
+.userEmail {
+    color: #666;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.resetButton {
+    padding: 0.45rem 1rem;
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.resetButton:hover {
+    background-color: #e0a800;
+}
+
+.deleteButton {
+    padding: 0.45rem 1rem;
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.deleteButton:hover {
+    background-color: #c0392b;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #f0f4fa;
+    margin-top: 0.5rem;
+}
+
+.pageButton {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #e3f1fb;
+    background-color: #fff;
+    color: #007acc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    min-width: 36px;
+}
+
+.pageButton:hover:not(:disabled) {
+    background-color: #f7fbff;
+    border-color: #007acc;
+}
+
+.pageButton.active {
+    background-color: #007acc;
+    color: #fff;
+    border-color: #007acc;
+}
+
+.pageButton:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+    border-color: #e3e3e3;
+}
