@@ -54,6 +54,8 @@ def pretty_print_stream_chunk(chunk):
             print(updates)
         print("\n")
 
+# 프롬프트 고치고 싶다면 memory_modules/agent.py의 create_prompt 함수 수정
+
 if __name__ == "__main__":
     # 테스트용 에이전트 생성
     # 처음에 랭그래프 이미지 생성시 주석 풀고 실행 한번 하면 주석 해야함
@@ -77,7 +79,8 @@ if __name__ == "__main__":
     response_v1 = graph.invoke({
         "messages": [{"role": "user", "content": "안녕하세요!"}]
     }, config)
-    response_v1["messages"][-1].pretty_print()
+    print(response_v1['messages'][-1].content)
+    print()
     
     response_v2 = graph.invoke({
         "messages": [{"role": "user", "content": "나는 이재혁이야 만나서 반가워!"}]
@@ -88,3 +91,21 @@ if __name__ == "__main__":
         "messages": [{"role": "user", "content": "내 이름이 뭔지 기억해?"}]
     }, config)
     response_v3["messages"][-1].pretty_print()
+    
+    response_v4 = graph.invoke({
+        "messages": [{"role": "user", "content": "나는 치킨을 좋아하고 피자를 싫어해"}]
+    }, config)
+    response_v4["messages"][-1].pretty_print()
+    
+    response_v5 = graph.invoke({
+        "messages": [{"role": "user", "content": "내가 좋아하는 음식이 뭔지 기억해?"}]
+    }, config)
+    response_v5["messages"][-1].pretty_print()
+    
+    response_v6 = graph.invoke({
+        "messages": [{"role": "user", "content": "내가 싫어하는 음식이 뭔지 기억해?"}]
+    }, config)
+    response_v6["messages"][-1].pretty_print()
+    
+    
+    
