@@ -27,3 +27,10 @@ dist-ssr
 __pycache__/
 **/__pycache__/
 *.pyc
+
+
+### dotenv ###
+.env
+**/.env
+*/.env
+
