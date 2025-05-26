@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import '../pages/notemate/css/notemate.css';
-import './ParticipantList.css';
+import React, { useState, useEffect } from 'react';
+import '../css/notemate.css';
+import '../css/ParticipantList.css';
 
 const ParticipantList = ({
   users,
@@ -10,7 +10,10 @@ const ParticipantList = ({
   getTranscriptData,
   meetingDate,
   hostName,
-  participantsInfo }) => {
+  setSendMessage,
+  setModalStep,
+  setSendEmailFn
+}) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -90,7 +93,7 @@ const ParticipantList = ({
     formData.append("subject", `Notemate에서 ${meetingDate} 회의록 전달드립니다`);
     formData.append(
       "body",
-      `📅 회의 일자: ${meetingDate}\n👤 주최자: ${hostName}\n👥 참석자: ${participantsInfo}`
+      `📅 회의 일자: ${meetingDate}\n👤 주최자: ${hostName}`
     );
     formData.append("transcript_file", new File([transcript], `${meetingDate}_회의록_전문.txt`, { type: "text/plain" }));
     formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
@@ -102,11 +105,22 @@ const ParticipantList = ({
       });
 
       const result = await res.json();
-      alert(result.message || result.error);
+      setSendMessage(result.message || "전송 완료");
+      setModalStep('sending_complete');
+      console.log("요청 보냄");
     } catch (err) {
-      alert("에러 발생: " + err.message);
+      setSendMessage("이메일 전송 실패: " + err.message);
+      setModalStep('sending_error');
+      console.log("요청 실패");
     }
   };
+
+  useEffect(() => {
+    if (setSendEmailFn) {
+      setSendEmailFn(() => handleSendEmail);
+    }
+  }, [setSendEmailFn]);
+
 
 
   return (
@@ -143,9 +157,9 @@ const ParticipantList = ({
 
       {/* 테이블 헤더 */}
       <div className="table-header">
+        <span>선택</span>
         <span>이름</span>
         <span>이메일</span>
-        <span>선택</span>
         <span>삭제</span>
       </div>
 
@@ -153,13 +167,13 @@ const ParticipantList = ({
       <ul className="user-list">
         {filteredUsers.map((user, idx) => (
           <li key={idx}>
-            <span>{user.name}</span>
-            <span>{user.email}</span>
             <input
               type="checkbox"
               checked={user.selected || false}
               onChange={() => handleCheck(idx)}
             />
+            <span>{user.name}</span>
+            <span>{user.email}</span>
             <button onClick={() => handleDelete(idx)}>✕</button>
           </li>
         ))}
@@ -169,7 +183,7 @@ const ParticipantList = ({
       {!isRecording && elapsed > 0 && (
         <div className="participant-actions">
           <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
-          <button className="send-btn" onClick={handleSendEmail}>📩 전송</button>
+          <button className="send-btn" onClick={() => setModalStep('sendConfirm')}>📩 전송</button>
         </div>
       )}
     </div>

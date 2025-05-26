@@ -1,31 +1,14 @@
-import React, { useState, useRef,useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [file, setFile] = useState(null);
-  const [sending, setSending] = useState(false);  // 추가
-  const fileInputRef = useRef(null);
+  const [sending, setSending] = useState(false);
+  const [files, setFiles] = useState([]); // 여러 개의 파일 저장
+  const fileInputRef = useRef(null); // 파일 input 초기화를 위한 참조
 
-  useEffect(() => {
-    // 페이지가 처음 열릴 때 MemorySaver 초기화 요청
-    const fetchChatmate = async () => {
-    try{  
-      const response = await fetch('http://localhost:8000/chatmate')
-        if(!response.ok){
-          console.log('chatmate 실행 실패')
-        }
-        const data = await response.json()
-        console.log(data)
-    } catch (error) {
-      console.error('chatmate 실행 실패:', error);
-    }
-  };
-  fetchChatmate();
-    
-  }, []); // 빈 배열: 마운트 시 1회만 실행
 
   const handleSend = async () => {
     if (sending) return;
@@ -33,8 +16,7 @@ const ChatArea = () => {
 
     const currentInput = input.trim();
 
-    // 입력 없고 파일도 없으면 종료
-    if (!currentInput && !file) {
+    if (!currentInput && files.length === 0) {
       setSending(false);
       return;
     }
@@ -48,9 +30,9 @@ const ChatArea = () => {
     try {
       const formData = new FormData();
       formData.append('question', currentInput);
-      if (file) {
-        formData.append('file', file);
-      }
+      files.forEach((f) => {
+        formData.append('files', f); // 여러 개 파일 추가
+      });
 
       const res = await fetch('http://localhost:8000/ask', {
         method: 'POST',
@@ -72,14 +54,13 @@ const ChatArea = () => {
       setMessages(prev => [...prev, errorMsg]);
     }
 
-    setFile(null);
+    setFiles([]); // 파일 초기화
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
 
     setSending(false);
   };
-
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -89,8 +70,8 @@ const ChatArea = () => {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files));
     }
   };
 
@@ -119,16 +100,17 @@ const ChatArea = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={sending}  // 전송 중 입력 막기 선택 사항
+          disabled={sending}
         />
         <input
           type="file"
           accept="application/pdf"
+          multiple
           style={{ display: 'none' }}
           id="pdf-upload"
           onChange={handleFileChange}
           ref={fileInputRef}
-          disabled={sending}  // 전송 중 파일 선택 막기 선택 사항
+          disabled={sending}
         />
         <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
           💾
@@ -137,15 +119,17 @@ const ChatArea = () => {
           type="button"
           className={styles.sendButton}
           onClick={handleSend}
-          disabled={sending}  // 전송 중 버튼 비활성화
+          disabled={sending}
         >
           Send
         </button>
       </div>
 
-      {file && (
+      {files && files.length > 0 && (
         <div className={styles.selectedFile}>
-          {file.name}
+          {files.map((f, idx) => (
+            <div key={idx}>{f.name}</div>
+          ))}
         </div>
       )}
     </div>

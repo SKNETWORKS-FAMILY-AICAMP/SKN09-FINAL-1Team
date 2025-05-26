@@ -1,14 +1,12 @@
 /* === Global Reset & Base === */
 body {
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  background: linear-gradient(to bottom, #f3f4f6, #ffffff);
+  background: linear-gradient(to bottom, #62b9ef, #ffffff);
+  color: #333;
+  font-size: 1rem;
   margin: 0;
   padding: 0;
-  color: #333;
 }
-
 /* === 회의 정보 입력 영역 === */
 .meeting-info {
   display: flex;
@@ -37,7 +35,7 @@ body {
 
 /* === 확인 버튼 스타일 === */
 .confirm-btn {
-  background: #00bfa6;
+  background: #005cbf;
   color: white;
   border: none;
   padding: 0.7rem 1.2rem;
@@ -54,7 +52,7 @@ body {
 }
 
 .confirm-btn:not(:disabled):hover {
-  background: #009e91;
+  background: #017699;
 }
 
 /* === 버튼 글씨 키우기 === */
@@ -68,15 +66,14 @@ button,
 .record-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;  /* auto 확장을 허용 */
 }
 
 .record-body {
   display: flex;
-  flex: 1;
-  padding: 1rem;
-  gap: 1rem;
+  flex-direction: row;
+  height: auto;           /* 내용에 따라 자동 확장 */
+  flex-grow: 1;
 }
 
 /* === Left Panel (Participants) === */
@@ -107,12 +104,12 @@ button,
 
 .search-input:focus {
   outline: none;
-  border-color: #00bfa6;
+  border-color: #005fbf;
   box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.15);
 }
 
 .register-btn {
-  background: #00bfa6;
+  background: #0063bf;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -122,7 +119,7 @@ button,
 }
 
 .register-btn:hover {
-  background: #009e91;
+  background: #004c9e;
 }
 
 .suggestion-list {
@@ -198,12 +195,12 @@ button,
 }
 
 .send-btn {
-  background: #00bfa6;
+  background: #2471e5;
   color: white;
 }
 
 .send-btn:hover {
-  background: #00a091;
+  background: #0a73bd;
 }
 
 /* === Right Panel (Transcript) === */
@@ -257,6 +254,8 @@ button,
 }
 
 /* === Mic Button === */
+@import url('https://fonts.googleapis.com/css?family=Rubik:700&display=swap');
+
 .mic-icon {
   text-align: center;
 }
@@ -266,47 +265,71 @@ button,
   border: none;
   background: none;
   cursor: pointer;
+  font-family: 'Rubik', sans-serif;
 }
 
-.mic-icon img {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+/* 💡 Learn More 스타일처럼 버튼 배경 */
+.learn-more-style {
+  padding: 1.25em 2em;
+  font-weight: 600;
+  color: #23424a;
+  background: #e0f7ff;
+  border: 2px solid #77b8d1;
+  border-radius: 0.75em;
+  text-transform: uppercase;
+  transform-style: preserve-3d;
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+              background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
-.mic-pulse {
+.learn-more-style::before {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 70px;
-  height: 70px;
-  background: rgba(255, 0, 0, 0.4);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: pulseAnim 1.4s infinite ease-in-out;
+  inset: 0;
+  background: #a8e0ff;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px #77b8d1, 0 0.625em 0 0 #b3eaff;
+  transform: translate3d(0, 0.75em, -1em);
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+              box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
   z-index: -1;
 }
 
-@keyframes pulseAnim {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.6);
-    opacity: 0;
-  }
+.learn-more-style:hover {
+  background: #cceeff;
+  transform: translateY(0.25em);
+}
+
+.learn-more-style:hover::before {
+  box-shadow: 0 0 0 2px #77b8d1, 0 0.5em 0 0 #b3eaff;
+  transform: translate3d(0, 0.5em, -1em);
+}
+
+.learn-more-style:active {
+  background: #cceeff;
+  transform: translateY(0.75em);
+}
+
+.learn-more-style:active::before {
+  box-shadow: 0 0 0 2px #77b8d1, 0 0 #b3eaff;
+  transform: translate3d(0, 0, -1em);
+}
+
+.mic-button img {
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
+  margin-right: 0.5em;
+}
+
+.mic-label {
+  vertical-align: middle;
+  font-size: 1rem;
 }
 
 .timer-text {
-  margin-top: 0.5rem;
+  margin-top: 2rem ;
   font-weight: bold;
   font-size: 1rem;
   color: #e74c3c;
-}
-
-/* === Footer/Header spacing if needed === */
-.footer, .header {
-  height: 50px;
 }

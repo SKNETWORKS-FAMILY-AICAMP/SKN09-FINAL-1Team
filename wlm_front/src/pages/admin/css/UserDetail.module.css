@@ -1,0 +1,90 @@
+.detailContainer {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
+    overflow: hidden;
+}
+
+.header {
+    padding: 1.2rem;
+    background: #f7fbff;
+    border-bottom: 2px solid #e3f1fb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    margin: 0;
+    color: #007acc;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.resetButton {
+    padding: 0.45rem 1rem;
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.resetButton:hover {
+    background-color: #e0a800;
+}
+
+.closeButton {
+    padding: 0.45rem 1rem;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background-color: #5a6268;
+}
+
+.content {
+    padding: 1.2rem;
+}
+
+.detailTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.detailTable th,
+.detailTable td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #f0f4fa;
+    text-align: left;
+}
+
+.detailTable th {
+    width: 120px;
+    color: #007acc;
+    font-weight: 600;
+    background-color: #f8fbff;
+}
+
+.detailTable td {
+    color: #333;
+}
+
+.detailTable tr:hover td {
+    background-color: #f8fafc;
+}

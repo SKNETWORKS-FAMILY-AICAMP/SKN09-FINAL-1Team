@@ -3,6 +3,7 @@ from typing import Annotated, TypedDict
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, trim_messages,filter_messages
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
+# from langchain_community.llms import Ollama
 from langgraph.graph import StateGraph, START, END, add_messages
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -16,6 +17,7 @@ class ChatBotGraph:
         super().__init__()
         self.model_name = model_name
         self.model = OllamaLLM(model=model_name)
+        # self.model = Ollama(model=model_name)
         
     def chatbot(self, state: State):
         answer = self.model.invoke(state['messages'])

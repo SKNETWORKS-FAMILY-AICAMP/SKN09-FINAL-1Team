@@ -1,0 +1,124 @@
+.question-item {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2c2c2c;
+}
+
+.question-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-dot.승인 {
+  background-color: #00BFFF;
+}
+.status-dot.거부 {
+  background-color: #FF4C4C;
+}
+.status-dot.수정 {
+  background-color: #FFA500;
+}
+
+.answer-box {
+  margin-top: 1rem;
+  background: #f5faff;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.edit-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+/* 버튼 그룹 */
+.btn-group {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* ===== 버튼 스타일 ===== */
+.btn {
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+/* 승인: 진한 파랑 */
+.btn.green {
+  background-color: #0074cc;
+  box-shadow: 0px 4px 0px #005fa3;
+}
+.btn.green:active {
+  background-color: #005fa3;
+  box-shadow: 0 0 #005fa3;
+}
+
+/* 거부: 중간 파랑 */
+.btn.red {
+  background-color: #338eda;
+  box-shadow: 0px 4px 0px #2c7fca;
+}
+.btn.red:active {
+  background-color: #2c7fca;
+  box-shadow: 0 0 #2c7fca;
+}
+
+/* 수정: 연한 파랑 */
+.btn.yellow {
+  background-color: #66b8f5;
+  box-shadow: 0px 4px 0px #57a3dd;
+  color: white;
+}
+.btn.yellow:active {
+  background-color: #57a3dd;
+  box-shadow: 0 0 #57a3dd;
+}
