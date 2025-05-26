@@ -3,7 +3,7 @@ import UserCreate from './UserCreate';
 import UserDetail from './UserDetail';
 import styles from '../admin.module.css';
 
-function AdminMain({ showCreateForm, selectedUser, onCreateUser, onCancelCreate, onCloseDetail }) {
+function AdminMain({ showCreateForm, selectedUser, onCreateUser, onCancelCreate, onCloseDetail, onResetPassword }) {
     return (
         <div className={styles.mainContent}>
             {showCreateForm ? (
@@ -15,6 +15,7 @@ function AdminMain({ showCreateForm, selectedUser, onCreateUser, onCancelCreate,
                 <UserDetail
                     user={selectedUser}
                     onClose={onCloseDetail}
+                    onResetPassword={onResetPassword}
                 />
             ) : (
                 <div className={styles.placeholder}>

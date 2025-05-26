@@ -1,37 +1,34 @@
 import React from 'react';
-import UserList from './UserList';
-import styles from '../admin.module.css';
+import UserList from './UserList.jsx';
+import UserSearch from './UserSearch.jsx';
+import styles from '../css/AdminSidebar.module.css';
 
-function AdminSidebar({ users, onSelectUser, onDeleteUser, searchType, searchText, onSearchType, onSearchText, onSearch }) {
+const AdminSidebar = ({
+    users,
+    onSelectUser,
+    onDeleteUser,
+    searchType,
+    searchText,
+    onSearchType,
+    onSearchText,
+    onSearch
+}) => {
     return (
-        <div className={styles.sidebar}>
-            <form className={styles.searchForm} onSubmit={onSearch}>
-                <select
-                    className={styles.searchSelect}
-                    value={searchType}
-                    onChange={e => onSearchType(e.target.value)}
-                >
-                    <option value="all">전체</option>
-                    <option value="emp_code">사원번호</option>
-                    <option value="emp_name">이름</option>
-                    <option value="emp_email">이메일</option>
-                </select>
-                <input
-                    className={styles.searchInput}
-                    type="text"
-                    placeholder="검색어 입력"
-                    value={searchText}
-                    onChange={e => onSearchText(e.target.value)}
-                />
-                <button className={styles.searchButton} type="submit">검색</button>
-            </form>
+        <aside className={styles.sidebar}>
+            <UserSearch
+                searchType={searchType}
+                searchText={searchText}
+                onSearchType={onSearchType}
+                onSearchText={onSearchText}
+                onSearch={onSearch}
+            />
             <UserList
                 users={users}
                 onSelectUser={onSelectUser}
                 onDeleteUser={onDeleteUser}
             />
-        </div>
+        </aside>
     );
-}
+};
 
 export default AdminSidebar; 
