@@ -9,21 +9,6 @@ const ChatArea = () => {
   const [files, setFiles] = useState([]); // 여러 개의 파일 저장
   const fileInputRef = useRef(null); // 파일 input 초기화를 위한 참조
 
-  useEffect(() => {
-    const fetchChatmate = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/chatmate');
-        if (!response.ok) {
-          console.log('chatmate 실행 실패');
-        }
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.error('chatmate 실행 실패:', error);
-      }
-    };
-    fetchChatmate();
-  }, []);
 
   const handleSend = async () => {
     if (sending) return;
