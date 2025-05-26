@@ -1,128 +1,145 @@
 body {
-    margin: 0;
-    background: #fffff9;
-    font-family: 'Inter', sans-serif;
-  }
-  
-  .mainpage {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 50px;
-    gap: 25px;
-    position: relative;
-    width: 1280px;
-    height: 80%;
-    background: #fffff9;
-    border: 1px solid #ffffff;
-    margin: 0 auto;
-  }
+  margin: 0;
+  background: #ccc; /* 전체 배경 흰색 */
+  font-family: 'Inter', sans-serif;
+}
 
-  .main-logo-wrapper {
-    width: 1280px;
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
+.mainpage {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px;
+  gap: 0px;
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  /* height: 80%; */
+  background: #ffffff; /* 흰색 */
+  border: 1px solid #ffffff;
+  margin: 0 auto;
+}
 
-  .body-section {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    width: 1280px;
-    height: 836px;
-    justify-content: space-between;
-    background: #fffff9;
-    border: 1px solid #ffffff;
-    margin-top: 0px;
-  }
-  
-  .card {
-    position: relative;
-    width: 315px;
-    height: 700px;
-    border-radius: 30px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-    padding: 0;
-    gap: 0;
-    border: 1px solid #000;
-    cursor: pointer;
-  }
-  
-  .card-bg {
-    width: 100%;
-    height: 100%;
-    border-radius: 30px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
+.main-logo-wrapper {
+  /* width: 1280px; */
+  /* height: 250px; */
+  width: 100vw;
+  height: 20vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* margin-bottom: 100px; */
+}
 
-  .chat-bg,
-  .note-bg,
-  .call-bg,
-  .query-bg {
-    background: #fffff9;
-    transition: background 0.3s;
-  }
+.body-section {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 80vh;
+  justify-content: center;      
+  background: #ffffff; /* 흰색 */
+  border: 1px solid #ffffff;
+  margin-top: 0px;
+  gap: 3vw; 
+  padding-top: 5vh;
+}
 
-  .card-img {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    top: 50%;
-    transform: translateY(-100%);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: relative;
-    z-index: 2;
-    opacity: 0.7;
-    flex-shrink: 0;
-  }
+.card {
+  position: relative;
+  flex: 1 1 0;      /* 카드가 container 전체를 균등하게 채움 */
+  max-width: 20vw;     
+  min-width: 200px;
+  height: 70vh;
+  border-radius: 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  margin: 0;
+  align-items: center;      /* 가로 중앙 */
+  justify-content: center;
+}
 
-  .card:hover .card-bg {
-    background: #d8d8d8;
-    box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
-  }
+.card-bg {
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
 
-  .card:hover .card-img {
-    opacity: 1;
-  }
+/* 기본 카드 배경 회색 */
+.chat-bg,
+.note-bg,
+.call-bg,
+.query-bg {
+  background: #e0f7ff;
+  transition: background 0.3s ease;
+}
 
-  .card-img.chat {
-    background-image: url('chat.png');
-  }
-  .card-img.note {
-    background-image: url('note.png');
-  }
-  .card-img.query {
-    background-image: url('query.png');
-  }
-  .card-img.call {
-    background-image: url('call.png');
-  }
-  
-  .card-title {
-    position: absolute;
-    display: flex;
-    top: 60%;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 45px;
-    color: #000;
-    z-index: 3;
-    text-align: center;
-    width: 80%;
-    opacity: 0.7;
-  }
+/* 마우스 오버 시 카드별 파란색 */
+.card:hover .chat-bg,
+.card:hover .note-bg,
+.card:hover .query-bg,
+.card:hover .call-bg {
+  background: #a7c7f9;
+}
+
+.card-img {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  top: 50%;
+  transform: translateY(-100%);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin: 0 auto;
+  /* position: static;  */
+  transform: translateY(-110%);
+}
+
+.card:hover .card-img {
+  opacity: 1;
+}
+
+.card-img.chat {
+  background-image: url('chat.png');
+}
+.card-img.note {
+  background-image: url('note.png');
+}
+.card-img.query {
+  background-image: url('query.png');
+}
+.card-img.call {
+  background-image: url('call.png');
+}
+
+.card-title {
+  position: absolute;
+  display: flex;
+  top: 60%;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 45px;
+  color: #000;
+  z-index: 3;
+  text-align: center;
+  width: 80%;
+  opacity: 0.7;
+}
+
+

@@ -1,16 +1,13 @@
 import React from 'react';
 import '../css/mainpage.css';
 import { Link } from 'react-router-dom';
+import Header from '../../../statics/component/header';
 
 const MainPage = () => {
 
-
-
   return (
     <div className="mainpage">
-      {/* Header */}
-
-
+      <Header />
 
       {/* Body Section */}
       <div className="body-section">
@@ -36,7 +33,6 @@ const MainPage = () => {
         </Link>
       </div>
 
-      {/* Footer */}
 
     </div>
   );
