@@ -11,7 +11,6 @@ import MyPage from './pages/mypage/component/mypage.jsx';
 import CallMate from './pages/callmate/Callmate.jsx';
 import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'
-import CallMate from './pages/callmate/Callmate.jsx'
 
 function AppRoutes() {
   const location = useLocation();
@@ -31,7 +30,6 @@ function AppRoutes() {
         <Route path="/notemate"        element={<NoteMate />} />
         <Route path="/chatmate"        element={<Base />} />
         <Route path="/mypage"          element={<MyPage />} />
-        <Route path="/callmate"        element={<CallMate />} />
       </Routes>
       <Footer />
     </>
