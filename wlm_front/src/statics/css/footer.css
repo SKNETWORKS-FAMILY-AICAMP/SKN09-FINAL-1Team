@@ -1,19 +1,22 @@
-.notemate-footer {
+/* statics/css/footer.css */
+
+.footer {
   display: flex;
-  position: relative;
   justify-content: space-between;
-  border-top: 1px solid #ffffff;
-  background-color: white;
-  font-size: 0.85rem;
+  align-items: center;
+  border-top: 1px solid #ccc;
+  background-color: #ffffff;
+  font-size: 0.75rem;
   color: #222;
   width: 100%;
+  padding: 0.5rem 1rem;
 }
 
-.notemate-footer a {
+.footer a {
   color: #0044cc;
   text-decoration: none;
 }
 
-.notemate-footer a:hover {
+.footer a:hover {
   text-decoration: underline;
 }

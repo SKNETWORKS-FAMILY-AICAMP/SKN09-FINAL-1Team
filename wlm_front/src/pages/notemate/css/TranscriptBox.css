@@ -1,44 +1,70 @@
-/* TranscriptBox.css */
-
 .transcript-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 24px;
   width: 100%;
-  max-width: 1000px; /* 원하는 최대 폭 지정 */
+  max-width: 960px;
   margin: 0 auto;
+  background-color: #f7fbff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.05);
+  box-sizing: border-box;
 }
 
+/* 텍스트 영역 */
 .form-item {
   margin-bottom: 20px;
-  width: 100%; /* 화면 구성에 맞춰 꽉 차도록 */
-  box-sizing: border-box;
-  font-size: 16px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  resize: vertical;
-}
-
-button {
-  margin-bottom: 20px;
-  padding: 12px 20px;
   width: 100%;
-  max-width: 400px;
-  border: none;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  border: 1px solid #a0c4ff;
   border-radius: 6px;
-  background-color: #007bff;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+  background-color: #ffffff;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.form-item:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.2);
 }
 
 textarea {
   min-height: 160px;
+  font-family: 'Inter', sans-serif;
+  color: #222;
+}
+
+/* ✅ 버튼 가로 정렬 */
+.button-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.transcript-btn {
+  padding: 0.5rem 1rem;
+  background-color: #009ffd;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: 150px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.transcript-btn:hover {
+  background-color: #007ccc;
+}
+
+.transcript-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }

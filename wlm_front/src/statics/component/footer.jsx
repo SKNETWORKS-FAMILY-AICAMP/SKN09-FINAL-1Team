@@ -3,7 +3,7 @@ import '../../statics/css/footer.css';
 
 const Footer = () => {
   return (
-    <footer className="notemate-footer">
+    <footer className="footer">
       <div>DEVELOPER</div>
       <div>
         GITHUB:{' '}

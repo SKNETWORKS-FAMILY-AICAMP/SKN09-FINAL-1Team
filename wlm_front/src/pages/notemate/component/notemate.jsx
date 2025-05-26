@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-// import Header from '../../../statics/component/header';
-// import Footer from '../../../statics/component/footer';
 import MicButton from './MicButton.jsx';
+import ParticipantList from './ParticipantList.jsx';
 import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
-import '../css/notemate.css';  
+import '../css/notemate.css';
 
 const NoteMate = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -13,20 +12,28 @@ const NoteMate = () => {
   const [timerInterval, setTimerInterval] = useState(null);
   const [meetingDate, setMeetingDate] = useState('');
   const [hostName, setHostName] = useState('');
-  const [participantsInfo, setParticipantsInfo] = useState('');
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [users, setUsers] = useState([
+    { name: '드무', email: 'dwuyoe@gmail.com', selected: false },
+    { name: 'dwuq', email: 'dwuq@gmail.com', selected: false },
+    { name: 'asdemx', email: 'asdemx@gmail.com', selected: false },
+    { name: 'qweqwer@', email: 'qweqwer@naver.com', selected: false },
+    { name: 'qwenvino', email: 'qwenvino@gmail.com', selected: false },
+  ]);
+
+  const transcriptRef = useRef();
 
   useEffect(() => {
     if (!isRecording) clearInterval(timerInterval);
   }, [isRecording]);
 
   useEffect(() => {
-    if (meetingDate && hostName && participantsInfo) {
+    if (meetingDate && hostName) {
       setIsFormComplete(true);
     } else {
       setIsFormComplete(false);
     }
-  }, [meetingDate, hostName, participantsInfo]);
+  }, [meetingDate, hostName]);
 
   const startMeeting = () => {
     const now = Date.now();
@@ -42,13 +49,10 @@ const NoteMate = () => {
     setIsRecording(false);
   };
 
-  const transcriptRef = useRef();
-
   return (
     <div className="record-page">
       <div className="record-body">
         <div className="record-left">
-          {/* ✅ 회의 정보 입력 영역 */}
           <div className="meeting-info">
             <div className="form-block">
               <label>회의 일자</label>
@@ -76,6 +80,16 @@ const NoteMate = () => {
           >
             확인
           </button>
+
+          <ParticipantList
+            users={users}
+            onUpdateUsers={setUsers}
+            isRecording={isRecording}
+            elapsed={elapsed}
+            getTranscriptData={() => transcriptRef.current?.getTextData()}
+            meetingDate={meetingDate}
+            hostName={hostName}
+          />
         </div>
 
         <div className="record-right">
@@ -103,7 +117,6 @@ const NoteMate = () => {
           stopMeeting={stopMeeting}
         />
       )}
-      {/* <Footer /> */}
     </div>
   );
 };
