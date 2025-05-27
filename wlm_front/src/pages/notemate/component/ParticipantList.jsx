@@ -4,6 +4,7 @@ import '../css/ParticipantList.css';
 
 const ParticipantList = ({
   users,
+  allUsers,
   isRecording,
   elapsed,
   onUpdateUsers,
@@ -14,12 +15,11 @@ const ParticipantList = ({
   const [filter, setFilter] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [newUser, setNewUser] = useState('');
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+
 
   const inputValue = filter;
 
-  const filteredUsers = users.filter(user =>
-    (filterType === '이름' ? user.name : user.email).includes(filter)
-  );
 
   const handleDelete = (index) => {
     const updated = [...users];
@@ -43,32 +43,37 @@ const ParticipantList = ({
       return;
     }
 
-    const filtered = users
-      .map(user => (filterType === '이름' ? user.name : user.email))
-      .filter(val => val.includes(value));
+    const filtered = allUsers.filter(user =>
+      user.name.includes(value) || user.email.includes(value)
+    );
 
     setSuggestions(filtered);
   };
 
-  const handleSelectSuggestion = (value) => {
-    setFilter(value);
-    setNewUser(value);
+  const handleSelectSuggestion = (user) => {
+    setSelectedSuggestion(user);
+    setFilter(`${user.name} (${user.email})`);
     setSuggestions([]);
   };
+
 
   const handleRegister = () => {
-    if (newUser.trim() === '') return;
+    if (!selectedSuggestion) {
+      alert("목록에 있는 사용자를 선택해주세요.");
+      return;
+    }
 
-    const newEntry =
-      filterType === '이름'
-        ? { name: newUser, email: '', selected: false }
-        : { name: '', email: newUser, selected: false };
+    const alreadyAdded = users.some(u => u.email === selectedSuggestion.email);
+    if (alreadyAdded) {
+      alert("이미 추가된 사용자입니다.");
+      return;
+    }
 
-    onUpdateUsers([...users, newEntry]);
+    onUpdateUsers([...users, { ...selectedSuggestion, selected: false }]);
     setFilter('');
-    setNewUser('');
-    setSuggestions([]);
+    setSelectedSuggestion(null);
   };
+
 
   const handleSelectAll = () => {
     const updated = users.map(user => ({ ...user, selected: true }));
@@ -98,9 +103,9 @@ const ParticipantList = ({
         <button className="register-btn" onClick={handleRegister}>등록</button>
         {suggestions.length > 0 && (
           <ul className="suggestion-list">
-            {suggestions.map((item, idx) => (
-              <li key={idx} onClick={() => handleSelectSuggestion(item)}>
-                {item}
+            {suggestions.map((user, idx) => (
+              <li key={idx} onClick={() => handleSelectSuggestion(user)}>
+                {user.name} ({user.email})
               </li>
             ))}
           </ul>
@@ -117,7 +122,7 @@ const ParticipantList = ({
 
       {/* 참가자 리스트 */}
       <ul className="user-list">
-        {filteredUsers.map((user, idx) => (
+        {users.map((user, idx) => (
           <li key={idx}>
             <input
               type="checkbox"

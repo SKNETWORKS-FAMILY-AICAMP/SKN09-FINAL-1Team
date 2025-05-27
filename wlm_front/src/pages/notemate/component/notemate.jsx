@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MicButton from './MicButton.jsx';
+import ParticipantList from './ParticipantList.jsx';
 import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
 import '../css/notemate.css';
@@ -13,14 +14,31 @@ const NoteMate = () => {
   const [hostName, setHostName] = useState('');
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [sendMessage, setSendMessage] = useState("");
-  const [sendEmailFn, setSendEmailFn] = useState(null);
-  const [users, setUsers] = useState([
-    { name: '드무', email: 'dwuyoe@gmail.com', selected: false },
-    { name: 'dwuq', email: 'dwuq@gmail.com', selected: false },
-    { name: 'asdemx', email: 'asdemx@gmail.com', selected: false },
-    { name: 'qweqwer@', email: 'qweqwer@naver.com', selected: false },
-    { name: 'qwenvino', email: 'qwenvino@gmail.com', selected: false },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/employees");
+        const result = await res.json();
+        if (result.status === "success") {
+          // 서버 응답에서 필요한 필드만 매핑해서 저장
+          const mapped = result.data.map(user => ({
+            name: user.emp_name,
+            email: user.emp_email,
+            selected: false,
+          }));
+          setAllUsers(mapped);
+        }
+      } catch (err) {
+        console.error("유저 목록 불러오기 실패:", err);
+      }
+    };
+
+    fetchAllUsers();
+  }, []);
+
 
   const transcriptRef = useRef();
 
@@ -30,7 +48,6 @@ const NoteMate = () => {
 
   useEffect(() => {
     if (meetingDate && hostName) {
-
       setIsFormComplete(true);
     } else {
       setIsFormComplete(false);
@@ -117,6 +134,7 @@ const NoteMate = () => {
   return emailSteps.includes(modalStep);
 };
 
+
   return (
     <div className="record-page">
       <div className="record-body">
@@ -151,6 +169,7 @@ const NoteMate = () => {
 
           <ParticipantList
             users={users}
+            allUsers={allUsers}
             onUpdateUsers={setUsers}
             isRecording={isRecording}
             elapsed={elapsed}
