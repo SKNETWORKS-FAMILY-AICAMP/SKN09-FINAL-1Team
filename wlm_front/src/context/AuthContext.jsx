@@ -1,41 +1,40 @@
-// import React, { createContext, useState, useContext } from 'react';
-
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-//   const login = () => setIsLoggedIn(true);
-//   const logout = () => setIsLoggedIn(false);
-
-//   return (
-//     <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);  // 로그인 사용자 정보 저장
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const storedAuth = localStorage.getItem('isLoggedIn');
+    return storedAuth === 'true';
+  });
+
+  const [user, setUser] = useState(() => {
+    return localStorage.getItem('user') || null;
+  });
 
   const login = (id) => {
-    setIsAuthenticated(true);
-    setUser(id);  // 로그인 시 사용자 id 저장
+    setIsLoggedIn(true);
+    setUser(id);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('user', id);
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
+    setIsLoggedIn(false);
     setUser(null);
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('user');
   };
 
+  useEffect(() => {
+    localStorage.setItem('isLoggedIn', isLoggedIn.toString());
+    if (user) {
+      localStorage.setItem('user', user);
+    }
+  }, [isLoggedIn, user]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
