@@ -1,7 +1,7 @@
+/* mainpage.css */
 * {
   box-sizing: border-box;
 }
-
 html, body {
   margin: 0;
   padding: 0;
@@ -9,13 +9,11 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #ffffff;
 }
-
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -24,35 +22,162 @@ html, body {
   z-index: 0;
 }
 
-.bg-img {
+/* 오른쪽 40vw만 배경 이미지, 위/아래/오른쪽 여백 */
+.bg-img-right {
   position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 5vh;        /* 위에 5% 여백 */
+  right: 80px;     /* 오른쪽 여백 80px */
+  width: 40vw;
+  height: 90vh;    /* 아래에 5% 여백 */
   background-size: cover;
-  background-position: center;
+  background-position: center center;
+  background-repeat: no-repeat;
   filter: blur(3px) brightness(0.85);
   opacity: 0.92;
-  z-index: -1;
+  z-index: 1;
   transition: background-image 0.3s, opacity 0.3s;
   pointer-events: none;
 }
-.bg-img::after {
+.bg-img-right::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(10,61,145,0.07) 100%);
+  background: linear-gradient(120deg, rgba(255,255,255,0.12) 0%, rgba(10,61,145,0.09) 100%);
   z-index: 2;
   pointer-events: none;
 }
 
+/* 오른쪽 텍스트: 박스 없이, 크고 굵게, 위아래 여백 줄임 */
+.right-text-only {
+  flex: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  background: none;
+  width: 100%;
+  min-height: 200px;
+  pointer-events: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+@media (min-width: 901px) {
+  .right-text-only {
+    max-width: 40vw;
+    width: 40vw;
+    margin-left: auto;
+    margin-right: 80px; /* 오른쪽 여백 80px */
+    padding: 0 14px;
+  }
+}
+@media (max-width: 900px) {
+  .bg-img-right {
+    width: 100vw;
+    right: 0;
+    left: 0;
+    top: 5vh;
+    height: 90vh;
+  }
+  .right-text-only {
+    width: 100vw;
+    max-width: 100vw;
+    left: 0;
+    right: 0;
+    margin-right: 0;
+    padding: 0 8px;
+  }
+}
+@media (max-width: 600px) {
+  .bg-img-right {
+    top: 0;
+    height: 100vh;
+    right: 0;
+  }
+  .right-text-only {
+    min-height: 80px;
+    padding: 4px 1px;
+  }
+}
+
+/* 설명 텍스트: 박스 없이, 크고 굵게, 그림자 */
+.desc-text-only {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 3px 12px rgba(23,65,134,0.25), 0 1px 0 #0a3d91;
+  line-height: 1.5;
+  word-break: keep-all;
+  white-space: normal;
+  margin: 0 auto;
+  padding: 0 0.5em;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: auto;
+  letter-spacing: -0.01em;
+}
+
+/* 환영 메시지는 박스+가독성 스타일 + 글씨 더 큼 */
+.welcome-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(255,255,255,0.82);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(23,65,134,0.10);
+  margin: 0 auto;
+  color: #174186;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.7;
+  word-break: keep-all;
+  white-space: normal;
+  max-width: 480px;
+}
+.welcome-text-top {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #2a2a2a;
+  margin-bottom: 32px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  line-height: 1.2;
+}
+.welcome-text-bottom {
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: #0a3d91;
+  margin-top: 36px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
+.logo-img {
+  width: 50%;
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 16px rgba(23,65,134,0.25));
+}
+.welcome-text-top .greeting {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* 왼쪽 카드 영역 및 기타 기존 스타일은 원래대로 */
 .app-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding: 5vh 40px;
 }
-
 .container {
   display: flex;
   flex: 1;
@@ -60,14 +185,12 @@ html, body {
   justify-content: center;
   align-items: center;
 }
-
 .left-section {
   flex: 0.5;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .body-section {
   width: 100%;
   display: grid;
@@ -75,7 +198,6 @@ html, body {
   grid-template-rows: 1fr 1fr;
   gap: 24px;
 }
-
 .card {
   position: relative;
   width: 100%;
@@ -164,119 +286,3 @@ html, body {
 .card-img.note { background-image: url('note.png'); }
 .card-img.query { background-image: url('query.png'); }
 .card-img.call { background-image: url('call.png'); }
-
-.welcome-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 60px 40px;
-}
-
-.welcome-text-top {
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: #2a2a2a;
-  margin-bottom: 32px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  user-select: none;
-  line-height: 1.2;
-}
-
-.welcome-text-bottom {
-  font-size: 3.2rem;
-  font-weight: 700;
-  color: #0a3d91;
-  margin-top: 36px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  user-select: none;
-}
-
-.right-section {
-  flex: 1.1;
-  background: rgba(255,255,255,0.87);
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  padding: 36px 32px;
-  font-size: 1rem;
-  color: #444;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  user-select: none;
-  overflow: hidden;
-  box-sizing: border-box;
-  max-width: 480px;
-  width: 100%;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.logo-img {
-  width: 50%;
-  max-width: 200px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-}
-
-.desc-text {
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #174186;
-  line-height: 1.7;
-  padding: 36px 28px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.92);
-  box-shadow: 0 4px 24px rgba(23,65,134,0.10);
-  text-shadow: 0 2px 8px rgba(23,65,134,0.10);
-  letter-spacing: 0.01em;
-  transition: background 0.2s;
-  min-height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin: 0 auto;
-
-  /* 자연스러운 줄바꿈을 위한 추가 */
-  word-break: keep-all;
-  white-space: normal;
-}
-
-/* 반응형 미디어 쿼리 추가 */
-@media (max-width: 900px) {
-  .container {
-    flex-direction: column;
-    gap: 24px;
-  }
-  .left-section, .right-section {
-    max-width: 100%;
-    width: 100%;
-    min-width: 0;
-  }
-  .body-section {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 16px;
-  }
-}
-@media (max-width: 600px) {
-  .body-section {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
-    gap: 12px;
-  }
-  .right-section {
-    padding: 24px 8px;
-    min-height: 200px;
-  }
-}
-.welcome-text-top .greeting {
-  display: block;
-  margin-bottom: 20px; /* 원하는 만큼 조절 가능 (예: 20px) */
-}

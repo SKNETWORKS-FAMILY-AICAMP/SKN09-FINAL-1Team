@@ -7,12 +7,6 @@ import chatImg from '../css/chat.jpeg';
 import meetImg from '../css/meet.jpeg';
 import queryImg from '../css/query.jpg';
 
-// 설명 텍스트 컴포넌트 분리
-const DescBox = ({ desc }) => (
-  <div className="desc-text">{desc}</div>
-);
-
-// 카드 데이터 구조화
 const cards = [
   {
     key: "chatmate",
@@ -55,7 +49,6 @@ const bgImages = {
   callmate: callImg,
 };
 
-// 시간대별 인사말 함수
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 6) return "좋은 새벽입니다!";
@@ -79,15 +72,16 @@ const MainPage = () => {
 
   return (
     <div className="main-wrapper">
-      {/* 배경 이미지 */}
+      {/* 오른쪽 40vw에만 배경 이미지, 위아래+오른쪽 여백(푸터 가리지 않음) */}
       {bg && (
         <div
-          className="bg-img"
+          className="bg-img-right"
           style={{ backgroundImage: `url(${bg})` }}
         />
       )}
       <div className="app-container">
         <div className="container">
+          {/* 왼쪽 카드 영역: 원래대로 */}
           <div className="left-section">
             <div className="body-section">
               {cards.map(card => (
@@ -110,7 +104,8 @@ const MainPage = () => {
               ))}
             </div>
           </div>
-          <div className="right-section">
+          {/* 오른쪽: 환영 메시지는 박스+가독성, 설명은 박스 없이 */}
+          <div className="right-text-only">
             {desc === "기능을 선택하면 설명이 이곳에 표시됩니다." ? (
               <div className="welcome-box">
                 <p className="welcome-text-top">
@@ -121,7 +116,7 @@ const MainPage = () => {
                 <p className="welcome-text-bottom">WLB_MATE</p>
               </div>
             ) : (
-              <DescBox desc={desc} />
+              <div className="desc-text-only">{desc}</div>
             )}
           </div>
         </div>
