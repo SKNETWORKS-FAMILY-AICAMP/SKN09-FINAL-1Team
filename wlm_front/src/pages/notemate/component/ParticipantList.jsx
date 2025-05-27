@@ -6,17 +6,37 @@ const ParticipantList = ({
   users,
   allUsers,
   isRecording,
-  elapsed,
   onUpdateUsers,
   setModalStep,
-  disableEmailButton
+  disableEmailButton,
+  hostName  // 로그인 계정에서 가져오는 주최자 이름
 }) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [newUser, setNewUser] = useState('');
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+  const [meetingDate, setMeetingDate] = useState('');
 
+  // 현재 시간 자동 적용
+  useEffect(() => {
+    const now = new Date();
+    const formattedDate = now.toLocaleString('ko-KR', { 
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+    setMeetingDate(formattedDate);
+  }, []);
+
+  // 로그인 사용자(주최자) 강제 등록
+  useEffect(() => {
+    if (hostName) {
+      const existingHost = users.find(user => user.name === hostName);
+      if (!existingHost) {
+        onUpdateUsers([{ name: hostName, email: '', selected: false }, ...users]);
+      }
+    }
+  }, [hostName, users, onUpdateUsers]);
 
   const inputValue = filter;
 
@@ -137,7 +157,7 @@ const ParticipantList = ({
       </ul>
 
       {/* 하단 버튼 */}
-      {!isRecording && elapsed > 0 && (
+      {!isRecording && (
         <div className="participant-actions">
           <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
           <button className="send-btn" onClick={() => setModalStep('sendConfirm')} disabled={disableEmailButton}>📩 전송</button>

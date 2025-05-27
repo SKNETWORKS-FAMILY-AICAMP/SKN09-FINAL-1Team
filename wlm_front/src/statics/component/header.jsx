@@ -1,4 +1,3 @@
-// 통합본
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../css/header.css';
@@ -26,7 +25,6 @@ const Header = () => {
 
   return (
     <div className="header">
-      {/* 로고 */}
       <div
         className="logo"
         style={{ backgroundImage: `url(${logoImage})` }}
@@ -36,7 +34,6 @@ const Header = () => {
         title="홈으로 이동"
       />
 
-      {/* 가운데 문구 (main에서만) vs 메뉴바 (기타 페이지에서만) */}
       {isMainPage ? (
         <div className="header-center-text">
           당신의 업무를 스마트하게, <strong> WLB_MATE</strong>
@@ -56,25 +53,24 @@ const Header = () => {
         </div>
       )}
 
-      {/* 버튼 영역 */}
       <div className="header-buttons">
         {isLoggedIn ? (
-          <div className="header-btn-wrap">
-            <button className="header-btn" onClick={handleLogout}>로그아웃</button>
-          </div>
-        ) : (
           <>
             <div className="header-btn-wrap">
-              <Link to="/login">
-                <button className="header-btn">로그인</button>
+              <Link to="/mypage">
+                <button className="header-btn">내정보</button>
               </Link>
             </div>
             <div className="header-btn-wrap">
-              <Link to="/signup">
-                <button className="header-btn">회원가입</button>
-              </Link>
+              <button className="header-btn" onClick={handleLogout}>로그아웃</button>
             </div>
           </>
+        ) : (
+          <div className="header-btn-wrap">
+            <Link to="/login">
+              <button className="header-btn">로그인</button>
+            </Link>
+          </div>
         )}
       </div>
     </div>

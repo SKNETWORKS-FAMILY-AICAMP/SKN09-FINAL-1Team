@@ -136,10 +136,13 @@ h2 {
 .select-all-btn:hover,
 .send-btn:hover {
   background-color: #007ccc;
+<<<<<<< HEAD
 }
 
 .send-btn:disabled {
   background-color: #cccccc;
   color: #666666;
   cursor: not-allowed;
+=======
+>>>>>>> 88a7aec663ad132ec9b1db3db119dc44f3ee018b
 }

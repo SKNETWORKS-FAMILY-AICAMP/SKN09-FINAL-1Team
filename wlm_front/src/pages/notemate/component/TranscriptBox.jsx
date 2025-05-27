@@ -10,22 +10,25 @@ const TranscriptBox = forwardRef((props, ref) => {
     getTextData: () => ({ transcript, summary })
   }));
 
-  const handleLoadAudio = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // 오디오 파일 업로드 기능 주석 처리
+  // const handleLoadAudio = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+  //   const formData = new FormData();
+  //   formData.append("file", file);
 
-    try {
-      const response = await axios.post("http://localhost:8000/transcribe_audio", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setTranscript(response.data.transcription);
-    } catch (err) {
-      console.error("불러오기 실패:", err);
-    }
-  };
+
+  //   try {
+  //     const response = await axios.post("http://localhost:8000/transcribe_audio", formData, {
+  //       headers: { "Content-Type": "multipart/form-data" }
+  //     });
+  //     setTranscript(response.data.transcription);
+  //   } catch (err) {
+  //     console.error("불러오기 실패:", err);
+  //   }
+  // };
+
 
   const handleSummarize = async () => {
     if (!transcript) return;
@@ -51,7 +54,9 @@ const TranscriptBox = forwardRef((props, ref) => {
 
   return (
     <div className="transcript-box">
-      <input type="file" accept="audio/mp3" onChange={handleLoadAudio} className="form-item" />
+      {/* 오디오 파일 업로드 기능 주석 처리 */}
+      {/* <input type="file" accept="audio/mp3" onChange={handleLoadAudio} className="form-item" /> */}
+
 
       <textarea
         className="form-item"

@@ -13,6 +13,8 @@ import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'
 import './App.module.css'
 
+import './App.module.css'
+
 function AppRoutes() {
   const location = useLocation();
   const hideHeaderPaths = ["/", "/login", "/main"];
@@ -21,18 +23,19 @@ function AppRoutes() {
   return (
     <div className="app-wrapper">
       {!hideHeader && <Header />}
-
-      <Routes>
-        <Route path="/"                element={<Login />} />
-        <Route path="/main"            element={<Mainpage />} />
-        <Route path="/login"           element={<Login />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/querymate"       element={<QueryMate />} />
-        <Route path="/callmate"        element={<CallMate />} />
-        <Route path="/notemate"        element={<NoteMate />} />
-        <Route path="/chatmate"        element={<Base />} />
-        <Route path="/mypage"          element={<MyPage />} />
-      </Routes>
+      <div className="content-body">
+        <Routes>
+          <Route path="/"                element={<Login />} />
+          <Route path="/main"            element={<Mainpage />} />
+          <Route path="/login"           element={<Login />} />
+          <Route path="/admin"           element={<AdminPage />} />
+          <Route path="/querymate"       element={<QueryMate />} />
+          <Route path="/callmate"        element={<CallMate />} />
+          <Route path="/notemate"        element={<NoteMate />} />
+          <Route path="/chatmate"        element={<Base />} />
+          <Route path="/mypage"          element={<MyPage />} />
+        </Routes>
+      </div>
       <Footer />
     </div>
   );

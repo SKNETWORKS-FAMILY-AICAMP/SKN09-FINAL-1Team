@@ -5,18 +5,29 @@ import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
 import '../css/notemate.css';
 
-const NoteMate = () => {
+const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop으로 받는다고 가정
   const [isRecording, setIsRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [modalStep, setModalStep] = useState(null);
   const [timerInterval, setTimerInterval] = useState(null);
   const [meetingDate, setMeetingDate] = useState('');
-  const [hostName, setHostName] = useState('');
+  const [hostName, setHostName] = useState(loginUserName || '');  // 로그인 사용자로 초기값 설정
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [sendMessage, setSendMessage] = useState("");
   const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
+  // 현재 시간으로 meetingDate 설정 (컴포넌트 마운트 시 한 번만)
+  useEffect(() => {
+    const now = new Date();
+    const formatted = now.toLocaleString('ko-KR', { 
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+    setMeetingDate(formatted);
+  }, []);
+
+  // db에서 유저목록 호출출
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
@@ -134,28 +145,22 @@ const NoteMate = () => {
   return emailSteps.includes(modalStep);
 };
 
-
   return (
     <div className="record-page">
       <div className="record-body">
         <div className="record-left">
+          {/* 회의 정보 입력 영역 - 수정됨 */}
+
           <div className="meeting-info">
             <div className="form-block">
               <label>회의 일자</label>
-              <input
-                type="date"
-                value={meetingDate}
-                onChange={(e) => setMeetingDate(e.target.value)}
-              />
+              {/* 달력 input 제거, 텍스트로만 표시 */}
+              <div className="readonly-field">{meetingDate}</div>
             </div>
             <div className="form-block">
               <label>주최자</label>
-              <input
-                type="text"
-                placeholder="이름 입력"
-                value={hostName}
-                onChange={(e) => setHostName(e.target.value)}
-              />
+              {/* 주최자 입력 제거, 텍스트로만 표시 */}
+              <div className="readonly-field">{hostName}</div>
             </div>
           </div>
 
