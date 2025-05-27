@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from views.employee_view import router as employee_router
+from controllers.employee_controller import router as employee_router
 
 app = FastAPI()
 
