@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MicButton from './MicButton.jsx';
-import ParticipantList from './ParticipantList.jsx';
 import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
 import '../css/notemate.css';
@@ -31,6 +30,7 @@ const NoteMate = () => {
 
   useEffect(() => {
     if (meetingDate && hostName) {
+
       setIsFormComplete(true);
     } else {
       setIsFormComplete(false);
@@ -116,7 +116,6 @@ const NoteMate = () => {
   ];
   return emailSteps.includes(modalStep);
 };
-
 
   return (
     <div className="record-page">

@@ -11,7 +11,6 @@ import MyPage from './pages/mypage/component/mypage.jsx';
 import CallMate from './pages/callmate/Callmate.jsx';
 import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'
-
 import './App.module.css'
 
 function AppRoutes() {
@@ -22,19 +21,18 @@ function AppRoutes() {
   return (
     <div className="app-wrapper">
       {!hideHeader && <Header />}
-      <div className="content-body">
-        <Routes>
-          <Route path="/"                element={<Login />} />
-          <Route path="/main"            element={<Mainpage />} />
-          <Route path="/login"           element={<Login />} />
-          <Route path="/admin"           element={<AdminPage />} />
-          <Route path="/querymate"       element={<QueryMate />} />
-          <Route path="/callmate"        element={<CallMate />} />
-          <Route path="/notemate"        element={<NoteMate />} />
-          <Route path="/chatmate"        element={<Base />} />
-          <Route path="/mypage"          element={<MyPage />} />
-        </Routes>
-      </div>
+
+      <Routes>
+        <Route path="/"                element={<Login />} />
+        <Route path="/main"            element={<Mainpage />} />
+        <Route path="/login"           element={<Login />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/querymate"       element={<QueryMate />} />
+        <Route path="/callmate"        element={<CallMate />} />
+        <Route path="/notemate"        element={<NoteMate />} />
+        <Route path="/chatmate"        element={<Base />} />
+        <Route path="/mypage"          element={<MyPage />} />
+      </Routes>
       <Footer />
     </div>
   );
