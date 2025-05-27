@@ -16,7 +16,7 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/login', 
+      const response = await axios.post('http://localhost:8000/api/login',
         {
           emp_code: empCode,
           emp_pwd: empPwd
@@ -39,13 +39,14 @@ const Login = () => {
         console.log('이메일:', sessionResponse.data.employee.emp_email);
         console.log('==================');
 
-        login(empCode);
+        // 세션 정보를 localStorage에 저장(session에만 저장할거기에 사용 안함)
+        // login(empCode);
         navigate('/main');
       }
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(
-        error.response?.data?.detail || 
+        error.response?.data?.detail ||
         '로그인 중 오류가 발생했습니다. 다시 시도해주세요.'
       );
     }
