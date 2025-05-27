@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  background: #ccc; /* 전체 배경 흰색 */
+  background: #ccc;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
@@ -15,58 +15,40 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  /* height: 80%; */
-  background: #ffffff; /* 흰색 */
+  background: #ffffff;
   border: 1px solid #ffffff;
   margin: 0 auto;
   overflow-x: hidden;
 }
 
-.main-logo-wrapper {
-  /* width: 1280px; */
-  /* height: 250px; */
-  width: 100%;
-  height: 20vh;
-  min-height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  /* margin-bottom: 100px; */
-}
-
 .body-section {
-  position: relative;
-  display: flex;
-  flex-direction: row;
   width: 100%;
-  min-height: 80vh;
-  justify-content: center;      
-  background: #ffffff; /* 흰색 */
-  border: 1px solid #ffffff;
-  margin-top: 0px;
+  max-width: 900px;  /* 적당한 최대 넓이 */
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2열 */
+  grid-template-rows: repeat(2, 1fr);    /* 2행 */
   gap: 30px;
   padding: 5vh 2vw;
-  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  min-height: 80vh;
 }
 
 .card {
   position: relative;
-  flex: 1 1 300px;
-  max-width: 400px;     
-  min-width: 250px;
-  height: 500px;
+  width: 100%;      /* 그리드 셀 가득 채우기 */
+  aspect-ratio: 1 / 1;  /* 정사각형 비율 유지 */
   border-radius: 30px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
   padding: 0;
   cursor: pointer;
-  margin: 10px;
-  align-items: center;      /* 가로 중앙 */
-  justify-content: center;
+  margin: 0; /* 그리드 gap으로 간격 처리 */
 }
 
 .card-bg {
@@ -79,7 +61,6 @@ body {
   z-index: 1;
 }
 
-/* 기본 카드 배경 회색 */
 .chat-bg,
 .note-bg,
 .call-bg,
@@ -88,7 +69,6 @@ body {
   transition: background 0.3s ease;
 }
 
-/* 마우스 오버 시 카드별 파란색 */
 .card:hover .chat-bg,
 .card:hover .note-bg,
 .card:hover .query-bg,
@@ -98,18 +78,14 @@ body {
 
 .card-img {
   position: relative;
-  width: 250px;
-  height: 250px;
-  top: 40%;
-  transform: translateY(-100%);
+  width: 50%;
+  height: 50%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   z-index: 2;
   opacity: 0.7;
-  flex-shrink: 0;
-  margin: 0 auto;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .card:hover .card-img {
@@ -119,79 +95,29 @@ body {
 .card-img.chat {
   background-image: url('chat.png');
 }
+
 .card-img.note {
   background-image: url('note.png');
 }
+
 .card-img.query {
   background-image: url('query.png');
 }
+
 .card-img.call {
   background-image: url('call.png');
 }
 
 .card-title {
-  position: absolute;
-  display: flex;
-  top: 65%;
-  align-items: center;
-  justify-content: center;
+  position: relative;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 2.5rem;
   color: #000;
-  z-index: 3;
   text-align: center;
-  width: 80%;
+  width: 100%;
   opacity: 0.7;
-  padding-top: 20px;
+  padding-top: 10px;
+  z-index: 3;
+  
 }
-
-@media screen and (max-width: 1200px) {
-  .body-section {
-    padding: 3vh 1vw;
-    gap: 20px;
-  }
-  
-  .card {
-    flex: 1 1 250px;
-    height: 400px;
-  }
-  
-  .card-img {
-    width: 200px;
-    height: 200px;
-    top: 35%;
-    margin-bottom: 30px;
-  }
-  
-  .card-title {
-    top: 62%;
-    padding-top: 15px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .body-section {
-    padding: 2vh 1vw;
-    gap: 15px;
-  }
-  
-  .card {
-    flex: 1 1 200px;
-    height: 350px;
-  }
-  
-  .card-img {
-    width: 150px;
-    height: 150px;
-    top: 35%;
-    margin-bottom: 25px;
-  }
-  
-  .card-title {
-    top: 60%;
-    padding-top: 10px;
-  }
-}
-
-
