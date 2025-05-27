@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './css/querymate.css';
 import Sidebar from './component/Sidebar';
-import QuestionList from './component/questionlist';
+import QuestionList from './component/QuestionList';
 
 const QueryMate = () => {
   const [searchParams, setSearchParams] = useState({
