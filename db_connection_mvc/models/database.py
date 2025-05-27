@@ -1,5 +1,5 @@
 import pymysql
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class Database:
@@ -16,6 +16,21 @@ class Database:
         except Exception as e:
             print(f"데이터베이스 조회 오류: {e}")
             return []
+
+    def verify_employee_login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
+        try:
+            query = """
+                SELECT emp_no, emp_name, emp_code, emp_email, emp_role, 
+                       emp_birth_date, emp_create_dt
+                FROM employee 
+                WHERE emp_code = %s AND emp_pwd = %s
+            """
+            self.cursor.execute(query, (emp_code, emp_pwd))
+            result = self.cursor.fetchone()
+            return result
+        except Exception as e:
+            print(f"로그인 검증 오류: {e}")
+            return None
 
     def __del__(self):
         if hasattr(self, "cursor"):
