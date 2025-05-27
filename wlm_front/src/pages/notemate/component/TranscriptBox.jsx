@@ -18,6 +18,7 @@ const TranscriptBox = forwardRef((props, ref) => {
   //   const formData = new FormData();
   //   formData.append("file", file);
 
+
   //   try {
   //     const response = await axios.post("http://localhost:8000/transcribe_audio", formData, {
   //       headers: { "Content-Type": "multipart/form-data" }
@@ -27,6 +28,7 @@ const TranscriptBox = forwardRef((props, ref) => {
   //     console.error("불러오기 실패:", err);
   //   }
   // };
+
 
   const handleSummarize = async () => {
     if (!transcript) return;
@@ -54,6 +56,7 @@ const TranscriptBox = forwardRef((props, ref) => {
     <div className="transcript-box">
       {/* 오디오 파일 업로드 기능 주석 처리 */}
       {/* <input type="file" accept="audio/mp3" onChange={handleLoadAudio} className="form-item" /> */}
+
 
       <textarea
         className="form-item"

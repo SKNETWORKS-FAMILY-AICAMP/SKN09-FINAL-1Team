@@ -11,6 +11,7 @@ import MyPage from './pages/mypage/component/mypage.jsx';
 import CallMate from './pages/callmate/Callmate.jsx';
 import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'
+import './App.module.css'
 
 import './App.module.css'
 
