@@ -94,13 +94,13 @@ const ConfirmModal = ({
       )}
       {modalStep === 'sending_complete' && (
         <>
-          <p>✅ {sendMessage}</p>
+          <p>{sendMessage}</p>
           <button onClick={() => setModalStep(null)}>확인</button>
         </>
       )}
       {modalStep === 'sending_error' && (
         <>
-          <p>❌ {sendMessage}</p>
+          <p>오류가 발생했습니다.<br /><strong>{sendMessage}</strong><br />관리자에게 문의하세요.</p>
           <button onClick={() => setModalStep(null)}>확인</button>
         </>
       )}

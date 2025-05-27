@@ -58,9 +58,64 @@ const NoteMate = () => {
     if (!summary) return 'missing_summary';
     return 'ready';
   };
+
   const sendEmailRef = useRef();
+  const getTranscriptData = () => transcriptRef.current?.getTextData();
+
+  const handleSendEmail = async () => {
+    const selectedEmails = users.filter(user => user.selected).map(user => user.email);
+    if (selectedEmails.length === 0) {
+      alert("수신자를 선택해주세요.");
+      return;
+    }
+
+    const { transcript, summary } = getTranscriptData?.() || {};
+
+    const formData = new FormData();
+    selectedEmails.forEach(email => formData.append("recipients", email));
+    formData.append("subject", `Notemate에서 ${meetingDate} 회의록 전달드립니다`);
+    formData.append(
+      "body",
+      `📅 회의 일자: ${meetingDate}\n👤 주최자: ${hostName}`
+    );
+    formData.append("transcript_file", new File([transcript], `${meetingDate}_회의록_전문.txt`, { type: "text/plain" }));
+    formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
+
+    try {
+      const res = await fetch('http://localhost:8000/send-email', {
+        method: 'POST',
+        body: formData,
+      });
+    
+      const result = await res.json();
+    
+      if (res.status === 200) {
+        setSendMessage(result.message); // 정상 응답
+        setModalStep('sending_complete');
+      } else {
+        setSendMessage(`${res.status} ${res.statusText}`);
+        setModalStep('sending_error');
+      }
+    } catch (err) {
+      setSendMessage(err.message);
+      setModalStep('sending_error');
+      console.log("요청 실패");
+    }
+  };
 
 
+  const isEmailStep = (modalStep) => {
+  const emailSteps = [
+    'sendConfirm',
+    'missing_transcript',
+    'missing_summary',
+    'sendNotice',
+    'sending',
+    'sending_complete',
+    'sending_error'
+  ];
+  return emailSteps.includes(modalStep);
+};
 
 
   return (
@@ -105,6 +160,7 @@ const NoteMate = () => {
             hostName={hostName}
             setModalStep={setModalStep}
             setSendMessage={setSendMessage}
+            disableEmailButton={isEmailStep(modalStep)}
           />
         </div>
 
@@ -135,7 +191,8 @@ const NoteMate = () => {
           startMeeting={startMeeting}
           stopMeeting={stopMeeting}
           isReadyToSend={isReadyToSend}
-          handleSendEmail={sendEmailFn}
+          handleSendEmail={handleSendEmail}
+          sendMessage={sendMessage}
         />
       )}
     </div>

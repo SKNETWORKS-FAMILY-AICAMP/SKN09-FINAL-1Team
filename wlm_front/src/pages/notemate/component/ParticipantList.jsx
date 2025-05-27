@@ -7,12 +7,8 @@ const ParticipantList = ({
   isRecording,
   elapsed,
   onUpdateUsers,
-  getTranscriptData,
-  meetingDate,
-  hostName,
-  setSendMessage,
   setModalStep,
-  setSendEmailFn
+  disableEmailButton
 }) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
@@ -79,50 +75,6 @@ const ParticipantList = ({
     onUpdateUsers(updated);
   };
 
-  const handleSendEmail = async () => {
-    const selectedEmails = users.filter(user => user.selected).map(user => user.email);
-    if (selectedEmails.length === 0) {
-      alert("수신자를 선택해주세요.");
-      return;
-    }
-
-    const { transcript, summary } = getTranscriptData?.() || {};
-
-    const formData = new FormData();
-    selectedEmails.forEach(email => formData.append("recipients", email));
-    formData.append("subject", `Notemate에서 ${meetingDate} 회의록 전달드립니다`);
-    formData.append(
-      "body",
-      `📅 회의 일자: ${meetingDate}\n👤 주최자: ${hostName}`
-    );
-    formData.append("transcript_file", new File([transcript], `${meetingDate}_회의록_전문.txt`, { type: "text/plain" }));
-    formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
-
-    try {
-      const res = await fetch('http://localhost:8000/send-email', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await res.json();
-      setSendMessage(result.message || "전송 완료");
-      setModalStep('sending_complete');
-      console.log("요청 보냄");
-    } catch (err) {
-      setSendMessage("이메일 전송 실패: " + err.message);
-      setModalStep('sending_error');
-      console.log("요청 실패");
-    }
-  };
-
-  useEffect(() => {
-    if (setSendEmailFn) {
-      setSendEmailFn(() => handleSendEmail);
-    }
-  }, [setSendEmailFn]);
-
-
-
   return (
     <div className="record-left">
       <h2>참가자 목록</h2>
@@ -183,7 +135,7 @@ const ParticipantList = ({
       {!isRecording && elapsed > 0 && (
         <div className="participant-actions">
           <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
-          <button className="send-btn" onClick={() => setModalStep('sendConfirm')}>📩 전송</button>
+          <button className="send-btn" onClick={() => setModalStep('sendConfirm')} disabled={disableEmailButton}>📩 전송</button>
         </div>
       )}
     </div>
