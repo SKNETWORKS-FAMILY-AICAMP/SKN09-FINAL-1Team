@@ -49,13 +49,6 @@ const bgImages = {
   callmate: callImg,
 };
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 6) return "좋은 새벽입니다!";
-  if (hour < 12) return "좋은 아침입니다!";
-  if (hour < 18) return "좋은 하루입니다!";
-  return "좋은 저녁입니다!";
-}
 
 const MainPage = () => {
   const [desc, setDesc] = useState("기능을 선택하면 설명이 이곳에 표시됩니다.");
@@ -104,12 +97,10 @@ const MainPage = () => {
               ))}
             </div>
           </div>
-          {/* 오른쪽: 환영 메시지는 박스+가독성, 설명은 박스 없이 */}
           <div className="right-text-only">
             {desc === "기능을 선택하면 설명이 이곳에 표시됩니다." ? (
               <div className="welcome-box">
                 <p className="welcome-text-top">
-                  <span className="greeting">{getGreeting()}</span>
                   당신의 업무를<br />스마트하게
                 </p>
                 <img src={logoImg} alt="로고" className="logo-img" />
