@@ -66,7 +66,7 @@ function AdminBase() {
         const user = users.find(u => u.emp_no === emp_no);
         if (user) {
             const oldPassword = user.password;
-            const newPassword = Math.floor(Math.random() * 1000000000).toString();
+            const newPassword = '1234';
             console.log('비밀번호 초기화 정보:', {
                 사용자: user.emp_name,
                 이전_비밀번호: oldPassword,
@@ -80,7 +80,7 @@ function AdminBase() {
                 return u;
             }));
             
-            alert(`새로운 비밀번호가 생성되었습니다.\n콘솔창을 확인해주세요.`);
+            alert(`비밀번호가 '1234'로 초기화되었습니다.`);
         }
     };
 

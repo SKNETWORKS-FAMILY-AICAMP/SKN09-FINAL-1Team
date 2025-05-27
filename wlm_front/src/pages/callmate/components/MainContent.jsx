@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import styles from '../css/MainContent.module.css';
 
-const MainContent = ({ qaList, onApprove, onDelete, onFeedback }) => {
+const MainContent = ({ qaList, onDelete, onFeedback }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const fileInputRef = useRef(null);
@@ -79,9 +79,6 @@ const MainContent = ({ qaList, onApprove, onDelete, onFeedback }) => {
                 <div className={styles.qaHeader}>
                   <h3 className={styles.qaQuestion}>Q: {qa.question}</h3>
                   <div className={styles.qaHeaderRight}>
-                    <span className={`${styles.statusBadge} ${qa.isApproved ? styles.approvedBadge : styles.pendingBadge}`}>
-                      {qa.isApproved ? '승인완료' : '미처리'}
-                    </span>
                     <span className={styles.qaDate}>{qa.date}</span>
                   </div>
                 </div>
@@ -130,20 +127,11 @@ const MainContent = ({ qaList, onApprove, onDelete, onFeedback }) => {
                 )}
                 <div className={styles.qaActions}>
                   <button 
-                    className={`${styles.actionButton} ${qa.isApproved ? styles.approvedButton : ''}`}
-                    onClick={() => onApprove(qa.id)}
-                    disabled={qa.isApproved}
+                    className={`${styles.actionButton} ${styles.deleteButton}`}
+                    onClick={() => onDelete(qa.id)}
                   >
-                    {qa.isApproved ? '승인완료' : '승인'}
+                    삭제
                   </button>
-                  {!qa.isApproved && (
-                    <button 
-                      className={`${styles.actionButton} ${styles.deleteButton}`}
-                      onClick={() => onDelete(qa.id)}
-                    >
-                      삭제
-                    </button>
-                  )}
                 </div>
               </div>
             ))
