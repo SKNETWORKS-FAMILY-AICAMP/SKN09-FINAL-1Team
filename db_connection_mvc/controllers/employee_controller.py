@@ -37,3 +37,9 @@ async def login(request: Request, login_data: LoginRequest):
 
     return {'message': '로그인 성공'}
 
+@router.get("/check-session")
+async def check_session(request: Request):
+    if "employee" not in request.session:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    return {"employee": request.session["employee"]}

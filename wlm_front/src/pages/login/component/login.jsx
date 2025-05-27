@@ -22,12 +22,23 @@ const Login = () => {
           emp_pwd: empPwd
         },
         {
-          withCredentials: true // 세션 쿠키를 주고받기 위해 필요
+          withCredentials: true
         }
       );
 
       if (response.data.message === '로그인 성공') {
-        // AuthContext의 login 함수 호출
+        // 세션 정보 확인을 위한 API 호출
+        const sessionResponse = await axios.get('http://localhost:8000/api/check-session', {
+          withCredentials: true
+        });
+
+        // 사용자 정보 콘솔 출력
+        console.log('=== 로그인 성공 ===');
+        console.log('이름:', sessionResponse.data.employee.emp_name);
+        console.log('사원코드:', sessionResponse.data.employee.emp_code);
+        console.log('이메일:', sessionResponse.data.employee.emp_email);
+        console.log('==================');
+
         login(empCode);
         navigate('/main');
       }
