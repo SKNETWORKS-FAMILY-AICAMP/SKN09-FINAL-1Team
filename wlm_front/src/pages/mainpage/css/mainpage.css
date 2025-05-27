@@ -20,27 +20,52 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+.bg-img {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px) brightness(0.85);
+  opacity: 0.92;
+  z-index: -1;
+  transition: background-image 0.3s, opacity 0.3s;
+  pointer-events: none;
+}
+.bg-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(10,61,145,0.07) 100%);
+  z-index: 2;
+  pointer-events: none;
 }
 
 .app-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 5vh 80px;
+  padding: 5vh 40px;
 }
 
 .container {
   display: flex;
   flex: 1;
-  gap: 40px;
+  gap: 36px;
+  justify-content: center;
+  align-items: center;
 }
 
-.left-section,
-.right-section {
-  flex: 1;
-  width: 50%;
-  height: 100%;
-  min-height: 300px;
+.left-section {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .body-section {
@@ -64,18 +89,88 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  transition: background-color 0.25s, box-shadow 0.25s, transform 0.2s;
   color: #222;
   user-select: none;
   overflow: hidden;
+  text-decoration: none;
+  outline: none;
 }
+.card:focus {
+  outline: 2px solid #0a3d91;
+  outline-offset: 2px;
+}
+.card:active {
+  transform: scale(0.97) rotate(-1deg);
+}
+.card:hover {
+  background-color: #ebf3ff;
+  box-shadow: 0 10px 30px rgba(0, 108, 255, 0.25);
+  transform: translateY(-4px) scale(1.03);
+}
+.card-title {
+  position: relative;
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: #222;
+  text-align: center;
+  width: 100%;
+  opacity: 0.9;
+  z-index: 3;
+  transition: color 0.2s;
+}
+.card:hover .card-title,
+.card:focus .card-title {
+  color: #0a3d91;
+}
+.card-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 12px;
+  z-index: 1;
+  transition: background 0.3s;
+}
+.chat-bg, .note-bg, .query-bg, .call-bg {
+  background: #cee4ff88;
+}
+.card:hover .chat-bg,
+.card:focus .chat-bg,
+.card:hover .note-bg,
+.card:focus .note-bg,
+.card:hover .query-bg,
+.card:focus .query-bg,
+.card:hover .call-bg,
+.card:focus .call-bg {
+  background: #a4c9ffcc;
+}
+.card-img {
+  position: relative;
+  width: 35%;
+  height: 35%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 2;
+  opacity: 0.85;
+  margin-bottom: 12px;
+  transition: opacity 0.25s;
+}
+.card:hover .card-img,
+.card:focus .card-img {
+  opacity: 1;
+}
+.card-img.chat { background-image: url('chat.png'); }
+.card-img.note { background-image: url('note.png'); }
+.card-img.query { background-image: url('query.png'); }
+.card-img.call { background-image: url('call.png'); }
 
 .welcome-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 60px 40px; 
+  padding: 60px 40px;
 }
 
 .welcome-text-top {
@@ -85,15 +180,7 @@ html, body {
   margin-bottom: 32px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   user-select: none;
-}
-
-.logo-img {
-  width: 80%;
-  max-width: 400px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
+  line-height: 1.2;
 }
 
 .welcome-text-bottom {
@@ -105,78 +192,91 @@ html, body {
   user-select: none;
 }
 
-.card:hover {
-  background-color: #ebf3ff;
-  box-shadow: 0 10px 30px rgba(0, 108, 255, 0.25);
-  transform: translateY(-4px);
-}
-
-.card-bg {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border-radius: 12px;
-  z-index: 1;
-  transition: background 0.3s ease;
-}
-
-.chat-bg { background: #cee4ff88; }
-.note-bg { background: #cee4ff88; }
-.query-bg { background: #cee4ff88; }
-.call-bg { background: #cee4ff88; }
-
-.card:hover .chat-bg { background: #a4c9ffcc; }
-.card:hover .note-bg { background: #a4c9ffcc; }
-.card:hover .query-bg { background: #a4c9ffcc; }
-.card:hover .call-bg { background: #a4c9ffcc; }
-
-.card-img {
-  position: relative;
-  width: 48%;
-  height: 48%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  z-index: 2;
-  opacity: 0.85;
-  margin-bottom: 12px;
-  transition: opacity 0.25s ease;
-}
-
-.card:hover .card-img {
-  opacity: 1;
-}
-
-.card-img.chat { background-image: url('chat.png'); }
-.card-img.note { background-image: url('note.png'); }
-.card-img.query { background-image: url('query.png'); }
-.card-img.call { background-image: url('call.png'); }
-
-.card-title {
-  position: relative;
-  font-weight: 700;
-  font-size: 1.7rem;
-  color: #222;
-  text-align: center;
-  width: 100%;
-  opacity: 0.9;
-  z-index: 3;
-}
-
 .right-section {
-  background-color: #ffffff;
+  flex: 1.1;
+  background: rgba(255,255,255,0.87);
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  padding: 32px;
-  font-size: 1.15rem;
+  padding: 36px 32px;
+  font-size: 1rem;
   color: #444;
-  min-height: 320px;
+  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   user-select: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
+.logo-img {
+  width: 50%;
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
 
+.desc-text {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #174186;
+  line-height: 1.7;
+  padding: 36px 28px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 4px 24px rgba(23,65,134,0.10);
+  text-shadow: 0 2px 8px rgba(23,65,134,0.10);
+  letter-spacing: 0.01em;
+  transition: background 0.2s;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 0 auto;
 
+  /* 자연스러운 줄바꿈을 위한 추가 */
+  word-break: keep-all;
+  white-space: normal;
+}
+
+/* 반응형 미디어 쿼리 추가 */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .left-section, .right-section {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .body-section {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .body-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .right-section {
+    padding: 24px 8px;
+    min-height: 200px;
+  }
+}
+.welcome-text-top .greeting {
+  display: block;
+  margin-bottom: 20px; /* 원하는 만큼 조절 가능 (예: 20px) */
+}
