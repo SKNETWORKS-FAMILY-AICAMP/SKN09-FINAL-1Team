@@ -110,9 +110,8 @@
 
 // export default NoteMate;
 import React, { useState, useEffect, useRef } from 'react';
-// import Header from '../../../statics/component/header';
-// import Footer from '../../../statics/component/footer';
 import MicButton from './MicButton.jsx';
+import ParticipantList from './ParticipantList.jsx';
 import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
 import '../css/notemate.css';
@@ -126,6 +125,15 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   const [hostName, setHostName] = useState(loginUserName || '');  // 로그인 사용자로 초기값 설정
   const [participantsInfo, setParticipantsInfo] = useState('');
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [users, setUsers] = useState([
+    { name: '드무', email: 'dwuyoe@gmail.com', selected: false },
+    { name: 'dwuq', email: 'dwuq@gmail.com', selected: false },
+    { name: 'asdemx', email: 'asdemx@gmail.com', selected: false },
+    { name: 'qweqwer@', email: 'qweqwer@naver.com', selected: false },
+    { name: 'qwenvino', email: 'qwenvino@gmail.com', selected: false },
+  ]);
+
+  const transcriptRef = useRef();
 
   // 현재 시간으로 meetingDate 설정 (컴포넌트 마운트 시 한 번만)
   useEffect(() => {
@@ -138,12 +146,12 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   }, []);
 
   useEffect(() => {
-    if (meetingDate && hostName && participantsInfo) {
+    if (meetingDate && hostName) {
       setIsFormComplete(true);
     } else {
       setIsFormComplete(false);
     }
-  }, [meetingDate, hostName, participantsInfo]);
+  }, [meetingDate, hostName]);
 
   const startMeeting = () => {
     const now = Date.now();
@@ -158,8 +166,6 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
     clearInterval(timerInterval);
     setIsRecording(false);
   };
-
-  const transcriptRef = useRef();
 
   return (
     <div className="record-page">
@@ -186,6 +192,16 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
           >
             확인
           </button>
+
+          <ParticipantList
+            users={users}
+            onUpdateUsers={setUsers}
+            isRecording={isRecording}
+            elapsed={elapsed}
+            getTranscriptData={() => transcriptRef.current?.getTextData()}
+            meetingDate={meetingDate}
+            hostName={hostName}
+          />
         </div>
 
         <div className="record-right">
@@ -213,7 +229,6 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
           stopMeeting={stopMeeting}
         />
       )}
-      {/* <Footer /> */}
     </div>
   );
 };

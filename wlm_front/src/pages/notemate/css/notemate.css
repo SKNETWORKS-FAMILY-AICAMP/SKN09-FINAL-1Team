@@ -1,7 +1,7 @@
 /* === Global Reset & Base === */
 body {
   font-family: 'Noto Sans KR', sans-serif;
-  background: linear-gradient(to bottom, #eef6fb, #ffffff);
+  background: linear-gradient(to bottom, #62b9ef, #ffffff);
   color: #333;
   font-size: 1rem;
   margin: 0;
@@ -35,7 +35,7 @@ body {
 
 /* === 확인 버튼 스타일 === */
 .confirm-btn {
-  background: #00bfa6;
+  background: #005cbf;
   color: white;
   border: none;
   padding: 0.7rem 1.2rem;
@@ -52,7 +52,7 @@ body {
 }
 
 .confirm-btn:not(:disabled):hover {
-  background: #009e91;
+  background: #017699;
 }
 
 /* === 버튼 글씨 키우기 === */
@@ -66,15 +66,14 @@ button,
 .record-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;  /* auto 확장을 허용 */
 }
 
 .record-body {
   display: flex;
-  flex: 1;
-  padding: 1rem;
-  gap: 1rem;
+  flex-direction: row;
+  height: auto;           /* 내용에 따라 자동 확장 */
+  flex-grow: 1;
 }
 
 /* === Left Panel (Participants) === */
@@ -105,12 +104,12 @@ button,
 
 .search-input:focus {
   outline: none;
-  border-color: #00bfa6;
+  border-color: #005fbf;
   box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.15);
 }
 
 .register-btn {
-  background: #00bfa6;
+  background: #0063bf;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -120,7 +119,7 @@ button,
 }
 
 .register-btn:hover {
-  background: #009e91;
+  background: #004c9e;
 }
 
 .suggestion-list {
@@ -196,12 +195,12 @@ button,
 }
 
 .send-btn {
-  background: #00bfa6;
+  background: #2471e5;
   color: white;
 }
 
 .send-btn:hover {
-  background: #00a091;
+  background: #0a73bd;
 }
 
 /* === Right Panel (Transcript) === */
@@ -333,9 +332,4 @@ button,
   font-weight: bold;
   font-size: 1rem;
   color: #e74c3c;
-}
-
-/* === Footer/Header spacing if needed === */
-.footer, .header {
-  height: 50px;
 }

@@ -341,9 +341,9 @@ const ParticipantList = ({
 
       {/* 테이블 헤더 */}
       <div className="table-header">
+        <span>선택</span>
         <span>이름</span>
         <span>이메일</span>
-        <span>선택</span>
         <span>삭제</span>
       </div>
 
@@ -351,13 +351,13 @@ const ParticipantList = ({
       <ul className="user-list">
         {filteredUsers.map((user, idx) => (
           <li key={idx}>
-            <span>{user.name}</span>
-            <span>{user.email}</span>
             <input
               type="checkbox"
               checked={user.selected || false}
               onChange={() => handleCheck(idx)}
             />
+            <span>{user.name}</span>
+            <span>{user.email}</span>
             <button onClick={() => handleDelete(idx)}>✕</button>
           </li>
         ))}
