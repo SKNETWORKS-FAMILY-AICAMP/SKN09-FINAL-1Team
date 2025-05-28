@@ -1,17 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../css/header.css';
 import { useAuth } from '../../context/AuthContext';
 import logoImage from '../../../src/pages/images/logo-image.png';
+import axios from 'axios';
 
 const Header = () => {
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sessionInfo, setSessionInfo] = useState(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  // 세션 정보 확인
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/check-session', {
+          withCredentials: true
+        });
+        setSessionInfo(response.data.employee);
+      } catch (error) {
+        setSessionInfo(null);
+      }
+    };
+    checkSession();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // 서버 세션 삭제를 위한 API 호출
+      await axios.post('http://localhost:8000/api/logout', {}, {
+        withCredentials: true
+      });
+
+      // 로컬 상태 초기화
+      logout();
+      setSessionInfo(null);
+
+      // 로그인 페이지로 이동
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+    }
   };
 
   const menuItems = [
@@ -28,7 +58,7 @@ const Header = () => {
       <div
         className="logo"
         style={{ backgroundImage: `url(${logoImage})` }}
-        onClick={() => navigate(isLoggedIn ? '/main' : '/login')}
+        onClick={() => navigate(sessionInfo ? '/main' : '/login')}
         role="button"
         aria-label="logo"
         title="홈으로 이동"
@@ -54,7 +84,7 @@ const Header = () => {
       )}
 
       <div className="header-buttons">
-        {isLoggedIn ? (
+        {sessionInfo ? (
           <>
             <div className="header-btn-wrap">
               <Link to="/mypage">

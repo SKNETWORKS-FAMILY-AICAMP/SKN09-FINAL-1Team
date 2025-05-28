@@ -1,123 +1,306 @@
-body {
-  margin: 0;
-  background: #ccc;
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
-}
-
-.mainpage {
+/* mainpage.css */
+* {
   box-sizing: border-box;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #F4FAFF;
+}
+#root {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+}
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 5vh 40px;
+}
+
+.content-container {
+  display: flex;
+  gap: 72px;
+  justify-content: center;
   align-items: center;
-  padding: 0px;
-  gap: 0px;
+  margin-top: 80px;
+  padding: 0 160px;
+}
+
+.left-content {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 520px;
+}
+
+.right-content {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 520px;
+}
+
+.feature-preview {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  margin: 0 auto;
-  overflow-x: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-img-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 오른쪽 40vw만 배경 이미지, 위/아래/오른쪽 여백 */
+.bg-img-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px) brightness(0.85);
+  transition: background-image 0.3s;
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
 }
 
 .body-section {
   width: 100%;
-  max-width: 900px;  /* 적당한 최대 넓이 */
-  margin: 0 auto;
+  height: 100%;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2열 */
-  grid-template-rows: repeat(2, 1fr);    /* 2행 */
-  gap: 30px;
-  padding: 5vh 2vw;
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  min-height: 80vh;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
 }
 
+/* 오른쪽 텍스트: 박스 없이, 크고 굵게, 위아래 여백 줄임 */
+.right-text-only {
+  flex: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  background: transparent;
+  width: 100%;
+  min-height: 200px;
+  pointer-events: none;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 901px) {
+  .right-text-only {
+    max-width: 40vw;
+    width: 40vw;
+    margin-left: auto;
+    margin-right: 80px; /* 오른쪽 여백 80px */
+    padding: 0 14px;
+  }
+}
+@media (max-width: 1400px) {
+  .content-container {
+    padding: 0 80px;
+  }
+}
+@media (max-width: 900px) {
+  .content-container {
+    padding: 0 40px;
+  }
+  
+  .content-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .left-content,
+  .right-content {
+    flex: none;
+    width: 100%;
+  }
+  
+  .right-content {
+    min-height: 300px;
+  }
+}
+@media (max-width: 600px) {
+  .main-wrapper {
+    padding: 3vh 20px;
+  }
+  
+  .right-content {
+    min-height: 250px;
+  }
+  
+  .desc-text-only {
+    font-size: 1.2rem;
+  }
+}
+
+/* 설명 텍스트: 박스 없이, 크고 굵게, 그림자 */
+.desc-text-only {
+  position: relative;
+  z-index: 2;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 3px 12px rgba(23,65,134,0.25), 0 1px 0 #0a3d91;
+  text-align: center;
+  padding: 20px;
+  max-width: 90%;
+}
+
+/* 환영 메시지는 박스+가독성 스타일 + 글씨 더 큼 */
+.welcome-box {
+  width: 100%;
+  padding: 40px 20px;
+  text-align: center;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 16px;
+}
+
+#translucent-welcome {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.welcome-text-top {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #2a2a2a;
+  margin-bottom: 32px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  line-height: 1.2;
+}
+.welcome-text-bottom {
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: #0a3d91;
+  margin-top: 36px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
+.logo-img {
+  width: 50%;
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 16px rgba(23,65,134,0.25));
+}
+.welcome-text-top .greeting {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* 왼쪽 카드 영역 및 기타 기존 스타일은 원래대로 */
 .card {
   position: relative;
-  width: 100%;      /* 그리드 셀 가득 채우기 */
-  aspect-ratio: 1 / 1;  /* 정사각형 비율 유지 */
-  border-radius: 30px;
-  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background-color: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border: 1px solid #e1e4e8;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  padding: 0;
   cursor: pointer;
-  margin: 0; /* 그리드 gap으로 간격 처리 */
+  transition: background-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  color: #222;
+  user-select: none;
+  overflow: hidden;
+  text-decoration: none;
+  outline: none;
 }
-
-.card-bg {
+.card:focus {
+  outline: 2px solid #0a3d91;
+  outline-offset: 2px;
+}
+.card:active {
+  transform: scale(0.97) rotate(-1deg);
+}
+.card:hover {
+  background-color: #ebf3ff;
+  box-shadow: 0 10px 30px rgba(0, 108, 255, 0.25);
+  transform: translateY(-4px) scale(1.03);
+}
+.card-title {
+  position: relative;
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: #222;
+  text-align: center;
   width: 100%;
-  height: 100%;
-  border-radius: 30px;
+  opacity: 0.9;
+  z-index: 3;
+  transition: color 0.2s;
+}
+.card:hover .card-title,
+.card:focus .card-title {
+  color: #0a3d91;
+}
+.card-bg {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 12px;
   z-index: 1;
+  transition: background 0.3s;
 }
-
-.chat-bg,
-.note-bg,
-.call-bg,
-.query-bg {
-  background: #e0f7ff;
-  transition: background 0.3s ease;
+.chat-bg, .note-bg, .query-bg, .call-bg {
+  background: #cee4ff88;
 }
-
 .card:hover .chat-bg,
+.card:focus .chat-bg,
 .card:hover .note-bg,
+.card:focus .note-bg,
 .card:hover .query-bg,
-.card:hover .call-bg {
-  background: #a7c7f9;
+.card:focus .query-bg,
+.card:hover .call-bg,
+.card:focus .call-bg {
+  background: #a4c9ffcc;
 }
-
 .card-img {
   position: relative;
-  width: 50%;
-  height: 50%;
+  width: 35%;
+  height: 35%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   z-index: 2;
-  opacity: 0.7;
-  margin-bottom: 20px;
+  opacity: 0.85;
+  margin-bottom: 12px;
+  transition: opacity 0.25s;
 }
-
-.card:hover .card-img {
+.card:hover .card-img,
+.card:focus .card-img {
   opacity: 1;
 }
-
-.card-img.chat {
-  background-image: url('chat.png');
-}
-
-.card-img.note {
-  background-image: url('note.png');
-}
-
-.card-img.query {
-  background-image: url('query.png');
-}
-
-.card-img.call {
-  background-image: url('call.png');
-}
-
-.card-title {
-  position: relative;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 2.5rem;
-  color: #000;
-  text-align: center;
-  width: 100%;
-  opacity: 0.7;
-  padding-top: 10px;
-  z-index: 3;
-  
-}
+.card-img.chat { background-image: url('chat.png'); }
+.card-img.note { background-image: url('note.png'); }
+.card-img.query { background-image: url('query.png'); }
+.card-img.call { background-image: url('call.png'); }

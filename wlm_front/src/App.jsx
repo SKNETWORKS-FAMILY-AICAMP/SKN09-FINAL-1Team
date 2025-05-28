@@ -17,7 +17,7 @@ import './App.module.css'
 
 function AppRoutes() {
   const location = useLocation();
-  const hideHeaderPaths = ["/", "/login", "/main"];
+  const hideHeaderPaths = ["/", "/login"];
   const hideHeader = hideHeaderPaths.includes(location.pathname);
 
   return (
