@@ -40,18 +40,19 @@
   display: block;
   margin-bottom: 0.3rem;
 }
-.btn {
+.search-btn, .reset-btn {
+  width: 100%;
   padding: 10px 18px;
-  background-color: #009ffd;
+  background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   transition: background-color 0.3s ease;
 }
 
-.btn:hover {
+.search-btn:hover, .reset-btn:hover {
   background-color: #007ccc;
 }
 
@@ -63,7 +64,7 @@
 }
 
 /* 검색 초기화 버튼 */
-.btn.restet-btn {
+.restet-btn {
   padding: 10px 18px;
   font-size: 0.9rem;
   border: none;
@@ -72,6 +73,6 @@
   color: white;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-.btn.reset-btn:hover {
+.reset-btn:hover {
   background-color: #e0e0e0;
 }

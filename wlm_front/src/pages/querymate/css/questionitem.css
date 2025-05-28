@@ -44,8 +44,13 @@
   background-color: #FF4C4C;
 }
 .status-dot.수정 {
-  background-color: #FFA500;
+  background-color: #f1c40f;
 }
+.status-dot.대기 {
+  background-color: #ccc;
+}
+
+
 
 .answer-box {
   margin-top: 1rem;
@@ -73,7 +78,7 @@
   gap: 1rem;
 }
 
-/* ===== 버튼 스타일 ===== */
+/* ===== 공통 버튼 스타일 (fade 스타일 적용) ===== */
 .btn {
   padding: 10px 18px;
   font-size: 0.9rem;
@@ -81,44 +86,51 @@
   border-radius: 20px;
   cursor: pointer;
   color: white;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  opacity: 0.95;
+  transform: scale(1);
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    opacity 0.3s ease;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
+  transform: scale(1.03);
+  opacity: 1;
 }
 
 .btn:active {
-  transform: translateY(2px);
+  transform: scale(0.98);
+  opacity: 0.8;
 }
 
-/* 승인: 진한 파랑 */
+/* 승인: 초록색 */
 .btn.green {
-  background-color: #0074cc;
-  box-shadow: 0px 4px 0px #005fa3;
+  background-color: #07cc00;
+  box-shadow: 0px 4px 0px #009900;
 }
 .btn.green:active {
-  background-color: #005fa3;
-  box-shadow: 0 0 #005fa3;
+  background-color: #00a336;
+  box-shadow: 0 0 #006600;
 }
 
-/* 거부: 중간 파랑 */
+/* 거부: 빨간색 */
 .btn.red {
-  background-color: #338eda;
-  box-shadow: 0px 4px 0px #2c7fca;
+  background-color: #e74c3c;
+  box-shadow: 0px 4px 0px #c0392b;
 }
 .btn.red:active {
-  background-color: #2c7fca;
-  box-shadow: 0 0 #2c7fca;
+  background-color: #c0392b;
+  box-shadow: 0 0 #922b21;
 }
 
-/* 수정: 연한 파랑 */
+/* 수정: 노란색 */
 .btn.yellow {
-  background-color: #66b8f5;
-  box-shadow: 0px 4px 0px #57a3dd;
+  background-color: #f1c40f;
+  box-shadow: 0px 4px 0px #d4ac0d;
   color: white;
 }
 .btn.yellow:active {
-  background-color: #57a3dd;
-  box-shadow: 0 0 #57a3dd;
+  background-color: #d4ac0d;
+  box-shadow: 0 0 #b7950b;
 }

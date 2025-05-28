@@ -35,24 +35,25 @@ body {
 
 /* === 확인 버튼 스타일 === */
 .confirm-btn {
-  background: #005cbf;
+  background-color: #4a90e2;
   color: white;
   border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
   font-size: 1rem;
+  font-weight: 500;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.3s;
-  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
 }
 
 .confirm-btn:disabled {
-  background: #ccc;
+  background-color: #ccc;
+  color: #666;
   cursor: not-allowed;
 }
 
 .confirm-btn:not(:disabled):hover {
-  background: #017699;
+  background-color: #0076d6;
 }
 
 /* === 버튼 글씨 키우기 === */
@@ -109,17 +110,19 @@ button,
 }
 
 .register-btn {
-  background: #0063bf;
+  background-color: #4a90e2;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .register-btn:hover {
-  background: #004c9e;
+  background-color: #0076d6;
 }
 
 .suggestion-list {
@@ -174,33 +177,36 @@ button,
 
 .participant-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 20px;
 }
 
 .select-all-btn,
 .send-btn {
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  border-radius: 12px;
+  background-color: #4a90e2;
+  color: white;
   border: none;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 999px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .select-all-btn {
-  background: #e2e8f0;
+  background: #4f9ffb;
   color: #333;
 }
 
 .send-btn {
-  background: #2471e5;
+  background: #4f9ffb;
   color: white;
 }
 
 .send-btn:hover {
-  background: #0a73bd;
+  background-color: #0076d6;;
 }
 
 /* === Right Panel (Transcript) === */

@@ -7,7 +7,7 @@ const QueryMate = () => {
   const [searchParams, setSearchParams] = useState({
     keyword: '',
     date: '',
-    sort: '최근순',
+    status: '전체',
   });
 
   return (

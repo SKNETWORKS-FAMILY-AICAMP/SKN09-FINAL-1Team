@@ -71,6 +71,7 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
+  border-radius: 999px;
   transition: background-color 0.2s;
 }
 
