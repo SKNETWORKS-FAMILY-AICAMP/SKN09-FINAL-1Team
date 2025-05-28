@@ -64,49 +64,49 @@ const MainPage = () => {
 
   return (
     <div className="main-wrapper">
-      {bg && (
-        <div
-          className="bg-img-right"
-          style={{ backgroundImage: `url(${bg})` }}
-        />
-      )}
-      <div className="app-container">
-        <div className="container">
-          <div className="left-section">
-            <div className="body-section">
-              {cards.map(card => (
-                <Link
-                  key={card.key}
-                  to={card.to}
-                  className="card"
-                  onMouseEnter={() => handleMouseEnter(card)}
-                  onFocus={() => handleMouseEnter(card)}
-                  onMouseLeave={handleMouseLeave}
-                  onBlur={handleMouseLeave}
-                  tabIndex={0}
-                  aria-label={card.title}
-                  title={card.title}
-                >
-                  <div className={`card-bg ${card.bgClass}`}></div>
-                  <div className={`card-img ${card.imgClass}`}></div>
-                  <div className="card-title">{card.title}</div>
-                </Link>
-              ))}
-            </div>
+      <div className="content-container">
+        <div className="left-content">
+          <div className="body-section">
+            {cards.map(card => (
+              <Link
+                key={card.key}
+                to={card.to}
+                className="card"
+                onMouseEnter={() => handleMouseEnter(card)}
+                onFocus={() => handleMouseEnter(card)}
+                onMouseLeave={handleMouseLeave}
+                onBlur={handleMouseLeave}
+                tabIndex={0}
+                aria-label={card.title}
+                title={card.title}
+              >
+                <div className={`card-bg ${card.bgClass}`}></div>
+                <div className={`card-img ${card.imgClass}`}></div>
+                <div className="card-title">{card.title}</div>
+              </Link>
+            ))}
           </div>
-          <div className="right-text-only">
-            {desc === "기능을 선택하면 설명이 이곳에 표시됩니다." ? (
-              <div className="welcome-box" id="translucent-welcome">
-                <p className="welcome-text-top">
-                  당신의 업무를<br />스마트하게
-                </p>
-                <img src={logoImg} alt="로고" className="logo-img" />
-                <p className="welcome-text-bottom">WLB_MATE</p>
+        </div>
+        <div className="right-content">
+          {bg ? (
+            <>
+              <div className="bg-img-container">
+                <div
+                  className="bg-img-right"
+                  style={{ backgroundImage: `url(${bg})` }}
+                />
               </div>
-            ) : (
               <div className="desc-text-only">{desc}</div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="welcome-box" id="translucent-welcome">
+              <p className="welcome-text-top">
+                당신의 업무를<br />스마트하게
+              </p>
+              <img src={logoImg} alt="로고" className="logo-img" />
+              <p className="welcome-text-bottom">WLB_MATE</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

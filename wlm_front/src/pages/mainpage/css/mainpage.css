@@ -7,7 +7,7 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #ffffff;
+  background-color: #F4FAFF;
 }
 #root {
   display: flex;
@@ -18,36 +18,75 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding: 5vh 40px;
+}
+
+.content-container {
+  display: flex;
+  gap: 72px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 80px;
+  padding: 0 160px;
+}
+
+.left-content {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 520px;
+}
+
+.right-content {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  z-index: 0;
+  height: 520px;
+}
+
+.feature-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-img-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* 오른쪽 40vw만 배경 이미지, 위/아래/오른쪽 여백 */
 .bg-img-right {
-  position: fixed;
-  top: 5vh;
-  right: 80px;
-  width: 40vw;
-  height: 90vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  background-position: center;
   filter: blur(3px) brightness(0.85);
-  opacity: 1; /* 전체 투명도는 유지 */
-  z-index: 1;
-  transition: background-image 0.3s, opacity 0.3s;
-  pointer-events: none;
-  mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%);
-  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%);
+  transition: background-image 0.3s;
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
 }
 
-.bg-img-right::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, rgba(255,255,255,0.12) 0%, rgba(10,61,145,0.09) 100%);
-  z-index: 2;
-  pointer-events: none;
+.body-section {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
 }
 
 /* 오른쪽 텍스트: 박스 없이, 크고 굵게, 위아래 여백 줄임 */
@@ -67,7 +106,6 @@ html, body {
   box-sizing: border-box;
 }
 
-
 @media (min-width: 901px) {
   .right-text-only {
     max-width: 40vw;
@@ -77,82 +115,71 @@ html, body {
     padding: 0 14px;
   }
 }
-@media (max-width: 900px) {
-  .bg-img-right {
-    width: 100vw;
-    right: 0;
-    left: 0;
-    top: 5vh;
-    height: 90vh;
+@media (max-width: 1400px) {
+  .content-container {
+    padding: 0 80px;
   }
-  .right-text-only {
-    width: 100vw;
-    max-width: 100vw;
-    left: 0;
-    right: 0;
-    margin-right: 0;
-    padding: 0 8px;
+}
+@media (max-width: 900px) {
+  .content-container {
+    padding: 0 40px;
+  }
+  
+  .content-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .left-content,
+  .right-content {
+    flex: none;
+    width: 100%;
+  }
+  
+  .right-content {
+    min-height: 300px;
   }
 }
 @media (max-width: 600px) {
-  .bg-img-right {
-    top: 0;
-    height: 100vh;
-    right: 0;
+  .main-wrapper {
+    padding: 3vh 20px;
   }
-  .right-text-only {
-    min-height: 80px;
-    padding: 4px 1px;
+  
+  .right-content {
+    min-height: 250px;
+  }
+  
+  .desc-text-only {
+    font-size: 1.2rem;
   }
 }
 
 /* 설명 텍스트: 박스 없이, 크고 굵게, 그림자 */
 .desc-text-only {
+  position: relative;
+  z-index: 2;
   font-size: 1.6rem;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 3px 12px rgba(23,65,134,0.25), 0 1px 0 #0a3d91;
-  line-height: 1.5;
-  word-break: keep-all;
-  white-space: normal;
-  margin: 0 auto;
-  padding: 0 0.5em;
-  background: none;
-  border-radius: 0;
-  box-shadow: none;
-  pointer-events: auto;
-  letter-spacing: -0.01em;
+  text-align: center;
+  padding: 20px;
+  max-width: 90%;
 }
 
 /* 환영 메시지는 박스+가독성 스타일 + 글씨 더 큼 */
 .welcome-box {
-  background: none !important;
-  backdrop-filter: none !important;
-  box-shadow: none !important;
+  width: 100%;
   padding: 40px 20px;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
-  color: #174186;
-  font-size: clamp(1rem, 2.5vw, 1.3rem); /* 반응형 폰트 */
-  font-weight: 600;
-  line-height: 1.6;
-  word-break: keep-all;
-  white-space: normal;
-  max-width: 90%;
-  z-index: 10;
-  pointer-events: auto;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 16px;
 }
 
-
 #translucent-welcome {
-  background: rgba(255, 255, 255, 0.7);  /* 유지 */
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  opacity: 1; /* ← 텍스트 선명하게 */
-  z-index: 10;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .welcome-text-top {
@@ -189,36 +216,10 @@ html, body {
 }
 
 /* 왼쪽 카드 영역 및 기타 기존 스타일은 원래대로 */
-.app-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 5vh 40px;
-}
-.container {
-  display: flex;
-  flex: 1;
-  gap: 36px;
-  justify-content: center;
-  align-items: center;
-}
-.left-section {
-  flex: 0.5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.body-section {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 24px;
-}
 .card {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   background-color: #fefefe;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
