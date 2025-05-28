@@ -34,7 +34,7 @@ const ChatArea = () => {
         formData.append('files', f);
       });
 
-      const res = await fetch('http://localhost:8000/ask', {
+      const res = await fetch('http://localhost:8001/ask', {
         method: 'POST',
         body: formData,
       });

@@ -33,7 +33,7 @@ const TranscriptBox = forwardRef((props, ref) => {
   const handleSummarize = async () => {
     if (!transcript) return;
     try {
-      const response = await axios.post("http://localhost:8000/summarize_text", {
+      const response = await axios.post("http://localhost:8001/summarize_text", {
         text: transcript
       });
       setSummary(response.data.summary);

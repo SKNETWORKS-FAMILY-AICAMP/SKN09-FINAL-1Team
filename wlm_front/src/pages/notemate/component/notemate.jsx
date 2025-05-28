@@ -31,7 +31,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/employees");
+        const res = await fetch("http://localhost:8001/api/employees");
         const result = await res.json();
         if (result.status === "success") {
           // 서버 응답에서 필요한 필드만 매핑해서 저장
@@ -110,7 +110,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
     formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
 
     try {
-      const res = await fetch('http://localhost:8000/send-email', {
+      const res = await fetch('http://localhost:8001/send-email', {
         method: 'POST',
         body: formData,
       });

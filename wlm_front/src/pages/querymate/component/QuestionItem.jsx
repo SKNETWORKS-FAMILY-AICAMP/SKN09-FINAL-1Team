@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/questionitem.css';
 
 const QuestionItem = ({ data, onDelete, onStatusChange }) => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [answer, setAnswer] = useState(data.answer || 'AI가 작성한 답변입니다.');
-  const [tempAnswer, setTempAnswer] = useState(answer);
+  const [answer, setAnswer] = useState(data.answer ?? '');
+  const [tempAnswer, setTempAnswer] = useState(data.answer ?? '');
+
+  // data.answer가 바뀌면 내부 상태도 갱신
+  useEffect(() => {
+    setAnswer(data.answer ?? '');
+    setTempAnswer(data.answer ?? '');
+  }, [data.answer]);
 
   const handleClick = (action) => {
     switch (action) {
-      case '등록':  // 승인 → 등록
+      case '등록':
         onStatusChange(data.id, '승인');
         setEditing(false);
         break;
@@ -30,6 +36,26 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
     }
   };
 
+  // 답변 표시 로직
+  const renderAnswer = () => {
+    if (editing) {
+      return (
+        <textarea
+          className="edit-textarea"
+          value={tempAnswer}
+          onChange={(e) => setTempAnswer(e.target.value)}
+        />
+      );
+    }
+    if (answer === "") {
+      return <p style={{ color: '#aaa' }}>답변 작성중...</p>;
+    }
+    if (answer === null || answer === "null") {
+      return <p style={{ color: '#aaa' }}>아직 답변이 작성되지 않았습니다.</p>;
+    }
+    return <p>{answer}</p>;
+  };
+
   const isRejected = data.status === '거부';
   const isModified = data.status === '수정됨';
   const isEditable = data.status === '대기';
@@ -47,16 +73,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
       {open && (
         <div className="answer-box">
           <strong>A:</strong>
-          {editing ? (
-            <textarea
-              className="edit-textarea"
-              value={tempAnswer}
-              onChange={(e) => setTempAnswer(e.target.value)}
-            />
-          ) : (
-            <p>{answer}</p>
-          )}
-
+          {renderAnswer()}
           <div className="btn-group">
             {!editing && isEditable && (
               <>
