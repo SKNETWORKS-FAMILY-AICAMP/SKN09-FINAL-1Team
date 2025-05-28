@@ -9,12 +9,9 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
 
   const handleClick = (action) => {
     switch (action) {
-      case '승인':
+      case '등록':  // 승인 → 등록
         onStatusChange(data.id, '승인');
         setEditing(false);
-        break;
-      case '거부':
-        onStatusChange(data.id, '거부');
         break;
       case '수정':
         setEditing(true);
@@ -28,9 +25,6 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
         setTempAnswer(answer);
         setEditing(false);
         break;
-      case '삭제':
-        onDelete(data.id);
-        break;
       default:
         break;
     }
@@ -38,7 +32,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
 
   const isRejected = data.status === '거부';
   const isModified = data.status === '수정됨';
-  const isEditable = data.status === '대기' || isModified;
+  const isEditable = data.status === '대기';
 
   return (
     <div className="question-item">
@@ -66,20 +60,18 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
           <div className="btn-group">
             {!editing && isEditable && (
               <>
-                <a onClick={() => handleClick('승인')} className="btn green rounded">승인</a>
-                <a onClick={() => handleClick('거부')} className="btn red rounded">거부</a>
+                <a onClick={() => handleClick('등록')} className="btn green rounded">등록</a>
                 <a onClick={() => handleClick('수정')} className="btn yellow rounded">수정</a>
               </>
             )}
             {!editing && isRejected && (
               <>
                 <a onClick={() => handleClick('수정')} className="btn yellow rounded">수정</a>
-                <a onClick={() => handleClick('삭제')} className="btn red rounded">삭제</a>
               </>
             )}
             {editing && (
               <>
-                <a onClick={() => handleClick('수정완료')} className="btn green rounded">수정 완료</a>
+                <a onClick={() => handleClick('수정완료')} className="btn yellow rounded">수정 완료</a>
                 <a onClick={() => handleClick('수정취소')} className="btn red rounded">수정 취소</a>
               </>
             )}
