@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
+import { FaFilePdf, FaTimes } from 'react-icons/fa'; // 아이콘
 
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [files, setFiles] = useState([]); // 여러 개의 파일 저장
-  const fileInputRef = useRef(null); // 파일 input 초기화를 위한 참조
-
+  const [files, setFiles] = useState([]);
+  const fileInputRef = useRef(null);
 
   const handleSend = async () => {
     if (sending) return;
@@ -31,7 +31,7 @@ const ChatArea = () => {
       const formData = new FormData();
       formData.append('question', currentInput);
       files.forEach((f) => {
-        formData.append('files', f); // 여러 개 파일 추가
+        formData.append('files', f);
       });
 
       const res = await fetch('http://localhost:8000/ask', {
@@ -54,7 +54,7 @@ const ChatArea = () => {
       setMessages(prev => [...prev, errorMsg]);
     }
 
-    setFiles([]); // 파일 초기화
+    setFiles([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -75,6 +75,11 @@ const ChatArea = () => {
     }
   };
 
+  const handleRemoveFile = (index) => {
+    const updated = files.filter((_, i) => i !== index);
+    setFiles(updated);
+  };
+
   return (
     <div className={styles.chatArea}>
       <div className={styles.chatContent}>
@@ -91,6 +96,24 @@ const ChatArea = () => {
           </div>
         ))}
       </div>
+
+      {files.length > 0 && (
+        <div className={styles.selectedFileList}>
+          {files.map((file, index) => (
+            <div key={index} className={styles.fileItem}>
+              <FaFilePdf className={styles.fileIcon} />
+              <span className={styles.fileName} title={file.name}>
+                {file.name}
+              </span>
+              <FaTimes
+                className={styles.removeIcon}
+                onClick={() => handleRemoveFile(index)}
+                title="삭제"
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className={styles.inputWrapper}>
         <input
@@ -124,14 +147,6 @@ const ChatArea = () => {
           Send
         </button>
       </div>
-
-      {files && files.length > 0 && (
-        <div className={styles.selectedFile}>
-          {files.map((f, idx) => (
-            <div key={idx}>{f.name}</div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

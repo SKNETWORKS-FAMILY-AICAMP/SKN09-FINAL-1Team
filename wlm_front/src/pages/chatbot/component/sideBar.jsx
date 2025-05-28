@@ -28,10 +28,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <button className={styles.toggleButton} onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? '←' : '→'}
       </button>
-      <div className={`${styles.sidebar} ${!isOpen ? styles.closed : ''}`}>
+      <div className={styles.sidebar + (!isOpen ? ` ${styles.closed}` : '')}>
         <h2 className={styles.title}>HISTORY</h2>
 
         <FilterPanel />
+
+        {/* 🔍 검색 버튼 추가 */}
+        <div style={{ textAlign: 'right', margin: '0.5rem 0.5rem 1rem' }}>
+          <button className="search-btn">검색</button>
+        </div>  
 
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, keywords], index) => (

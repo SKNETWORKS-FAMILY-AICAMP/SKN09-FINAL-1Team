@@ -38,7 +38,7 @@ textarea {
   color: #222;
 }
 
-/* ✅ 버튼 가로 정렬 */
+/* 버튼 가로 정렬 */
 .button-row {
   display: flex;
   justify-content: flex-start;
@@ -49,22 +49,23 @@ textarea {
 
 .transcript-btn {
   padding: 0.5rem 1rem;
-  background-color: #009ffd;
+  background-color: #4f9ffb;
   color: white;
   border: none;
-  border-radius: 20px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 0.9rem;
-  width: 150px;
-  text-align: center;
   transition: background-color 0.3s ease;
 }
 
 .transcript-btn:hover {
-  background-color: #007ccc;
+  background-color: #0076d6;
 }
 
 .transcript-btn:disabled {
   background-color: #ccc;
+  color: #666;
   cursor: not-allowed;
 }

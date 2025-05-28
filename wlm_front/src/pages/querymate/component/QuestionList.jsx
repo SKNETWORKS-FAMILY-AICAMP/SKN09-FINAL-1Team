@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import QuestionItem from './questionitem';
+import QuestionItem from './QuestionItem';
 import Pagination from './Pagination';
 
 const QuestionList = ({ searchParams }) => {

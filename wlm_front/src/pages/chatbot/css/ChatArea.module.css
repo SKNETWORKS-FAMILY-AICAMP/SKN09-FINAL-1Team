@@ -43,7 +43,7 @@
 }
 
 .input:focus {
-  box-shadow: 0 0 0 4px rgba(86, 170, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(86, 196, 255, 0.495);
 }
 
 /* 공통 버튼 스타일: 하늘색 계열로 변경 */
@@ -54,60 +54,35 @@
   text-transform: uppercase;
   font-size: 0.9rem;
   padding: 1.25em 2em;
-  background: #e0f7ff;
-  color: #23424a;
-  border: 2px solid #77b8d1;
-  border-radius: 0.75em;
+  background: #4a90e2; /* Fade 스타일용 메인 컬러 */
+  color: white;
+  border: none;
+  border-radius: 999px;
   cursor: pointer;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
-              background 150ms cubic-bezier(0, 0, 0.58, 1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.sendButton::before,
-.uploadButton::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: #a8e0ff;
-  border-radius: inherit;
-  box-shadow: 0 0 0 2px #77b8d1, 0 0.625em 0 0 #b3eaff;
-  transform: translate3d(0, 0.75em, -1em);
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
-              box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
-  z-index: -1;
-}
-
+/* Hover 시 배경색이 부드럽게 변경되는 fade 효과 */
 .sendButton:hover,
 .uploadButton:hover {
-  background: #cceeff;
-  transform: translateY(0.25em);
+  background-color: #0076d6;
 }
 
-.sendButton:hover::before,
-.uploadButton:hover::before {
-  box-shadow: 0 0 0 2px #77b8d1, 0 0.5em 0 0 #b3eaff;
-  transform: translate3d(0, 0.5em, -1em);
-}
-
+/* 클릭 시 약간 눌리는 효과 (fade + 눌림 약간) */
 .sendButton:active,
 .uploadButton:active {
-  background: #cceeff;
-  transform: translateY(0.75em);
+  transform: scale(0.97);
 }
 
-.sendButton:active::before,
-.uploadButton:active::before {
-  box-shadow: 0 0 0 2px #77b8d1, 0 0 #b3eaff;
-  transform: translate3d(0, 0, -1em);
-}
-
+/* 비활성화 스타일 */
 .sendButton:disabled,
 .uploadButton:disabled {
-  opacity: 0.5;
+  background-color: #ccc;
+  color: #666;
   cursor: not-allowed;
+  opacity: 0.6;
 }
+
 
 
 /* 메시지 말풍선 */
@@ -169,4 +144,46 @@
   0% { opacity: 0.2; transform: translateY(0); }
   20% { opacity: 1; transform: translateY(-2px); }
   100% { opacity: 0.2; transform: translateY(0); }
+}
+.selectedFileList {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 10px;
+}
+
+.fileItem {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 5px 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  min-width: 160px;
+  max-width: 220px;
+}
+
+.fileIcon {
+  color: #e74c3c;
+  font-size: 1rem;
+}
+
+.fileName {
+  flex: 1;
+  margin: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+}
+
+.removeIcon {
+  cursor: pointer;
+  color: #999;
+  font-size: 0.9rem;
+}
+.removeIcon:hover {
+  color: #e74c3c;
 }

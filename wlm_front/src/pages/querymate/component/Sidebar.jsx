@@ -40,8 +40,8 @@ const Sidebar = ({ setSearchParams }) => {
 
 
       <div className="btn-group-row">
-        <button className="btn search-btn" onClick={handleSearch}>검색</button>
-        <button className="btn reset-btn" onClick={handleReset} title="초기화">
+        <button className="search-btn" onClick={handleSearch}>검색</button>
+        <button className="reset-btn" onClick={handleReset} title="초기화">
           초기화
         </button>
       </div>
