@@ -44,8 +44,13 @@
   background-color: #FF4C4C;
 }
 .status-dot.수정 {
-  background-color: #FFA500;
+  background-color: #f1c40f;
 }
+.status-dot.대기 {
+  background-color: #ccc;
+}
+
+
 
 .answer-box {
   margin-top: 1rem;
