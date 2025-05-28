@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import '../css/questionitem.css';
 
-const QuestionItem = ({ data, onDelete }) => {
+const QuestionItem = ({ data, onDelete, onStatusChange }) => {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState(data.status || '대기');
   const [editing, setEditing] = useState(false);
   const [answer, setAnswer] = useState(data.answer || 'AI가 작성한 답변입니다.');
   const [tempAnswer, setTempAnswer] = useState(answer);
@@ -11,19 +10,19 @@ const QuestionItem = ({ data, onDelete }) => {
   const handleClick = (action) => {
     switch (action) {
       case '승인':
-        setStatus('승인');
+        onStatusChange(data.id, '승인');
         setEditing(false);
         break;
       case '거부':
-        setStatus('거부');
+        onStatusChange(data.id, '거부');
         break;
       case '수정':
         setEditing(true);
         break;
       case '수정완료':
         setAnswer(tempAnswer);
-        setStatus('수정됨');
         setEditing(false);
+        onStatusChange(data.id, '수정됨');
         break;
       case '수정취소':
         setTempAnswer(answer);
@@ -37,10 +36,9 @@ const QuestionItem = ({ data, onDelete }) => {
     }
   };
 
-  const isApproved = status === '승인';
-  const isRejected = status === '거부';
-  const isModified = status === '수정됨';
-  const isEditable = status === '대기' || isModified;
+  const isRejected = data.status === '거부';
+  const isModified = data.status === '수정됨';
+  const isEditable = data.status === '대기' || isModified;
 
   return (
     <div className="question-item">
@@ -48,7 +46,7 @@ const QuestionItem = ({ data, onDelete }) => {
         <span className="question-text">Q: {data.question}</span>
         <div className="question-meta">
           <span className="date">{data.date}</span>
-          <span className={`status-dot ${status}`} />
+          <span className={`status-dot ${data.status}`} />
         </div>
       </div>
 

@@ -24,6 +24,14 @@ const QuestionList = ({ searchParams }) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
 
+  const handleStatusChange = (id, newStatus) => {
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === id ? { ...q, status: newStatus } : q
+      )
+    );
+  };
+
   const filtered = questions
     .filter((q) => q.question.toLowerCase().includes(searchParams.keyword.toLowerCase()))
     .filter((q) => (searchParams.date ? q.date === searchParams.date : true))
@@ -38,7 +46,12 @@ const QuestionList = ({ searchParams }) => {
     <>
       {currentItems.length > 0 ? (
         currentItems.map((item) => (
-          <QuestionItem key={item.id} data={item} onDelete={handleDelete} />
+          <QuestionItem
+            key={item.id}
+            data={item}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+          />
         ))
       ) : (
         <p style={{ color: '#888' }}>🔍 검색 결과가 없습니다.</p>
