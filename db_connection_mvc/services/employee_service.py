@@ -29,3 +29,17 @@ class EmployeeService:
             return employee
         except Exception as e:
             return self.format_error(str(e))
+        
+    async def get_emp_pwd(self, emp_code: str) -> Dict[str, Any]:
+        try:
+            emp_pwd = self.db.get_emp_pwd(emp_code)
+            return emp_pwd
+        except Exception as e:
+            return self.format_error(str(e))
+        
+    async def change_password(self, emp_code: str, new_password: str) -> Dict[str, Any]:
+        try:
+            self.db.change_password(emp_code, new_password)
+            return {"message": "비밀번호 변경 성공"}
+        except Exception as e:
+            return self.format_error(str(e))

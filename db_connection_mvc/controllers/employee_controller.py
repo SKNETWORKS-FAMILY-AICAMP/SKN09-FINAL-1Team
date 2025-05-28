@@ -6,6 +6,15 @@ from pydantic import BaseModel
 class LoginRequest(BaseModel):
     emp_code: str
     emp_pwd: str
+    
+# 비밀번호 확인 요청 모델
+class PasswordRequest(BaseModel):
+    password: str
+    
+# 비밀번호 변경 요청 모델
+class PasswordChangeRequest(BaseModel):
+    newPassword: str
+    checkNewPassword: str
 
 router = APIRouter()
 employee_service = EmployeeService()
@@ -66,3 +75,28 @@ async def get_mypage_info(request: Request):
         "emp_create_dt": employee["emp_create_dt"],
         "emp_role": employee["emp_role"]
     }
+    
+@router.post("/verify-password")
+async def verify_password(request: Request, password_request: PasswordRequest):
+
+    employee = request.session["employee"]
+    emp_code = employee["emp_code"]
+    
+    emp_pwd = await employee_service.get_emp_pwd(emp_code)
+
+    if emp_pwd["emp_pwd"] != password_request.password:
+        raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+    return {"message": "비밀번호 확인 성공"}
+
+@router.put("/change-password")
+async def change_password(request: Request, password_change_request: PasswordChangeRequest):
+    employee = request.session["employee"]
+    emp_code = employee["emp_code"]
+
+    try:
+        await employee_service.change_password(emp_code, password_change_request.newPassword)
+        return {"message": "비밀번호 변경 성공"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+

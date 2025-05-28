@@ -31,6 +31,34 @@ class Database:
         except Exception as e:
             print(f"로그인 검증 오류: {e}")
             return None
+        
+    def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
+        try:
+            query = """
+                SELECT emp_pwd
+                FROM employee
+                WHERE emp_code = %s
+            """
+            self.cursor.execute(query, (emp_code))
+            result = self.cursor.fetchone()
+            return result
+        except Exception as e:
+            print(f"비밀번호 조회 오류: {e}")
+            return None
+        
+    def change_password(self, emp_code: str, new_password: str) -> None:
+        try:
+            query = """
+                UPDATE employee
+                SET emp_pwd = %s
+                WHERE emp_code = %s
+            """
+            self.cursor.execute(query, (new_password, emp_code))
+            self.connection.commit()
+        except Exception as e:
+            print(f"비밀번호 변경 오류: {e}")
+            self.connection.rollback()
+    
 
     def __del__(self):
         if hasattr(self, "cursor"):
