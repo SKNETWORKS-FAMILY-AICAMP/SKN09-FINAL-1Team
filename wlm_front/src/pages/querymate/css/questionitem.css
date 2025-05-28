@@ -43,7 +43,7 @@
 .status-dot.거부 {
   background-color: #FF4C4C;
 }
-.status-dot.수정 {
+.status-dot.수정됨 {
   background-color: #f1c40f;
 }
 .status-dot.대기 {

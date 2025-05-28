@@ -29,7 +29,7 @@ const Sidebar = ({ setSearchParams }) => {
         <option value="대기">대기</option>
         <option value="승인">승인</option>
         <option value="거부">거부</option>
-        <option value="수정">거부 후 승인</option>
+        <option value="수정">수정완료</option>
       </select>
       <div className="btn-group-row">
         <button className="search-btn" onClick={handleSearch}>검색</button>

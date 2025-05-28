@@ -38,7 +38,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
 
   const isRejected = data.status === '거부';
   const isModified = data.status === '수정됨';
-  const isEditable = data.status === '대기' || isModified;
+  const isEditable = data.status === '대기';
 
   return (
     <div className="question-item">
@@ -79,7 +79,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
             )}
             {editing && (
               <>
-                <a onClick={() => handleClick('수정완료')} className="btn green rounded">수정 완료</a>
+                <a onClick={() => handleClick('수정완료')} className="btn yellow rounded">수정 완료</a>
                 <a onClick={() => handleClick('수정취소')} className="btn red rounded">수정 취소</a>
               </>
             )}
