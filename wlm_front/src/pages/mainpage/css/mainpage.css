@@ -65,7 +65,7 @@ html, body {
   overflow: hidden;
 }
 
-/* 오른쪽 40vw만 배경 이미지, 위/아래/오른쪽 여백 */
+/* �ㅻⅨ履� 40vw留� 諛곌꼍 �대�吏�, ��/�꾨옒/�ㅻⅨ履� �щ갚 */
 .bg-img-right {
   position: absolute;
   top: 0;
@@ -89,7 +89,7 @@ html, body {
   gap: 24px;
 }
 
-/* 오른쪽 텍스트: 박스 없이, 크고 굵게, 위아래 여백 줄임 */
+/* �ㅻⅨ履� �띿뒪��: 諛뺤뒪 �놁씠, �ш퀬 援듦쾶, �꾩븘�� �щ갚 以꾩엫 */
 .right-text-only {
   flex: 1.1;
   display: flex;
@@ -111,7 +111,7 @@ html, body {
     max-width: 40vw;
     width: 40vw;
     margin-left: auto;
-    margin-right: 80px; /* 오른쪽 여백 80px */
+    margin-right: 80px; /* �ㅻⅨ履� �щ갚 80px */
     padding: 0 14px;
   }
 }
@@ -154,7 +154,7 @@ html, body {
   }
 }
 
-/* 설명 텍스트: 박스 없이, 크고 굵게, 그림자 */
+/* �ㅻ챸 �띿뒪��: 諛뺤뒪 �놁씠, �ш퀬 援듦쾶, 洹몃┝�� */
 .desc-text-only {
   position: relative;
   z-index: 2;
@@ -167,7 +167,7 @@ html, body {
   max-width: 90%;
 }
 
-/* 환영 메시지는 박스+가독성 스타일 + 글씨 더 큼 */
+/* �섏쁺 硫붿떆吏��� 諛뺤뒪+媛��낆꽦 �ㅽ��� + 湲��� �� �� */
 .welcome-box {
   width: 100%;
   padding: 40px 20px;
@@ -215,7 +215,7 @@ html, body {
   font-weight: 700;
 }
 
-/* 왼쪽 카드 영역 및 기타 기존 스타일은 원래대로 */
+/* �쇱そ 移대뱶 �곸뿭 諛� 湲고� 湲곗〈 �ㅽ��쇱� �먮옒��濡� */
 .card {
   position: relative;
   width: 100%;

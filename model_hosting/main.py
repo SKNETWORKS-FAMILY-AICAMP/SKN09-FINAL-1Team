@@ -15,8 +15,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(router)
 app.include_router(email_router)
 
 
 ### uvicorn main:app --reload
+# uvicorn main:app --reload --port 8001

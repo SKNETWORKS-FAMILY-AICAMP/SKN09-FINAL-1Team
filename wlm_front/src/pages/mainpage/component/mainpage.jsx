@@ -14,7 +14,7 @@ const cards = [
     to: "/chatmate",
     bgClass: "chat-bg",
     imgClass: "chat",
-    description: "CHATMATE는 실시간 채팅, 문서 기반 정보 검색, 문서 평가 기능을 제공합니다.",
+    description: "'CHAT MATE' 는 실시간 채팅, 문서 기반 정보 검색, 문서 평가 기능을 제공합니다.",
   },
   {
     key: "notemate",
@@ -22,7 +22,7 @@ const cards = [
     to: "/notemate",
     bgClass: "note-bg",
     imgClass: "note",
-    description: "NOTEMATE는 회의록 작성과 이메일 전송 기능을 지원합니다.",
+    description: "'NOTE MATE' 는 회의록 작성과 이메일 전송 기능을 지원합니다.",
   },
   {
     key: "querymate",
@@ -30,7 +30,7 @@ const cards = [
     to: "/querymate",
     bgClass: "query-bg",
     imgClass: "query",
-    description: "QUERYMATE는 민원에 대한 답변을 자동으로 생성해주는 기능입니다.",
+    description: "'QUERY MATE' 는 민원들에 대한 답변을 자동으로 생성해줍니다.",
   },
   {
     key: "callmate",
@@ -38,7 +38,7 @@ const cards = [
     to: "/callmate",
     bgClass: "call-bg",
     imgClass: "call",
-    description: "CALLMATE는 음성 상담 데이터를 기반으로 고품질의 QnA 데이터를 제공합니다.",
+    description: "'CALL MATE' 는 음성 상담 데이터를 기반으로 고품질의 QnA 데이터를 제공합니다.",
   },
 ];
 
