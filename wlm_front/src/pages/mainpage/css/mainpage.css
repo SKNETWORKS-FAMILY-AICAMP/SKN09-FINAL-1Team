@@ -25,19 +25,22 @@ html, body {
 /* 오른쪽 40vw만 배경 이미지, 위/아래/오른쪽 여백 */
 .bg-img-right {
   position: fixed;
-  top: 5vh;        /* 위에 5% 여백 */
-  right: 80px;     /* 오른쪽 여백 80px */
+  top: 5vh;
+  right: 80px;
   width: 40vw;
-  height: 90vh;    /* 아래에 5% 여백 */
+  height: 90vh;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   filter: blur(3px) brightness(0.85);
-  opacity: 0.92;
+  opacity: 1; /* 전체 투명도는 유지 */
   z-index: 1;
   transition: background-image 0.3s, opacity 0.3s;
   pointer-events: none;
+  mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 40%);
 }
+
 .bg-img-right::after {
   content: "";
   position: absolute;
@@ -56,13 +59,15 @@ html, body {
   text-align: center;
   position: relative;
   z-index: 10;
-  background: none;
+  background: transparent;
   width: 100%;
   min-height: 200px;
   pointer-events: none;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding: 10px;
+  box-sizing: border-box;
 }
+
+
 @media (min-width: 901px) {
   .right-text-only {
     max-width: 40vw;
@@ -121,23 +126,35 @@ html, body {
 
 /* 환영 메시지는 박스+가독성 스타일 + 글씨 더 큼 */
 .welcome-box {
+  background: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 40px 20px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 48px 24px;
-  background: rgba(255,255,255,0.82);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(23,65,134,0.10);
-  margin: 0 auto;
   color: #174186;
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 2.5vw, 1.3rem); /* 반응형 폰트 */
   font-weight: 600;
-  line-height: 1.7;
+  line-height: 1.6;
   word-break: keep-all;
   white-space: normal;
-  max-width: 480px;
+  max-width: 90%;
+  z-index: 10;
+  pointer-events: auto;
 }
+
+
+#translucent-welcome {
+  background: rgba(255, 255, 255, 0.7);  /* 유지 */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1; /* ← 텍스트 선명하게 */
+  z-index: 10;
+}
+
 .welcome-text-top {
   font-size: 3.2rem;
   font-weight: 700;

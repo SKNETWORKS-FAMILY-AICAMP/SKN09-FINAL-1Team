@@ -49,7 +49,6 @@ const bgImages = {
   callmate: callImg,
 };
 
-
 const MainPage = () => {
   const [desc, setDesc] = useState("기능을 선택하면 설명이 이곳에 표시됩니다.");
   const [bg, setBg] = useState(null);
@@ -65,7 +64,6 @@ const MainPage = () => {
 
   return (
     <div className="main-wrapper">
-      {/* 오른쪽 40vw에만 배경 이미지, 위아래+오른쪽 여백(푸터 가리지 않음) */}
       {bg && (
         <div
           className="bg-img-right"
@@ -74,7 +72,6 @@ const MainPage = () => {
       )}
       <div className="app-container">
         <div className="container">
-          {/* 왼쪽 카드 영역: 원래대로 */}
           <div className="left-section">
             <div className="body-section">
               {cards.map(card => (
@@ -99,7 +96,7 @@ const MainPage = () => {
           </div>
           <div className="right-text-only">
             {desc === "기능을 선택하면 설명이 이곳에 표시됩니다." ? (
-              <div className="welcome-box">
+              <div className="welcome-box" id="translucent-welcome">
                 <p className="welcome-text-top">
                   당신의 업무를<br />스마트하게
                 </p>
