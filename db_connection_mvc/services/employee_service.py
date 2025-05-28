@@ -22,3 +22,10 @@ class EmployeeService:
             return self.format_employee_list(employees)
         except Exception as e:
             return self.format_error(str(e))
+        
+    async def login(self, emp_code: str, emp_pwd: str) -> Dict[str, Any]:
+        try:
+            employee = self.db.verify_employee_login(emp_code, emp_pwd)
+            return employee
+        except Exception as e:
+            return self.format_error(str(e))

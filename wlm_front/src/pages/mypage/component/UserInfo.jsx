@@ -5,7 +5,9 @@ const UserInfo = ({ userData, onPasswordChange }) => {
     const getRoleName = (role) => {
         return role === 1 ? '상담사' : '일반';
     };
-
+    if (!userData) {
+        return <div>사용자 정보를 불러오는 중...</div>;
+    }
     return (
         <div className={styles.userInfoContainer}>
             <div className={styles.header}>
@@ -47,8 +49,8 @@ const UserInfo = ({ userData, onPasswordChange }) => {
                         <tr>
                             <th>계정 생성일</th>
                             <td>
-                                {userData.createdAt ? 
-                                    new Date(userData.createdAt).toLocaleDateString() : 
+                                {userData.emp_create_dt ? 
+                                    new Date(userData.emp_create_dt).toLocaleDateString() : 
                                     ''}
                             </td>
                         </tr>

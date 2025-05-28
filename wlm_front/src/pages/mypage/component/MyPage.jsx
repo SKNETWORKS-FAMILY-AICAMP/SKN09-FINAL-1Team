@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserInfo from './UserInfo';
 import PasswordChangeModal from './PasswordChangeModal';
 import styles from '../css/MyPage.module.css';
+import axios from 'axios';
 
 const MyPage = () => {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    // 임시 사용자 데이터 (나중에 실제 API로 대체)
-    const userData = {
-        emp_name: "홍길동",
-        emp_code: "A001",
-        emp_email: "hong@example.com",
-        emp_birth_date: "1990-01-01",
-        createdAt: "2024-01-01"
-    };
+    const [userData, setUserData] = useState(null);
+
+    // 마이페이지 정보 가져오기
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/mypage', {
+                    withCredentials: true
+                });
+                setUserData(response.data);
+            } catch (error) {
+                console.error('마이페이지 데이터 로딩 실패:', error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const handlePasswordChange = (currentPassword, newPassword) => {
         // 여기에 실제 비밀번호 변경 API 호출 로직 추가
