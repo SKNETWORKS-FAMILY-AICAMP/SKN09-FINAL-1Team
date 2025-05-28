@@ -38,10 +38,7 @@
 }
 
 .status-dot.승인 {
-  background-color: #00BFFF;
-}
-.status-dot.거부 {
-  background-color: #FF4C4C;
+  background-color: #07cc00;
 }
 .status-dot.수정됨 {
   background-color: #f1c40f;
