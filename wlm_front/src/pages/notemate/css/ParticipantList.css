@@ -194,3 +194,10 @@ h2 {
 .send-btn:hover {
   background-color: #007ccc;
 }
+
+.send-btn:disabled {
+  background-color: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+  border: none;
+}

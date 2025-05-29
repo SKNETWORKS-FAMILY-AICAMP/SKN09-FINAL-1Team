@@ -7,23 +7,30 @@ body {
   margin: 0;
   padding: 0;
 }
+
 /* === 회의 정보 입력 영역 === */
+.meeting-info-container {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  padding: 28px 32px 18px 32px;
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+}
+
 .meeting-info {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.form-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  gap: 12px;
 }
 
 .form-block label {
   font-weight: 600;
-  font-size: 1.05rem;
+  color: #0077cc;
+  margin-bottom: 4px;
+  display: block;
 }
 
 .form-block input {
@@ -31,6 +38,16 @@ body {
   border-radius: 12px;
   border: 1px solid #ccc;
   font-size: 1rem;
+}
+
+.readonly-field {
+  background: #f7fbff;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 1.05rem;
+  color: #222;
+  border: 1px solid #e0e7ef;
+  margin-bottom: 4px;
 }
 
 /* === 확인 버튼 스타일 === */
@@ -67,58 +84,68 @@ button,
 .record-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;  /* auto 확장을 허용 */
+  min-height: 100vh;
+  /* auto 확장을 허용 */
 }
 
 .record-body {
   display: flex;
   flex-direction: row;
-  height: auto;           /* 내용에 따라 자동 확장 */
+  height: auto;
   flex-grow: 1;
 }
 
 /* === Left Panel (Participants) === */
 .record-left {
-  flex: 1;
+  flex: 0 0 480px;
+  max-width: 500px;
+  min-width: 320px;
   background: white;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
+  width: 100%;
 }
 
 .search-bar select,
 .search-input {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
   border: 1px solid #ccc;
+  flex: none;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #005fbf;
-  box-shadow: 0 0 0 3px rgba(0, 191, 166, 0.15);
+.search-input {
+  flex: 1 1 0%;
+  min-width: 0;
 }
 
 .register-btn {
   background-color: #4a90e2;
   color: white;
   border: none;
-  padding: 0.6rem 1.5rem;
+  padding: 0.6rem 1.1rem;
   font-size: 1rem;
   font-weight: 500;
   border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  min-width: 48px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .register-btn:hover {
@@ -134,7 +161,7 @@ button,
   margin: 0.3rem 0;
   max-height: 160px;
   overflow-y: auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   z-index: 100;
 }
 
@@ -151,11 +178,32 @@ button,
 .table-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-weight: bold;
-  font-size: 0.9rem;
-  padding: 0.4rem 0;
+  font-size: 0.97rem;
+  padding: 0.4rem 0.3rem;
   border-bottom: 1px solid #ddd;
   margin-top: 0.5rem;
+  background: #eaf4ff;
+}
+
+.table-header span {
+  flex: 1;
+  text-align: left;
+  padding: 0 4px;
+}
+
+.table-header span:nth-child(1) {
+  flex: 2;
+}
+
+.table-header span:nth-child(2) {
+  flex: 3;
+}
+
+.table-header span:nth-child(3) {
+  flex: 1;
+  text-align: center;
 }
 
 .user-list {
@@ -163,16 +211,51 @@ button,
   padding: 0;
   margin: 0.5rem 0;
   flex: 1;
+  width: 100%;
+  max-height: 240px;
   overflow-y: auto;
 }
 
 .user-list li {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0.3rem;
-  font-size: 0.88rem;
+  font-size: 0.97rem;
   border-bottom: 1px solid #eee;
+  word-break: break-all;
+}
+
+.user-list li span {
+  flex: 1;
+  padding: 0 4px;
+}
+
+.user-list li span:nth-child(1) {
+  flex: 2;
+}
+
+.user-list li span:nth-child(2) {
+  flex: 3;
+}
+
+.user-list li button {
+  flex: 1;
+  text-align: center;
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.user-list li button:hover {
+  color: #ff0000;
+}
+
+.user-list li.header {
+  background: #eaf4ff;
+  font-weight: bold;
+  border-bottom: 1px solid #b5d6f7;
 }
 
 .participant-actions {
@@ -206,12 +289,13 @@ button,
 }
 
 .send-btn:hover {
-  background-color: #0076d6;;
+  background-color: #0076d6;
+  ;
 }
 
 /* === Right Panel (Transcript) === */
 .record-right {
-  flex: 2;
+  flex: 1 1 0%;
   background: white;
   border-radius: 16px;
   padding: 2rem;
@@ -245,7 +329,7 @@ button,
 
 .transcript-actions button:hover {
   background: #1a202c;
-  
+
 }
 
 .transcript-box textarea {
@@ -256,7 +340,7 @@ button,
   background: rgba(255, 255, 255, 0.95);
   resize: none;
   font-size: 1rem;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* === Mic Button === */
@@ -285,7 +369,7 @@ button,
   text-transform: uppercase;
   transform-style: preserve-3d;
   transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
-              background 150ms cubic-bezier(0, 0, 0.58, 1);
+    background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
 .learn-more-style::before {
@@ -297,7 +381,7 @@ button,
   box-shadow: 0 0 0 2px #77b8d1, 0 0.625em 0 0 #b3eaff;
   transform: translate3d(0, 0.75em, -1em);
   transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
-              box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
+    box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
   z-index: -1;
 }
 
@@ -334,8 +418,51 @@ button,
 }
 
 .timer-text {
-  margin-top: 2rem ;
+  margin-top: 2rem;
   font-weight: bold;
   font-size: 1rem;
   color: #e74c3c;
+}
+
+.participant-list-container {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  padding: 28px 20px 32px 20px;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+@media (max-width: 700px) {
+  .participant-list-container {
+    padding: 12px 4px 18px 4px;
+    max-width: 100%;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .register-btn {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .record-body {
+    flex-direction: column;
+  }
+
+  .record-left,
+  .record-right {
+    max-width: 100%;
+    min-width: 0;
+    padding: 1.2rem;
+  }
 }

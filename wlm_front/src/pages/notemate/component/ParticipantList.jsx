@@ -9,7 +9,8 @@ const ParticipantList = ({
   onUpdateUsers,
   setModalStep,
   disableEmailButton,
-  hostName  // 로그인 계정에서 가져오는 주최자 이름
+  hostName,  // 로그인 계정에서 가져오는 주최자 이름
+  step
 }) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
@@ -126,15 +127,14 @@ const ParticipantList = ({
         )}
       </div>
 
-      {/* 테이블 헤더 */}
-      <div className="table-header">
-        <span>이름</span>
-        <span>이메일</span>
-        <span>삭제</span>
-      </div>
 
       {/* 참가자 리스트 */}
       <ul className="user-list">
+        <li>
+          <span>이름</span>
+          <span>이메일</span>
+          <span>삭제</span>
+        </li>
         {users.map((user, idx) => (
           <li key={idx}>
             <span>{user.name}</span>
@@ -145,11 +145,13 @@ const ParticipantList = ({
       </ul>
 
       {/* 하단 버튼 */}
-      {!isRecording && (
-        <div className="participant-actions">
-          <button className="send-btn" onClick={() => setModalStep('sendConfirm')} disabled={disableEmailButton}>📩 전송</button>
-        </div>
-      )}
+      <div className="participant-actions">
+        <button
+          className="send-btn"
+          onClick={() => setModalStep('sendConfirm')}
+          disabled={step !== 'summarized'}
+        >📩 전송</button>
+      </div>
     </div>
   );
 };

@@ -3,6 +3,8 @@ import MicButton from './MicButton.jsx';
 import ParticipantList from './ParticipantList.jsx';
 import TranscriptBox from './TranscriptBox.jsx';
 import ConfirmModal from './ConfirmModal.jsx';
+import InfoButton from './InfoButton.jsx';
+import InfoModal from './InfoModal.jsx';
 import '../css/notemate.css';
 
 const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop으로 받는다고 가정
@@ -17,6 +19,13 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   const [sendMessage, setSendMessage] = useState("");
   const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  // step: init, recording, transcripted, summarized
+  const [step, setStep] = useState('init');
+  // 예시 텍스트
+  const exampleTranscript = '예시 변환 텍스트입니다. 이곳에 음성 인식 결과가 표시됩니다.';
+  const exampleSummary = '예시 요약 결과입니다. 이곳에 요약 결과가 표시됩니다.';
+  const [showStartInfo, setShowStartInfo] = useState(false);
+  const [showTranscriptInfo, setShowTranscriptInfo] = useState(false);
 
   // 현재 시간으로 meetingDate 설정 (컴포넌트 마운트 시 한 번만)
   useEffect(() => {
@@ -67,6 +76,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   }, [meetingDate, hostName]);
 
   const startMeeting = () => {
+    setStep('recording');
     const now = Date.now();
     setIsRecording(true);
     const interval = setInterval(() => {
@@ -78,6 +88,12 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   const stopMeeting = () => {
     clearInterval(timerInterval);
     setIsRecording(false);
+    setStep('transcripted'); // 녹음 종료 시 변환 텍스트 예시로 이동
+    setTimeout(() => {
+      if (transcriptRef.current) {
+        transcriptRef.current.setExampleTranscript(exampleTranscript);
+      }
+    }, 100); // ref가 연결된 후 예시 텍스트 입력
   };
 
   const isReadyToSend = () => {
@@ -150,52 +166,71 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
     <div className="record-page">
       <div className="record-body">
         <div className="record-left">
-          {/* 회의 정보 입력 영역 - 수정됨 */}
-
-          <div className="meeting-info">
-            <div className="form-block">
-              <label>회의 일자</label>
-              {/* 달력 input 제거, 텍스트로만 표시 */}
-              <div className="readonly-field">{meetingDate}</div>
-            </div>
-            <div className="form-block">
-              <label>주최자</label>
-              {/* 주최자 입력 제거, 텍스트로만 표시 */}
-              <div className="readonly-field">{hostName} ({hostEmail})</div>
+          <div className="meeting-info-container">
+            <div className="meeting-info">
+              <div className="form-block">
+                <label>회의 일자</label>
+                <div className="readonly-field">{meetingDate}</div>
+              </div>
+              <div className="form-block">
+                <label>주최자</label>
+                <div className="readonly-field">{hostName} ({hostEmail})</div>
+              </div>
             </div>
           </div>
-
-          <ParticipantList
-            users={users}
-            allUsers={allUsers}
-            onUpdateUsers={setUsers}
-            isRecording={isRecording}
-            elapsed={elapsed}
-            getTranscriptData={() => transcriptRef.current?.getTextData()}
-            meetingDate={meetingDate}
-            hostName={hostName}
-            setModalStep={setModalStep}
-            setSendMessage={setSendMessage}
-            disableEmailButton={isEmailStep(modalStep)}
-          />
+          <div className="participant-list-container">
+            <ParticipantList
+              users={users}
+              allUsers={allUsers}
+              onUpdateUsers={setUsers}
+              isRecording={isRecording}
+              elapsed={elapsed}
+              getTranscriptData={() => transcriptRef.current?.getTextData()}
+              meetingDate={meetingDate}
+              hostName={hostName}
+              setModalStep={setModalStep}
+              setSendMessage={setSendMessage}
+              disableEmailButton={isEmailStep(modalStep)}
+              step={step}
+            />
+          </div>
         </div>
 
         <div className="record-right">
-          <MicButton
-            isRecording={isRecording}
-            elapsed={elapsed}
-            onStart={() => setModalStep('startConfirm')}
-            onStop={() => setModalStep('stopConfirm')}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+            <MicButton
+              isRecording={isRecording}
+              elapsed={elapsed}
+              onStart={() => {
+                setModalStep('startConfirm');
+                setStep('recording');
+              }}
+              onStop={() => {
+                setModalStep('stopConfirm');
+              }}
+              step={step}
+            />
+            <InfoButton onClick={() => setShowStartInfo(true)} />
+          </div>
           <TranscriptBox
             isRecording={isRecording}
             elapsed={elapsed}
             onSave={() => console.log('Save Clicked')}
-            onSummary={() => console.log('Summary Clicked')}
+            onSummary={() => {
+              setStep('summarized');
+              setTimeout(() => {
+                if (transcriptRef.current) {
+                  transcriptRef.current.setExampleSummary(exampleSummary);
+                }
+              }, 100);
+            }}
             ref={transcriptRef}
             registerSendEmailHandler={(fn) => {
               sendEmailRef.current = fn;
             }}
+            step={step}
+            showTranscriptInfo={showTranscriptInfo}
+            setShowTranscriptInfo={setShowTranscriptInfo}
           />
         </div>
       </div>
@@ -211,6 +246,16 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
           sendMessage={sendMessage}
         />
       )}
+
+      <InfoModal open={showStartInfo} onClose={() => setShowStartInfo(false)}>
+        <b>회의 진행 방식 안내</b><br />
+        1. 참가자를 추가한 뒤 <b>START</b> 버튼을 눌러 회의를 시작하세요.<br />
+        2. 회의가 끝나면 <b>STOP</b> 버튼을 누르고, 안내에 따라 회의를 종료하세요.<br />
+        3. 변환된 텍스트가 생성되면 수정할 수 있습니다.<br />
+        4. <b>요약</b> 버튼을 눌러 요약 결과를 확인하고, 필요시 수정하세요.<br />
+        <b>단!</b> 요약버튼을 누르면 변환된 텍스트 수정이 불가합니다. <br />
+        5. <b>요약본 다운로드</b>와 <b>전송</b> 버튼이 활성화되면 회의록을 저장하거나 이메일로 전송할 수 있습니다.
+      </InfoModal>
     </div>
   );
 };
