@@ -26,6 +26,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   const exampleSummary = '예시 요약 결과입니다. 이곳에 요약 결과가 표시됩니다.';
   const [showStartInfo, setShowStartInfo] = useState(false);
   const [showTranscriptInfo, setShowTranscriptInfo] = useState(false);
+  const [isMeetingEnded, setIsMeetingEnded] = useState(false);
 
   // 현재 시간으로 meetingDate 설정 (컴포넌트 마운트 시 한 번만)
   useEffect(() => {
@@ -89,6 +90,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
     clearInterval(timerInterval);
     setIsRecording(false);
     setStep('transcripted'); // 녹음 종료 시 변환 텍스트 예시로 이동
+    setIsMeetingEnded(true);
     setTimeout(() => {
       if (transcriptRef.current) {
         transcriptRef.current.setExampleTranscript(exampleTranscript);
@@ -209,6 +211,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
                 setModalStep('stopConfirm');
               }}
               step={step}
+              disabled={isMeetingEnded}
             />
             <InfoButton onClick={() => setShowStartInfo(true)} />
           </div>
