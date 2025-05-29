@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from '../css/SideBar.module.css';
 import FilterPanel from './FilterPanel';
 import DateSearch from '../../../statics/component/DateSearch.jsx'
@@ -20,11 +20,14 @@ const groupByDate = (data) => {
 };
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
+  const [filterByDate, setFilterByDate] = useState(false);
+  const [filterByKeyword, setFilterByKeyword] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const groupedData = groupByDate(mockData);
 
   return (
-
-    
     <div className={styles.wrapper}>
       <button className={styles.toggleButton} onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? '←' : '→'}
@@ -32,12 +35,23 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <div className={styles.sidebar + (!isOpen ? ` ${styles.closed}` : '')}>
         <h2 className={styles.title}>HISTORY</h2>
 
-        <FilterPanel />
+        <FilterPanel
+          filterByDate={filterByDate}
+          filterByKeyword={filterByKeyword}
+          setFilterByDate={setFilterByDate}
+          setFilterByKeyword={setFilterByKeyword}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+        />
 
         {/* 🔍 검색 버튼 추가 */}
-        <div style={{ textAlign: 'right', margin: '0.5rem 0.5rem 1rem' }}>
-          <button className="search-btn">검색</button>
-        </div>  
+        {/* <div style={{ textAlign: 'center', margin: '0.5rem 0 1rem' }}>
+          <button className={styles.searchBtn}>검색</button>
+        </div>   */}
 
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, keywords], index) => (

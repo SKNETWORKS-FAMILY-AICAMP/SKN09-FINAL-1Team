@@ -20,3 +20,63 @@
   border: 1px solid #ccc;
   font-size: 0.9rem;
 }
+
+.searchBtn {
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.searchBtn:hover {
+  background: #0076d6;
+}
+
+.dateInputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.dateInput {
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.dateDash {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+.dateInputCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.dateLabel {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.1rem;
+  margin-left: 0.1rem;
+}
+
+.filterCheckRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
