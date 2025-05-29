@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/questionitem.css';
+import styles from '../css/questionList.module.css';
 
 const QuestionItem = ({ data, onDelete, onStatusChange }) => {
   const [open, setOpen] = useState(false);
@@ -25,7 +26,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
       case '수정완료':
         setAnswer(tempAnswer);
         setEditing(false);
-        onStatusChange(data.id, '수정됨');
+        onStatusChange(data.id, '수정완료');
         break;
       case '수정취소':
         setTempAnswer(answer);
@@ -57,11 +58,12 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
   };
 
   const isRejected = data.status === '거부';
-  const isModified = data.status === '수정됨';
+  const isModified = data.status === '수정완료';
   const isEditable = data.status === '대기';
 
   return (
-    <div className="question-item">
+    <div className={`${styles.questionItem} question-item`}>
+      <div className={`${styles.statusBar} ${styles[data.status]}`} />
       <div className="question-header" onClick={() => setOpen(!open)}>
         <span className="question-text">Q: {data.question}</span>
         <div className="question-meta">

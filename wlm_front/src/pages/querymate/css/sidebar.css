@@ -1,78 +1,87 @@
 .sidebar {
-  width: 260px;
-  height: 1000px;
-  padding: 1.5rem;
-  background: linear-gradient(to bottom, #f8fafc, #ffffff);
+  width: 320px;
+  height: 100vh;
+  padding: 20px;
+  background-color: white;
   border-right: 1px solid #cce0f5;
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar h3 {
   font-size: 1.2rem;
   color: #0077cc;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .sidebar input,
 .sidebar select {
   width: 100%;
-  margin-bottom: 1rem;
-  padding: 0.65rem;
-  font-size: 0.95rem;
-  border: 1px solid #a5c8e8;
+  margin-bottom: 1.2rem;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
   border-radius: 6px;
-  background-color: #f9fcff;
-  transition: border 0.2s ease;
+  background-color: white;
+  transition: border-color 0.2s;
 }
 
 .sidebar input:focus,
 .sidebar select:focus {
   outline: none;
-  border-color: #009ffd;
-  box-shadow: 0 0 5px rgba(0, 159, 253, 0.2);
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
 }
 
 .filter-section label {
-  font-size: 0.9rem;
-  color: #444;
+  font-size: 14px;
+  color: #666;
   display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 10px;
 }
+
 .search-btn, .reset-btn {
   width: 100%;
-  padding: 10px 18px;
+  padding: 10px;
   background-color: #4a90e2;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-top: 0.5rem;
-  transition: background-color 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .search-btn:hover, .reset-btn:hover {
-  background-color: #007ccc;
+  background-color: #357abd;
 }
 
 .btn-group-row {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-start;
-  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 /* 검색 초기화 버튼 */
-.restet-btn {
-  padding: 10px 18px;
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  color: white;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+.reset-btn {
+  background-color: #6c757d;
 }
+
 .reset-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #5a6268;
+}
+
+/* DateSearch 컴포넌트 스타일 조정 */
+.sidebar :global(.dateSearchContainer) {
+  margin-bottom: 1.2rem;
+}
+
+.sidebar label {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-bottom: 10px;
 }

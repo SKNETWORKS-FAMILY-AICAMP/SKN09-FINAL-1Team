@@ -16,6 +16,7 @@ const DateSearch = ({ onSearch, onReset }) => {
             return;
         }
 
+        console.log('DateSearch handleSearch:', { startDate, endDate });
         onSearch({ startDate, endDate });
     };
 
@@ -25,22 +26,34 @@ const DateSearch = ({ onSearch, onReset }) => {
         onReset();
     };
 
+    const handleStartDateChange = (e) => {
+        const newStartDate = e.target.value;
+        console.log('Start date changed:', newStartDate);
+        setStartDate(newStartDate);
+    };
+
+    const handleEndDateChange = (e) => {
+        const newEndDate = e.target.value;
+        console.log('End date changed:', newEndDate);
+        setEndDate(newEndDate);
+    };
+
     return (
         <div className={styles.dateSearchContainer}>
-            <h3 className={styles.title}>날짜 검색</h3>
+            <h3 className={styles.title}>📅 날짜 검색</h3>
             <div className={styles.searchBox}>
                 <div className={styles.dateInputs}>
                     <input
                         type="date"
                         value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
+                        onChange={handleStartDateChange}
                         className={styles.dateInput}
                     />
                     <span className={styles.dateDivider}>~</span>
                     <input
                         type="date"
                         value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
+                        onChange={handleEndDateChange}
                         className={styles.dateInput}
                     />
                 </div>

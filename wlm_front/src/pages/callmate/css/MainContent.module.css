@@ -101,32 +101,10 @@
   font-size: 12px;
 }
 
-.qaAnswer {
-  color: #555;
-  line-height: 1.5;
-  margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 3em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.qaAnswer:hover {
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  padding: 4px;
-}
-
+.qaAnswer,
+.qaAnswer:hover,
 .qaAnswer.expanded {
-  -webkit-line-clamp: unset;
-  max-height: none;
-  background-color: #f0f0f0;
-  padding: 8px;
-  border-radius: 4px;
+  display: none;
 }
 
 .qaActions {
@@ -240,42 +218,43 @@
   background-color: #357abd;
 }
 
-.fileInfo {
-  margin: 12px 0;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #666;
+.fileInfoContainer {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.fileRow {
+.fileInfoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fileInfoRow {
   display: flex;
   align-items: center;
-  padding: 4px 0;
+  gap: 10px;
 }
 
-.fileRow:not(:last-child) {
-  margin-bottom: 8px;
-}
-
-.fileLabel {
+.fileInfoRow strong {
+  color: #333;
   min-width: 100px;
-  color: #555;
 }
 
-.fileLink {
-  background: none;
-  border: none;
-  color: #4a90e2;
-  cursor: pointer;
-  padding: 0;
+.downloadLink {
+  color: #007acc;
+  text-decoration: none;
   font-size: 14px;
-  text-decoration: underline;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.fileLink:hover {
-  color: #357abd;
+.downloadLink:hover {
+  background-color: #e9ecef;
+  color: #0056b3;
 }
 
 .qaHeaderRight {
@@ -339,4 +318,108 @@
   color: #495057;
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.expandedInfo {
+  margin-top: 5px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.additionalInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileInfoItem p {
+  margin: 0;
+  color: #333;
+}
+
+.fileInfoItem strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.downloadLink {
+  color: #007acc;
+  text-decoration: none;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  display: inline-block;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.downloadLink:hover {
+  background-color: #e9ecef;
+  color: #0056b3;
+  text-decoration: none;
+}
+
+.feedbackInfo {
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.feedbackInfo p {
+  margin: 0;
+  color: #666;
+}
+
+.feedbackInfo strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.answerSection {
+  margin-top: 1rem;
+  margin-bottom: 20px;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.answerSection:hover {
+  background-color: #f0f0f0;
+}
+
+.answerHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.answerLabel {
+  font-weight: 600;
+  color: #007acc;
+}
+
+.answerText {
+  margin: 0;
+  padding: 0.8rem;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+.expanded .answerText {
+  -webkit-line-clamp: unset;
+  max-height: none;
 } 
