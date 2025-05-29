@@ -1,34 +1,73 @@
 import React, { useState } from 'react';
 import styles from '../css/Sidebar.module.css';
+import DateSearch from '../../../statics/component/DateSearch';
 
 const Sidebar = ({ onSearch }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchDate, setSearchDate] = useState('');
-  const [searchType, setSearchType] = useState('all'); // 'all', 'tag', 'question'
+  const [searchType, setSearchType] = useState('all');
+  const [dateRange, setDateRange] = useState(null);
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    onSearch(searchKeyword, searchDate, searchType);
+    e?.preventDefault();
+    onSearch({
+      keyword: searchKeyword,
+      type: searchType,
+      dateRange: dateRange
+    });
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleSearch(e);
+      handleSearch();
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}.${month}.${day}`;
+  const handleKeywordChange = (e) => {
+    setSearchKeyword(e.target.value);
+    onSearch({
+      keyword: e.target.value,
+      type: searchType,
+      dateRange: dateRange
+    });
   };
 
-  const handleDateChange = (e) => {
-    const formattedDate = formatDate(e.target.value);
-    setSearchDate(formattedDate);
+  const handleTypeChange = (e) => {
+    setSearchType(e.target.value);
+    onSearch({
+      keyword: searchKeyword,
+      type: e.target.value,
+      dateRange: dateRange
+    });
+  };
+
+  const handleDateSearch = ({ startDate, endDate }) => {
+    // 날짜 유효성 검사
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      if (start > end) {
+        alert('종료일은 시작일보다 늦은 날짜여야 합니다.');
+        return;
+      }
+    }
+
+    const newDateRange = startDate && endDate ? { startDate, endDate } : null;
+    setDateRange(newDateRange);
+    onSearch({
+      keyword: searchKeyword,
+      type: searchType,
+      dateRange: newDateRange
+    });
+  };
+
+  const handleDateReset = () => {
+    setDateRange(null);
+    onSearch({
+      keyword: searchKeyword,
+      type: searchType,
+      dateRange: null
+    });
   };
 
   return (
@@ -42,7 +81,7 @@ const Sidebar = ({ onSearch }) => {
             <select 
               className={styles.searchTypeSelect}
               value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
+              onChange={handleTypeChange}
             >
               <option value="all">전체</option>
               <option value="tag">태그</option>
@@ -55,24 +94,18 @@ const Sidebar = ({ onSearch }) => {
                         searchType === 'question' ? '질문으로 검색...' : 
                         '태그 또는 질문으로 검색...'}
             value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
+            onChange={handleKeywordChange}
             onKeyPress={handleKeyPress}
             className={styles.searchInput}
           />
         </div>
 
         <div className={styles.searchBox}>
-          <h3 className={styles.searchTitle}>날짜 검색</h3>
-          <input
-            type="date"
-            onChange={handleDateChange}
-            className={styles.searchInput}
+          <DateSearch 
+            onSearch={handleDateSearch}
+            onReset={handleDateReset}
           />
         </div>
-
-        <button onClick={handleSearch} className={styles.searchButton}>
-          검색
-        </button>
       </div>
     </div>
   );

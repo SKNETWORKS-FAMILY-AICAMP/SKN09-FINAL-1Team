@@ -1,189 +1,100 @@
-// import React, { useState, useRef } from 'react';
-// import styles from '../css/MainContent.module.css';
-
-// const MainContent = ({ qaList, onDelete, onFeedback }) => {
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [selectedAnswer, setSelectedAnswer] = useState(null);
-//   const fileInputRef = useRef(null);
-//   const itemsPerPage = 5;
-
-//   // 현재 페이지의 아이템들
-//   const indexOfLastItem = currentPage * itemsPerPage;
-//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-//   const currentItems = qaList.slice(indexOfFirstItem, indexOfLastItem);
-
-//   // 전체 페이지 수 계산
-//   const totalPages = Math.ceil(qaList.length / itemsPerPage);
-
-//   // 페이지 변경 핸들러
-//   const handlePageChange = (pageNumber) => {
-//     setCurrentPage(pageNumber);
-//     setSelectedAnswer(null);
-//   };
-
-//   // 답변 클릭 핸들러
-//   const handleAnswerClick = (answer) => {
-//     setSelectedAnswer(selectedAnswer === answer ? null : answer);
-//   };
-
-//   // 파일 업로드 핸들러
-//   const handleFileUpload = (event) => {
-//     const file = event.target.files[0];
-//     if (file && file.type === 'audio/mpeg') {
-//       // TODO: 여기에 파일 업로드 로직 추가
-//       console.log('Uploaded file:', file.name);
-//     } else {
-//       alert('MP3 파일만 업로드 가능합니다.');
-//     }
-//   };
-
-//   // 파일 다운로드 핸들러
-//   const handleFileDownload = (fileName, fileType) => {
-//     // TODO: 실제 다운로드 로직 구현
-//     console.log('Downloading file:', fileName, 'Type:', fileType);
-//   };
-
-//   // 마지막 페이지 체크 및 조정
-//   React.useEffect(() => {
-//     const maxPage = Math.ceil(qaList.length / itemsPerPage);
-//     if (currentPage > maxPage && maxPage > 0) {
-//       setCurrentPage(maxPage);
-//     }
-//   }, [qaList.length, currentPage, itemsPerPage]);
-
-//   return (
-//     <div className={styles.mainContent}>
-//       <div className={styles.contentWrapper}>
-//         <div className={styles.headerSection}>
-//           <h2 className={styles.title}>QA리스트</h2>
-//           <div className={styles.uploadSection}>
-//             <input
-//               type="file"
-//               accept=".mp3"
-//               onChange={handleFileUpload}
-//               ref={fileInputRef}
-//               style={{ display: 'none' }}
-//             />
-//             <button 
-//               className={styles.uploadButton}
-//               onClick={() => fileInputRef.current.click()}
-//             >
-//               MP3 업로드
-//             </button>
-//           </div>
-//         </div>
-//         <div className={styles.qaList}>
-//           {currentItems.length > 0 ? (
-//             currentItems.map((qa) => (
-//               <div key={qa.id} className={styles.qaItem}>
-//                 <div className={styles.qaHeader}>
-//                   <h3 className={styles.qaQuestion}>Q: {qa.question}</h3>
-//                   <div className={styles.qaHeaderRight}>
-//                     <span className={styles.qaDate}>{qa.date}</span>
-//                   </div>
-//                 </div>
-//                 <div className={styles.tagList}>
-//                   {qa.tags.map((tag, index) => (
-//                     <span key={index} className={styles.tag}>#{tag}</span>
-//                   ))}
-//                 </div>
-//                 <p 
-//                   className={`${styles.qaAnswer} ${selectedAnswer === qa.answer ? styles.expanded : ''}`}
-//                   onClick={() => handleAnswerClick(qa.answer)}
-//                 >
-//                   A: {qa.answer}
-//                 </p>
-//                 {selectedAnswer === qa.answer && (
-//                   <div className={styles.expandedInfo}>
-//                     <div className={styles.fileInfo}>
-//                       <div className={styles.fileRow}>
-//                         <span className={styles.fileLabel}>음성 파일: </span>
-//                         <button 
-//                           className={styles.fileLink}
-//                           onClick={() => handleFileDownload(qa.audioFileName, 'audio')}
-//                         >
-//                           {qa.audioFileName || 'audio_file.mp3'}
-//                         </button>
-//                       </div>
-//                       <div className={styles.fileRow}>
-//                         <span className={styles.fileLabel}>원본 텍스트: </span>
-//                         <button 
-//                           className={styles.fileLink}
-//                           onClick={() => handleFileDownload(qa.textFileName, 'text')}
-//                         >
-//                           {qa.textFileName || 'text_file.txt'}
-//                         </button>
-//                       </div>
-//                     </div>
-//                     {qa.feedback && (
-//                       <div className={styles.feedbackSection}>
-//                         <div className={styles.feedbackHeader}>
-//                           <span className={styles.feedbackLabel}>F: 피드백</span>
-//                         </div>
-//                         <p className={styles.feedbackText}>{qa.feedback}</p>
-//                       </div>
-//                     )}
-//                   </div>
-//                 )}
-//                 <div className={styles.qaActions}>
-//                   <button 
-//                     className={`${styles.actionButton} ${styles.deleteButton}`}
-//                     onClick={() => onDelete(qa.id)}
-//                   >
-//                     삭제
-//                   </button>
-//                 </div>
-//               </div>
-//             ))
-//           ) : (
-//             <div className={styles.noResults}>
-//               검색 결과가 없습니다.
-//             </div>
-//           )}
-//         </div>
-//         {qaList.length > 0 && (
-//           <div className={styles.pagination}>
-//             <button 
-//               className={styles.pageButton} 
-//               onClick={() => handlePageChange(currentPage - 1)}
-//               disabled={currentPage === 1}
-//             >
-//               이전
-//             </button>
-//             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-//               <button
-//                 key={number}
-//                 className={`${styles.pageButton} ${currentPage === number ? styles.activePage : ''}`}
-//                 onClick={() => handlePageChange(number)}
-//               >
-//                 {number}
-//               </button>
-//             ))}
-//             <button 
-//               className={styles.pageButton} 
-//               onClick={() => handlePageChange(currentPage + 1)}
-//               disabled={currentPage === totalPages}
-//             >
-//               다음
-//             </button>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MainContent; 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from '../css/MainContent.module.css';
 
-const MainContent = () => {
-  const [qaList, setQaList] = useState([]); // Q&A 리스트
+const MainContent = ({ searchParams }) => {
+  // 예시 QA 리스트 데이터
+  const sampleQAList = [
+    {
+      id: 1,
+      question: "프로젝트의 주요 목표는 무엇인가요?",
+      answer: "이 프로젝트의 주요 목표는 업무 효율성 향상과 직원 만족도 개선입니다. 구체적으로 워크플로우 자동화, 실시간 협업 도구 도입, 그리고 데이터 기반 의사결정 시스템 구축을 통해 달성할 계획입니다.",
+      date: "2024-02-20",
+      tags: ["프로젝트", "목표", "효율성"]
+    },
+    {
+      id: 2,
+      question: "개발 일정은 어떻게 되나요?",
+      answer: "전체 개발 기간은 3개월로 예상됩니다. 1단계는 요구사항 분석과 설계(2주), 2단계는 핵심 기능 개발(6주), 3단계는 테스트와 버그 수정(4주)입니다. 각 단계별로 중간 검토회의를 진행할 예정입니다.",
+      date: "2024-02-21",
+      tags: ["개발일정", "계획"]
+    },
+    {
+      id: 3,
+      question: "필요한 개발 인력은 몇 명인가요?",
+      answer: "총 5명의 개발 인력이 필요합니다. 프론트엔드 개발자 2명, 백엔드 개발자 2명, 그리고 DevOps 엔지니어 1명입니다. 추가로 UI/UX 디자이너와의 협업도 필요할 것으로 예상됩니다.",
+      date: "2024-02-21",
+      tags: ["인력", "채용", "개발팀"]
+    },
+    {
+      id: 4,
+      question: "사용할 기술 스택은 무엇인가요?",
+      answer: "프론트엔드는 React와 TypeScript, 백엔드는 FastAPI와 Python, 데이터베이스는 PostgreSQL을 사용할 예정입니다. 배포는 Docker와 Kubernetes를 활용할 계획입니다.",
+      date: "2024-02-22",
+      tags: ["기술", "개발환경"]
+    },
+    {
+      id: 5,
+      question: "예상되는 주요 위험 요소는 무엇인가요?",
+      answer: "1. 타이트한 개발 일정, 2. 레거시 시스템과의 통합 문제, 3. 보안 요구사항 충족 등이 주요 위험 요소입니다. 이를 위해 철저한 사전 검토와 리스크 관리 계획을 수립할 예정입니다.",
+      date: "2024-02-22",
+      tags: ["위험관리", "계획"]
+    },
+    {
+      id: 6,
+      question: "품질 관리는 어떻게 진행되나요?",
+      answer: "자동화된 테스트 시스템 구축, 코드 리뷰 프로세스 도입, 그리고 정기적인 품질 미팅을 통해 관리할 예정입니다. 특히 단위 테스트 커버리지 80% 이상을 목표로 하고 있습니다.",
+      date: "2024-02-23",
+      tags: ["품질관리", "테스트"]
+    },
+    {
+      id: 7,
+      question: "유지보수 계획은 어떻게 되나요?",
+      answer: "출시 후 6개월간 집중 유지보수 기간을 가질 예정입니다. 24/7 모니터링 시스템 구축, 정기 업데이트 일정 수립, 그리고 사용자 피드백을 반영한 지속적인 개선을 진행할 계획입니다.",
+      date: "2024-02-23",
+      tags: ["유지보수", "계획", "피드백"]
+    }
+  ];
+
+  const [qaList, setQaList] = useState(sampleQAList);
+  const [filteredQAList, setFilteredQAList] = useState(sampleQAList);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const itemsPerPage = 5;
+
+  // 검색 조건에 따른 필터링
+  useEffect(() => {
+    let filtered = [...qaList];
+
+    // 키워드 검색 필터링
+    if (searchParams?.keyword) {
+      filtered = filtered.filter(qa => {
+        if (searchParams.type === 'tag') {
+          return qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
+        } else if (searchParams.type === 'question') {
+          return qa.question.toLowerCase().includes(searchParams.keyword.toLowerCase());
+        } else {
+          // 전체 검색
+          return qa.question.toLowerCase().includes(searchParams.keyword.toLowerCase()) ||
+                 qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
+        }
+      });
+    }
+
+    // 날짜 범위 필터링
+    if (searchParams?.dateRange?.startDate && searchParams?.dateRange?.endDate) {
+      filtered = filtered.filter(qa => {
+        const qaDate = new Date(qa.date);
+        const startDate = new Date(searchParams.dateRange.startDate);
+        const endDate = new Date(searchParams.dateRange.endDate);
+        return qaDate >= startDate && qaDate <= endDate;
+      });
+    }
+
+    setFilteredQAList(filtered);
+    setCurrentPage(1); // 검색 결과가 변경될 때 첫 페이지로 이동
+  }, [searchParams, qaList]);
 
   // 파일 업로드 핸들러
   const handleFileUpload = async (event) => {
@@ -196,6 +107,7 @@ const MainContent = () => {
 
     setLoading(true);
     setQaList([]); // 업로드 시 기존 리스트 초기화
+    setFilteredQAList([]); // 필터링된 리스트도 초기화
 
     // 서버로 파일 업로드
     const formData = new FormData();
@@ -230,10 +142,10 @@ const MainContent = () => {
   // 현재 페이지의 아이템들
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = qaList.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredQAList.slice(indexOfFirstItem, indexOfLastItem);
 
   // 전체 페이지 수 계산
-  const totalPages = Math.ceil(qaList.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredQAList.length / itemsPerPage);
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber) => {
@@ -253,17 +165,17 @@ const MainContent = () => {
 
   // 마지막 페이지 체크 및 조정
   useEffect(() => {
-    const maxPage = Math.ceil(qaList.length / itemsPerPage);
+    const maxPage = Math.ceil(filteredQAList.length / itemsPerPage);
     if (currentPage > maxPage && maxPage > 0) {
       setCurrentPage(maxPage);
     }
-  }, [qaList.length, currentPage, itemsPerPage]);
+  }, [filteredQAList.length, currentPage, itemsPerPage]);
 
   return (
     <div className={styles.mainContent}>
       <div className={styles.contentWrapper}>
         <div className={styles.headerSection}>
-          <h2 className={styles.title}>QA리스트</h2>
+          <h2 className={styles.title}>CALL MANAGEMENT LIST</h2>
           <div className={styles.uploadSection}>
             <input
               type="file"
@@ -325,7 +237,7 @@ const MainContent = () => {
             </div>
           )}
         </div>
-        {qaList.length > 0 && (
+        {filteredQAList.length > 0 && (
           <div className={styles.pagination}>
             <button 
               className={styles.pageButton} 

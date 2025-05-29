@@ -96,10 +96,12 @@ const Callmate = () => {
     }
   ]);
 
-  // 검색 조건 상태
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchDate, setSearchDate] = useState('');
-  const [searchType, setSearchType] = useState('all');
+  // 검색 파라미터 상태
+  const [searchParams, setSearchParams] = useState({
+    keyword: '',
+    type: 'all',
+    dateRange: null
+  });
 
   // 삭제 핸들러
   const handleDelete = (id) => {
@@ -121,11 +123,11 @@ const Callmate = () => {
 
   // 필터링된 QA 데이터
   const filteredQaData = qaData.filter(qa => {
-    const keyword = searchKeyword.toLowerCase();
-    
+    // 키워드 검색 필터링
     let matchesKeyword = true;
-    if (searchKeyword !== '') {
-      switch (searchType) {
+    if (searchParams.keyword) {
+      const keyword = searchParams.keyword.toLowerCase();
+      switch (searchParams.type) {
         case 'tag':
           matchesKeyword = qa.tags.some(tag => 
             tag.toLowerCase().includes(keyword)
@@ -143,16 +145,21 @@ const Callmate = () => {
       }
     }
     
-    const matchesDate = searchDate === '' || qa.date === searchDate;
+    // 날짜 검색 필터링
+    let matchesDate = true;
+    if (searchParams.dateRange) {
+      const qaDate = new Date(qa.date);
+      const startDate = new Date(searchParams.dateRange.startDate);
+      const endDate = new Date(searchParams.dateRange.endDate);
+      matchesDate = qaDate >= startDate && qaDate <= endDate;
+    }
 
     return matchesKeyword && matchesDate;
   });
 
   // 검색 핸들러
-  const handleSearch = (keyword, date, type) => {
-    setSearchKeyword(keyword);
-    setSearchDate(date);
-    setSearchType(type);
+  const handleSearch = (params) => {
+    setSearchParams(params);
   };
 
   return (
@@ -163,6 +170,7 @@ const Callmate = () => {
           qaList={filteredQaData}
           onDelete={handleDelete}
           onFeedback={handleFeedback}
+          searchParams={searchParams}
         />
       </div>
     </div>

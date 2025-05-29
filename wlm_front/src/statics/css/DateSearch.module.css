@@ -1,0 +1,89 @@
+.dateSearchContainer {
+    width: 100%;
+}
+
+.title {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.searchBox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.dateInputs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.dateInput {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: calc(50% - 10px);
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+.dateDivider {
+    color: #666;
+    font-weight: bold;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 5px;
+}
+
+.searchButton, .resetButton {
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex: 1;
+}
+
+.searchButton {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.searchButton:hover {
+    background-color: #357abd;
+}
+
+.resetButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.resetButton:hover {
+    background-color: #5a6268;
+}
+
+@media (max-width: 480px) {
+    .dateInputs {
+        flex-direction: column;
+    }
+    
+    .buttonGroup {
+        flex-direction: column;
+    }
+    
+    .searchButton, .resetButton {
+        width: 100%;
+    }
+} 
