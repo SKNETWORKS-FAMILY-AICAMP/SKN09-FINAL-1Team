@@ -4,14 +4,12 @@ import DateSearch from '../../../statics/component/DateSearch';
 
 const Sidebar = ({ onSearch }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchType, setSearchType] = useState('all');
   const [dateRange, setDateRange] = useState(null);
 
   const handleSearch = (e) => {
     e?.preventDefault();
     onSearch({
       keyword: searchKeyword,
-      type: searchType,
       dateRange: dateRange
     });
   };
@@ -26,16 +24,6 @@ const Sidebar = ({ onSearch }) => {
     setSearchKeyword(e.target.value);
     onSearch({
       keyword: e.target.value,
-      type: searchType,
-      dateRange: dateRange
-    });
-  };
-
-  const handleTypeChange = (e) => {
-    setSearchType(e.target.value);
-    onSearch({
-      keyword: searchKeyword,
-      type: e.target.value,
       dateRange: dateRange
     });
   };
@@ -45,7 +33,7 @@ const Sidebar = ({ onSearch }) => {
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      
+
       if (start > end) {
         alert('종료일은 시작일보다 늦은 날짜여야 합니다.');
         return;
@@ -56,7 +44,6 @@ const Sidebar = ({ onSearch }) => {
     setDateRange(newDateRange);
     onSearch({
       keyword: searchKeyword,
-      type: searchType,
       dateRange: newDateRange
     });
   };
@@ -65,49 +52,29 @@ const Sidebar = ({ onSearch }) => {
     setDateRange(null);
     onSearch({
       keyword: searchKeyword,
-      type: searchType,
       dateRange: null
     });
   };
 
   return (
-    <div className={styles.sidebar}>
-      <h1 className={styles.title}>Callmate</h1>
-      
-      <div className={styles.searchSection}>
-        <div className={styles.searchBox}>
-          <h3 className={styles.searchTitle}>질문 검색</h3>
-          <div className={styles.searchTypeContainer}>
-            <select 
-              className={styles.searchTypeSelect}
-              value={searchType}
-              onChange={handleTypeChange}
-            >
-              <option value="all">전체</option>
-              <option value="tag">태그</option>
-              <option value="question">질문</option>
-            </select>
-          </div>
-          <input
-            type="text"
-            placeholder={searchType === 'tag' ? '태그로 검색...' : 
-                        searchType === 'question' ? '질문으로 검색...' : 
-                        '태그 또는 질문으로 검색...'}
-            value={searchKeyword}
-            onChange={handleKeywordChange}
-            onKeyPress={handleKeyPress}
-            className={styles.searchInput}
-          />
-        </div>
+    <aside className={styles.sidebar}>
+      <h3 className={styles.title}>필터 검색</h3>
 
-        <div className={styles.searchBox}>
-          <DateSearch 
-            onSearch={handleDateSearch}
-            onReset={handleDateReset}
-          />
-        </div>
-      </div>
-    </div>
+      <label className={styles.filterSection}>🔍 질문 검색</label>
+      <input
+        type="text"
+        placeholder="검색어 입력..."
+        value={searchKeyword}
+        onChange={handleKeywordChange}
+        onKeyPress={handleKeyPress}
+        className={styles.searchInput}
+      />
+
+      <DateSearch
+        onSearch={handleDateSearch}
+        onReset={handleDateReset}
+      />
+    </aside>
   );
 };
 

@@ -1,35 +1,42 @@
 .dateSearchContainer {
     width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .title {
     font-size: 1rem;
-    color: #333;
-    margin-bottom: 2px;
+    color: #0077cc;
+    margin-bottom: 12px;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .searchBox {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 12px;
     width: 100%;
 }
 
 .dateInputs {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 12px;
     width: 100%;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    justify-content: center;
 }
 
 .dateInput {
-    padding: 6px;
+    padding: 10px 14px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    width: calc(50% - 10px);
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 140px;
+    background: #fff;
 }
 
 .dateInput:focus {
@@ -40,29 +47,34 @@
 .dateDivider {
     color: #666;
     font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 6px;
 }
 
 .buttonGroup {
     display: flex;
-    gap: 10px;
+    gap: 14px;
     width: 100%;
+    justify-content: center;
+    margin-top: 8px;
 }
 
-.searchButton, .resetButton {
-    padding: 10px 18px;
-    font-size: 0.9rem;
+.searchButton,
+.resetButton {
+    padding: 12px 0;
+    font-size: 1rem;
     border: none;
     border-radius: 20px;
     cursor: pointer;
     color: white;
     opacity: 0.95;
-    transform: scale(1);
+    width: 130px;
     transition:
         background-color 0.3s ease,
         transform 0.2s ease,
         opacity 0.3s ease;
-    flex: 1;
     text-align: center;
+    box-shadow: 0px 4px 0px #004d85;
 }
 
 .searchButton {
@@ -102,13 +114,16 @@
 @media (max-width: 480px) {
     .dateInputs {
         flex-direction: column;
+        gap: 8px;
     }
-    
+
     .buttonGroup {
         flex-direction: column;
+        gap: 8px;
     }
-    
-    .searchButton, .resetButton {
+
+    .searchButton,
+    .resetButton {
         width: 100%;
     }
-} 
+}

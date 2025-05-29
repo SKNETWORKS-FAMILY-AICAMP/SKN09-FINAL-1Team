@@ -1,3 +1,91 @@
+.sidebar {
+  width: 320px;
+  height: 100vh;
+  padding: 20px;
+  background-color: white;
+  border-right: 1px solid #cce0f5;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+  font-size: 1.2rem;
+  color: #0077cc;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar input,
+.sidebar select {
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.sidebar input:focus,
+.sidebar select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
+}
+
+.filterSection label {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.searchBtn,
+.resetBtn {
+  width: 100%;
+  padding: 10px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.searchBtn:hover,
+.resetBtn:hover {
+  background-color: #357abd;
+}
+
+.btnGroupRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.resetBtn {
+  background-color: #6c757d;
+}
+
+.resetBtn:hover {
+  background-color: #5a6268;
+}
+
+.dateSearchContainer {
+  margin-bottom: 1.2rem;
+}
+
+.sidebar label {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-bottom: 10px;
+}
+
 .statusLegend {
   margin-top: 150px;
   padding: 10px;
@@ -35,4 +123,4 @@
 
 .statusColor.수정완료 {
   background-color: #FFD700;
-} 
+}

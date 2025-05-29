@@ -72,11 +72,15 @@ const QuestionList = ({ searchParams }) => {
       if (!searchParams.dateRange) return true;
       const { startDate, endDate } = searchParams.dateRange;
       if (!startDate || !endDate) return true;
-      
+
       const questionDate = parseDate(q.date);
       const start = new Date(startDate);
       const end = new Date(endDate);
-      
+
+      // 시작 날짜와 종료 날짜를 자정 기준으로 설정
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
       return questionDate >= start && questionDate <= end;
     })
     .filter((q) => {

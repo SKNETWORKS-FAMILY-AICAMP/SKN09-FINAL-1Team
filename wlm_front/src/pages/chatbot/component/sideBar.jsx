@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../css/SideBar.module.css';
 import FilterPanel from './FilterPanel';
+import DateSearch from '../../../statics/component/DateSearch.jsx'
 
 const mockData = [
   { date: '2025.05.09', keyword: '로그인 문제' },

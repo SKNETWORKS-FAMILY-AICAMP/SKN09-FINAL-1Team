@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../css/sidebar.css';
 import styles from '../css/sidebar.module.css';
 import DateSearch from '../../../statics/component/DateSearch';
 
@@ -29,12 +28,12 @@ const Sidebar = ({ setSearchParams }) => {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={styles.sidebar}>
       <h3>필터 검색</h3>
-      
-      <label>📌 상태 필터</label>
-      <select 
-        value={status} 
+
+      <label className={styles.filterSection}>📌 상태 필터</label>
+      <select
+        value={status}
         onChange={(e) => {
           setStatus(e.target.value);
           setSearchParams({
@@ -50,11 +49,11 @@ const Sidebar = ({ setSearchParams }) => {
         <option value="수정완료">수정완료</option>
       </select>
 
-      <label>🔍 질문 검색</label>
-      <input 
-        type="text" 
-        placeholder="검색어 입력..." 
-        value={keyword} 
+      <label className={styles.filterSection}>🔍 질문 검색</label>
+      <input
+        type="text"
+        placeholder="검색어 입력..."
+        value={keyword}
         onChange={(e) => {
           setKeyword(e.target.value);
           setSearchParams({
@@ -62,10 +61,10 @@ const Sidebar = ({ setSearchParams }) => {
             dateRange,
             status
           });
-        }} 
+        }}
       />
-      
-      <DateSearch 
+
+      <DateSearch
         onSearch={handleDateSearch}
         onReset={handleDateReset}
       />
@@ -85,7 +84,7 @@ const Sidebar = ({ setSearchParams }) => {
           <span>수정완료 - 답변 수정됨</span>
         </div>
       </div>
-    
+
     </aside>
   );
 };
