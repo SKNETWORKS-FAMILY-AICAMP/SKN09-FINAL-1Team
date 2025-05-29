@@ -4,19 +4,20 @@ import styles from '../css/DateSearch.module.css';
 const DateSearch = ({ onSearch, onReset }) => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMsg, setModalMsg] = useState('');
 
     const handleSearch = () => {
         if (!startDate || !endDate) {
-            alert('시작일과 종료일을 모두 선택해주세요.');
+            setModalMsg('시작일과 종료일을 모두 선택해주세요.');
+            setModalOpen(true);
             return;
         }
-        
         if (startDate > endDate) {
-            alert('종료일은 시작일보다 늦은 날짜여야 합니다.');
+            setModalMsg('종료일은 시작일보다 늦은 날짜여야 합니다.');
+            setModalOpen(true);
             return;
         }
-
-        console.log('DateSearch handleSearch:', { startDate, endDate });
         onSearch({ startDate, endDate });
     };
 
@@ -27,15 +28,11 @@ const DateSearch = ({ onSearch, onReset }) => {
     };
 
     const handleStartDateChange = (e) => {
-        const newStartDate = e.target.value;
-        console.log('Start date changed:', newStartDate);
-        setStartDate(newStartDate);
+        setStartDate(e.target.value);
     };
 
     const handleEndDateChange = (e) => {
-        const newEndDate = e.target.value;
-        console.log('End date changed:', newEndDate);
-        setEndDate(newEndDate);
+        setEndDate(e.target.value);
     };
 
     return (
@@ -58,13 +55,13 @@ const DateSearch = ({ onSearch, onReset }) => {
                     />
                 </div>
                 <div className={styles.buttonGroup}>
-                    <button 
+                    <button
                         onClick={handleSearch}
                         className={styles.searchButton}
                     >
                         날짜 적용
                     </button>
-                    <button 
+                    <button
                         onClick={handleReset}
                         className={styles.resetButton}
                     >
@@ -72,6 +69,18 @@ const DateSearch = ({ onSearch, onReset }) => {
                     </button>
                 </div>
             </div>
+            {modalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.customModal}>
+                        <p className={styles.modalMsg}>
+                            <span role="img" aria-label="경고">⚠️</span> {modalMsg}
+                        </p>
+                        <button className={styles.modalButton} onClick={() => setModalOpen(false)}>
+                            확인
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

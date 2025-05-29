@@ -21,7 +21,7 @@ const ParticipantList = ({
   // 현재 시간 자동 적용
   useEffect(() => {
     const now = new Date();
-    const formattedDate = now.toLocaleString('ko-KR', { 
+    const formattedDate = now.toLocaleString('ko-KR', {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit'
     });
@@ -94,12 +94,6 @@ const ParticipantList = ({
     setSelectedSuggestion(null);
   };
 
-
-  const handleSelectAll = () => {
-    const updated = users.map(user => ({ ...user, selected: true }));
-    onUpdateUsers(updated);
-  };
-
   return (
     <div className="record-left">
       <h2>참가자 목록</h2>
@@ -120,7 +114,7 @@ const ParticipantList = ({
           value={inputValue}
           onChange={handleInputChange}
         />
-        <button className="register-btn" onClick={handleRegister}>등록</button>
+        <button className="register-btn" onClick={handleRegister}>추가</button>
         {suggestions.length > 0 && (
           <ul className="suggestion-list">
             {suggestions.map((user, idx) => (
@@ -134,7 +128,6 @@ const ParticipantList = ({
 
       {/* 테이블 헤더 */}
       <div className="table-header">
-        <span>선택</span>
         <span>이름</span>
         <span>이메일</span>
         <span>삭제</span>
@@ -144,11 +137,6 @@ const ParticipantList = ({
       <ul className="user-list">
         {users.map((user, idx) => (
           <li key={idx}>
-            <input
-              type="checkbox"
-              checked={user.selected || false}
-              onChange={() => handleCheck(idx)}
-            />
             <span>{user.name}</span>
             <span>{user.email}</span>
             <button onClick={() => handleDelete(idx)}>✕</button>
@@ -159,7 +147,6 @@ const ParticipantList = ({
       {/* 하단 버튼 */}
       {!isRecording && (
         <div className="participant-actions">
-          <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
           <button className="send-btn" onClick={() => setModalStep('sendConfirm')} disabled={disableEmailButton}>📩 전송</button>
         </div>
       )}
