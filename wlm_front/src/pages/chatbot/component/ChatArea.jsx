@@ -97,55 +97,56 @@ const ChatArea = () => {
         ))}
       </div>
 
-      {files.length > 0 && (
-        <div className={styles.selectedFileList}>
-          {files.map((file, index) => (
-            <div key={index} className={styles.fileItem}>
-              <FaFilePdf className={styles.fileIcon} />
-              <span className={styles.fileName} title={file.name}>
-                {file.name}
-              </span>
-              <FaTimes
-                className={styles.removeIcon}
-                onClick={() => handleRemoveFile(index)}
-                title="삭제"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className={styles.inputWrapper}>
-        <input
-          type="text"
-          placeholder="Type your message..."
-          className={styles.input}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={sending}
-        />
-        <input
-          type="file"
-          accept="application/pdf"
-          multiple
-          style={{ display: 'none' }}
-          id="pdf-upload"
-          onChange={handleFileChange}
-          ref={fileInputRef}
-          disabled={sending}
-        />
-        <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
-          💾
-        </label>
-        <button
-          type="button"
-          className={styles.sendButton}
-          onClick={handleSend}
-          disabled={sending}
-        >
-          Send
-        </button>
+        {files.length > 0 && (
+          <div className={styles.selectedFileList}>
+            {files.map((file, index) => (
+              <div key={index} className={styles.fileItem}>
+                <FaFilePdf className={styles.fileIcon} />
+                <span className={styles.fileName} title={file.name}>
+                  {file.name}
+                </span>
+                <FaTimes
+                  className={styles.removeIcon}
+                  onClick={() => handleRemoveFile(index)}
+                  title="삭제"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+        <div className={styles.inputRow}>
+          <input
+            type="text"
+            placeholder="Type your message..."
+            className={styles.input}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={sending}
+          />
+          <input
+            type="file"
+            accept="application/pdf"
+            multiple
+            style={{ display: 'none' }}
+            id="pdf-upload"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            disabled={sending}
+          />
+          <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
+            💾
+          </label>
+          <button
+            type="button"
+            className={styles.sendButton}
+            onClick={handleSend}
+            disabled={sending}
+          >
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );

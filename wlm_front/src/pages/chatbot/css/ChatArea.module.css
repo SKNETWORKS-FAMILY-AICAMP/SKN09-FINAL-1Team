@@ -1,17 +1,19 @@
 @import url('https://fonts.googleapis.com/css?family=Rubik:700&display=swap');
 
 .chatArea {
-  flex: 7;
-  background: linear-gradient(to bottom, #b3e4f3, #f4f3fb);
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  background: linear-gradient(to bottom, #b3e4f3, #f4f3fb);
+  flex: 7;
   padding: 1.2rem;
   box-sizing: border-box;
 }
 
 .chatContent {
-  flex-grow: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -21,11 +23,17 @@
 }
 
 .inputWrapper {
-  padding-top: 14px;
+  background: #f4f3fb;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.07);
+  padding: 14px 24px 32px 24px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputRow {
+  display: flex;
   align-items: center;
-  background: transparent;
   gap: 10px;
 }
 
@@ -37,7 +45,7 @@
   border: none;
   border-radius: 20px;
   outline: none;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s ease;
 }
@@ -54,7 +62,8 @@
   text-transform: uppercase;
   font-size: 0.9rem;
   padding: 1.25em 2em;
-  background: #4a90e2; /* Fade 스타일용 메인 컬러 */
+  background: #4a90e2;
+  /* Fade 스타일용 메인 컬러 */
   color: white;
   border: none;
   border-radius: 999px;
@@ -136,20 +145,33 @@
 .typing span:nth-child(2) {
   animation-delay: 0.2s;
 }
+
 .typing span:nth-child(3) {
   animation-delay: 0.4s;
 }
 
 @keyframes blink {
-  0% { opacity: 0.2; transform: translateY(0); }
-  20% { opacity: 1; transform: translateY(-2px); }
-  100% { opacity: 0.2; transform: translateY(0); }
+  0% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
 }
+
 .selectedFileList {
   display: flex;
-  flex-direction: row;
-  overflow-x: auto;
+  flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 2px;
 }
 
 .fileItem {
@@ -160,7 +182,7 @@
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 5px 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-width: 160px;
   max-width: 220px;
 }
@@ -184,6 +206,7 @@
   color: #999;
   font-size: 0.9rem;
 }
+
 .removeIcon:hover {
   color: #e74c3c;
 }

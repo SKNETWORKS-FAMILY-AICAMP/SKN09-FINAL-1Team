@@ -38,16 +38,16 @@
 }
 
 .status-dot.승인 {
-  background-color: #07cc00;
+  background-color: #4CAF50;
 }
-.status-dot.수정됨 {
-  background-color: #f1c40f;
+
+.status-dot.수정완료 {
+  background-color: #FFD700;
 }
+
 .status-dot.대기 {
-  background-color: #ccc;
+  background-color: #808080;
 }
-
-
 
 .answer-box {
   margin-top: 1rem;

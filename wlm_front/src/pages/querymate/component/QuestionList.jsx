@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import QuestionItem from './QuestionItem';
 import Pagination from './Pagination';
+import styles from '../css/questionList.module.css';
 
 const INITIAL_QUESTIONS = [
   { id: 1, question: "생성형 AI 콘텐츠 저작권 문제는?", answer: "", date: "2025.05.01", status: "대기" },
@@ -15,7 +16,7 @@ const INITIAL_QUESTIONS = [
 const QuestionList = ({ searchParams }) => {
   const [questions, setQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 5;
 
   // 질문 생성 버튼 클릭 시
   const handleGenerateQuestions = async () => {
@@ -59,9 +60,29 @@ const QuestionList = ({ searchParams }) => {
     );
   };
 
+  // 날짜 문자열을 Date 객체로 변환하는 함수
+  const parseDate = (dateStr) => {
+    const [year, month, day] = dateStr.split('.').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const filtered = questions
     .filter((q) => q.question.toLowerCase().includes((searchParams.keyword || "").toLowerCase()))
-    .filter((q) => (searchParams.date ? q.date === searchParams.date : true))
+    .filter((q) => {
+      if (!searchParams.dateRange) return true;
+      const { startDate, endDate } = searchParams.dateRange;
+      if (!startDate || !endDate) return true;
+
+      const questionDate = parseDate(q.date);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      // 시작 날짜와 종료 날짜를 자정 기준으로 설정
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
+      return questionDate >= start && questionDate <= end;
+    })
     .filter((q) => {
       if (!searchParams.status || searchParams.status === '전체') return true;
       return q.status === searchParams.status;
@@ -69,44 +90,47 @@ const QuestionList = ({ searchParams }) => {
 
   const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  // 컴포넌트 마운트 시 초기 데이터 로드
+  useEffect(() => {
+    handleGenerateQuestions();
+  }, []);
+
   return (
-    <>
-      {/* 질문 생성 버튼 */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+    <div className={styles.listContainer}>
+      <div className={styles.headerSection}>
+        <h2 className={styles.title}>📋 민원 질문 목록</h2>
         <button
-          style={{
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: 4,
-            padding: "8px 16px",
-            cursor: "pointer",
-            marginLeft: 8,
-          }}
+          className={styles.generateButton}
           onClick={handleGenerateQuestions}
         >
           질문 생성
         </button>
       </div>
 
-      {currentItems.length > 0 ? (
-        currentItems.map((item) => (
-          <QuestionItem
-            key={item.id}
-            data={item}
-            onDelete={handleDelete}
-            onStatusChange={handleStatusChange}
-          />
-        ))
-      ) : (
-        <p style={{ color: '#888' }}>🔍 검색 결과가 없습니다.</p>
-      )}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
-      />
-    </>
+      <div className={styles.questionList}>
+        {currentItems.length > 0 ? (
+          currentItems.map((item) => (
+            <QuestionItem
+              key={item.id}
+              data={item}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+            />
+          ))
+        ) : (
+          <p className={styles.noResults}>🔍 검색 결과가 없습니다.</p>
+        )}
+      </div>
+
+      <div className={styles.paginationContainer}>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+    </div>
   );
 };
 

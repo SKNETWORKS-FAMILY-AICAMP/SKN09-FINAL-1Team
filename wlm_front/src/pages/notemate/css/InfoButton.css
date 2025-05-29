@@ -1,0 +1,21 @@
+.info-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #4a90e2;
+    background: #fff;
+    color: #4a90e2;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.info-btn:hover {
+    background: #eaf4ff;
+    border-color: #007ccc;
+}

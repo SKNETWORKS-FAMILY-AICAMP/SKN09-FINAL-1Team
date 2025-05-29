@@ -10,13 +10,13 @@ const ConfirmModal = ({
   handleSendEmail,
   sendMessage
 }) => {
-  
+
   useEffect(() => {
     if (modalStep === 'sendConfirm' && isReadyToSend() === 'ready') {
       setModalStep('sendNotice');
     }
-  }, [modalStep, isReadyToSend]);  
-  
+  }, [modalStep, isReadyToSend]);
+
   if (!modalStep) return null;
 
   return (
@@ -83,7 +83,7 @@ const ConfirmModal = ({
       {modalStep === 'sendNotice' && (
         <>
           <p>📩 회의록을 이메일로 전송하시겠습니까?</p>
-          <button onClick={() => {setModalStep('sending'); handleSendEmail();}}>네</button>
+          <button onClick={() => { setModalStep('sending'); handleSendEmail(); }}>네</button>
           <button onClick={() => setModalStep(null)}>아니요</button>
         </>
       )}

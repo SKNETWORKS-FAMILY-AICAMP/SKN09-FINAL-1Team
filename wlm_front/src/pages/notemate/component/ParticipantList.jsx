@@ -9,7 +9,8 @@ const ParticipantList = ({
   onUpdateUsers,
   setModalStep,
   disableEmailButton,
-  hostName  // 로그인 계정에서 가져오는 주최자 이름
+  hostName,  // 로그인 계정에서 가져오는 주최자 이름
+  step
 }) => {
   const [filterType, setFilterType] = useState('이름');
   const [filter, setFilter] = useState('');
@@ -21,7 +22,7 @@ const ParticipantList = ({
   // 현재 시간 자동 적용
   useEffect(() => {
     const now = new Date();
-    const formattedDate = now.toLocaleString('ko-KR', { 
+    const formattedDate = now.toLocaleString('ko-KR', {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit'
     });
@@ -94,12 +95,6 @@ const ParticipantList = ({
     setSelectedSuggestion(null);
   };
 
-
-  const handleSelectAll = () => {
-    const updated = users.map(user => ({ ...user, selected: true }));
-    onUpdateUsers(updated);
-  };
-
   return (
     <div className="record-left">
       <h2>참가자 목록</h2>
@@ -120,7 +115,7 @@ const ParticipantList = ({
           value={inputValue}
           onChange={handleInputChange}
         />
-        <button className="register-btn" onClick={handleRegister}>등록</button>
+        <button className="register-btn" onClick={handleRegister}>추가</button>
         {suggestions.length > 0 && (
           <ul className="suggestion-list">
             {suggestions.map((user, idx) => (
@@ -132,23 +127,16 @@ const ParticipantList = ({
         )}
       </div>
 
-      {/* 테이블 헤더 */}
-      <div className="table-header">
-        <span>선택</span>
-        <span>이름</span>
-        <span>이메일</span>
-        <span>삭제</span>
-      </div>
 
       {/* 참가자 리스트 */}
       <ul className="user-list">
+        <li>
+          <span>이름</span>
+          <span>이메일</span>
+          <span>삭제</span>
+        </li>
         {users.map((user, idx) => (
           <li key={idx}>
-            <input
-              type="checkbox"
-              checked={user.selected || false}
-              onChange={() => handleCheck(idx)}
-            />
             <span>{user.name}</span>
             <span>{user.email}</span>
             <button onClick={() => handleDelete(idx)}>✕</button>
@@ -157,12 +145,13 @@ const ParticipantList = ({
       </ul>
 
       {/* 하단 버튼 */}
-      {!isRecording && (
-        <div className="participant-actions">
-          <button className="select-all-btn" onClick={handleSelectAll}>전체 선택</button>
-          <button className="send-btn" onClick={() => setModalStep('sendConfirm')} disabled={disableEmailButton}>📩 전송</button>
-        </div>
-      )}
+      <div className="participant-actions">
+        <button
+          className="send-btn"
+          onClick={() => setModalStep('sendConfirm')}
+          disabled={step !== 'summarized'}
+        >📩 전송</button>
+      </div>
     </div>
   );
 };

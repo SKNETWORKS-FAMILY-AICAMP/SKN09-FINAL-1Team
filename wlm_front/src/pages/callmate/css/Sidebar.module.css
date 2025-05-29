@@ -1,69 +1,56 @@
 .sidebar {
-  width: 280px;
-  height: 100%;
+  width: 320px;
+  height: 100vh;
+  padding: 30px;
   background-color: white;
+  border-right: 1px solid #cce0f5;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  padding: 20px;
 }
 
 .title {
-  font-size: 24px;
-  margin-bottom: 30px;
-  color: #333;
+  font-size: 1.2rem;
+  color: #0077cc;
+  margin-bottom: 2rem;
 }
 
 .searchSection {
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .searchBox {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
+  width: 100%;
 }
 
 .searchTitle {
   font-size: 14px;
   color: #666;
-  margin-bottom: 8px;
-}
-
-.searchTypeContainer {
-  margin-bottom: 8px;
-}
-
-.searchTypeSelect {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #333;
-  background-color: white;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.searchTypeSelect:focus {
-  border-color: #4a90e2;
+  margin-bottom: 12px;
 }
 
 .searchInput {
   width: 100%;
-  padding: 8px 12px;
+  padding: 12px 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+  margin-bottom: 25px;
 }
 
 .searchInput:focus {
+  outline: none;
   border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
 }
 
 .searchButton {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background-color: #4a90e2;
   color: white;
   border: none;
@@ -71,7 +58,6 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 999px;
   transition: background-color 0.2s;
 }
 
@@ -79,17 +65,25 @@
   background-color: #357abd;
 }
 
+.filterSection {
+  font-size: 14px;
+  color: #666;
+  display: block;
+  margin-bottom: 12px;
+  margin-top: 20px;
+}
+
 .menuList {
   list-style: none;
   padding: 0;
-  margin-top: 20px;
+  margin-top: 30px;
   border-top: 1px solid #eee;
-  padding-top: 20px;
+  padding-top: 25px;
 }
 
 .menuItem {
   padding: 12px 15px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -97,4 +91,4 @@
 
 .menuItem:hover {
   background-color: #f0f0f0;
-} 
+}
