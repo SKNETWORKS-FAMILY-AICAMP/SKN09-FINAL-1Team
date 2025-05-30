@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styles from '../css/Sidebar.module.css';
-import DateSearch from '../../../statics/component/DateSearch';
 
 const Sidebar = ({ onSearch }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -68,11 +67,6 @@ const Sidebar = ({ onSearch }) => {
         onChange={handleKeywordChange}
         onKeyPress={handleKeyPress}
         className={styles.searchInput}
-      />
-
-      <DateSearch
-        onSearch={handleDateSearch}
-        onReset={handleDateReset}
       />
     </aside>
   );

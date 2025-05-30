@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from '../css/sidebar.module.css';
-import DateSearch from '../../../statics/component/DateSearch';
 
 const Sidebar = ({ setSearchParams }) => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식의 오늘 날짜
+  
   const [keyword, setKeyword] = useState('');
-  const [dateRange, setDateRange] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState(today);
   const [status, setStatus] = useState('전체');
 
-  const handleDateSearch = ({ startDate, endDate }) => {
-    console.log('Date Search:', { startDate, endDate }); // 디버깅용
-    const newDateRange = { startDate, endDate };
-    setDateRange(newDateRange);
+  // 컴포넌트 마운트 시 초기 검색 파라미터 설정
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
+  const handleSearch = () => {
     setSearchParams({
       keyword,
-      dateRange: newDateRange,
+      startDate,
+      endDate,
       status
     });
   };
 
   const handleDateReset = () => {
-    setDateRange(null);
+    setStartDate('');
+    setEndDate(today);
     setSearchParams({
       keyword,
-      dateRange: null,
+      startDate: '',
+      endDate: today,
       status
     });
   };
@@ -38,7 +45,8 @@ const Sidebar = ({ setSearchParams }) => {
           setStatus(e.target.value);
           setSearchParams({
             keyword,
-            dateRange,
+            startDate,
+            endDate,
             status: e.target.value
           });
         }}
@@ -49,6 +57,52 @@ const Sidebar = ({ setSearchParams }) => {
         <option value="수정완료">수정완료</option>
       </select>
 
+      <div className={styles.filterHeaderRow}>
+        <label className={styles.filterSection}>📅 날짜 필터</label>
+        <button className={styles.smallResetBtn} onClick={handleDateReset}>
+          초기화
+        </button>
+      </div>
+      <div className={styles.dateInputContainer}>
+        <div className={styles.dateInputCol}>
+          <label className={styles.dateLabel}>시작 날짜</label>
+          <input
+            type="date"
+            className={styles.dateInput}
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setSearchParams({
+                keyword,
+                startDate: e.target.value,
+                endDate,
+                status
+              });
+            }}
+            max={endDate}
+          />
+        </div>
+        <div className={styles.dateInputCol}>
+          <label className={styles.dateLabel}>끝 날짜</label>
+          <input
+            type="date"
+            className={styles.dateInput}
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setSearchParams({
+                keyword,
+                startDate,
+                endDate: e.target.value,
+                status
+              });
+            }}
+            min={startDate || '1900-01-01'}
+            max={today}
+          />
+        </div>
+      </div>
+
       <label className={styles.filterSection}>🔍 질문 검색</label>
       <input
         type="text"
@@ -58,15 +112,11 @@ const Sidebar = ({ setSearchParams }) => {
           setKeyword(e.target.value);
           setSearchParams({
             keyword: e.target.value,
-            dateRange,
+            startDate,
+            endDate,
             status
           });
         }}
-      />
-
-      <DateSearch
-        onSearch={handleDateSearch}
-        onReset={handleDateReset}
       />
 
       <div className={styles.statusLegend}>
@@ -84,7 +134,6 @@ const Sidebar = ({ setSearchParams }) => {
           <span>수정완료 - 답변 수정됨</span>
         </div>
       </div>
-
     </aside>
   );
 };
