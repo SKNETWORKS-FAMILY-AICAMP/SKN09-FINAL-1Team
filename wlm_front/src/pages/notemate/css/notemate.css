@@ -478,3 +478,19 @@ button,
 .mic-button.mic-disabled img {
   filter: grayscale(1) brightness(1.2);
 }
+
+.learn-more-style.mic-disabled {
+  background: #e0e0e0 !important;
+  border: 2px solid #bdbdbd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  pointer-events: none; /* 클릭 방지 */
+  text-transform: none; /* 비활성 느낌을 위해 대문자 제거 (선택 사항) */
+}
+
+.learn-more-style.mic-disabled::before {
+  background: #d5d5d5 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
