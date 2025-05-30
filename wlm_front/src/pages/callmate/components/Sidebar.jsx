@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import styles from '../css/Sidebar.module.css';
 
 const Sidebar = ({ onSearch }) => {
+  const today = new Date().toISOString().split('T')[0];
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [dateRange, setDateRange] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState(today);
 
-  const handleSearch = (e) => {
-    e?.preventDefault();
+  const handleSearch = () => {
     onSearch({
       keyword: searchKeyword,
-      dateRange: dateRange
+      startDate,
+      endDate
     });
   };
 
@@ -23,41 +25,68 @@ const Sidebar = ({ onSearch }) => {
     setSearchKeyword(e.target.value);
     onSearch({
       keyword: e.target.value,
-      dateRange: dateRange
-    });
-  };
-
-  const handleDateSearch = ({ startDate, endDate }) => {
-    // 날짜 유효성 검사
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      if (start > end) {
-        alert('종료일은 시작일보다 늦은 날짜여야 합니다.');
-        return;
-      }
-    }
-
-    const newDateRange = startDate && endDate ? { startDate, endDate } : null;
-    setDateRange(newDateRange);
-    onSearch({
-      keyword: searchKeyword,
-      dateRange: newDateRange
+      startDate,
+      endDate
     });
   };
 
   const handleDateReset = () => {
-    setDateRange(null);
+    setStartDate('');
+    setEndDate(today);
     onSearch({
       keyword: searchKeyword,
-      dateRange: null
+      startDate: '',
+      endDate: today
     });
   };
 
   return (
     <aside className={styles.sidebar}>
       <h3 className={styles.title}>필터 검색</h3>
+
+      <div className={styles.filterHeaderRow}>
+        <label className={styles.filterSection}>📅 날짜 필터</label>
+        <button className={styles.smallResetBtn} onClick={handleDateReset}>
+          초기화
+        </button>
+      </div>
+      <div className={styles.dateInputContainer}>
+        <div className={styles.dateInputCol}>
+          <label className={styles.dateLabel}>시작 날짜</label>
+          <input
+            type="date"
+            className={styles.dateInput}
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              onSearch({
+                keyword: searchKeyword,
+                startDate: e.target.value,
+                endDate
+              });
+            }}
+            max={endDate}
+          />
+        </div>
+        <div className={styles.dateInputCol}>
+          <label className={styles.dateLabel}>끝 날짜</label>
+          <input
+            type="date"
+            className={styles.dateInput}
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              onSearch({
+                keyword: searchKeyword,
+                startDate,
+                endDate: e.target.value
+              });
+            }}
+            min={startDate || '1900-01-01'}
+            max={today}
+          />
+        </div>
+      </div>
 
       <label className={styles.filterSection}>🔍 질문 검색</label>
       <input
@@ -72,4 +101,4 @@ const Sidebar = ({ onSearch }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
