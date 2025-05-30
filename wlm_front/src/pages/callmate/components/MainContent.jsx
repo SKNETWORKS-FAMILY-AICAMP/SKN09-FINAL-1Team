@@ -104,12 +104,24 @@ const MainContent = ({ searchParams }) => {
     }
 
     // 날짜 범위 필터링
-    if (searchParams?.dateRange?.startDate && searchParams?.dateRange?.endDate) {
+    if (searchParams?.startDate || searchParams?.endDate) {
       filtered = filtered.filter(qa => {
         const qaDate = new Date(qa.date);
-        const startDate = new Date(searchParams.dateRange.startDate);
-        const endDate = new Date(searchParams.dateRange.endDate);
-        return qaDate >= startDate && qaDate <= endDate;
+        qaDate.setHours(0, 0, 0, 0);
+
+        if (searchParams.startDate) {
+          const startDate = new Date(searchParams.startDate);
+          startDate.setHours(0, 0, 0, 0);
+          if (qaDate < startDate) return false;
+        }
+
+        if (searchParams.endDate) {
+          const endDate = new Date(searchParams.endDate);
+          endDate.setHours(23, 59, 59, 999);
+          if (qaDate > endDate) return false;
+        }
+
+        return true;
       });
     }
 

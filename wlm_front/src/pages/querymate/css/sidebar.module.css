@@ -87,7 +87,7 @@
 }
 
 .statusLegend {
-  margin-top: 150px;
+  margin-top: 60px;
   padding: 10px;
   border-radius: 8px;
   background-color: #f8f9fa;
@@ -123,4 +123,52 @@
 
 .statusColor.수정완료 {
   background-color: #FFD700;
+}
+
+.dateInputContainer {
+  margin-bottom: 15px;
+}
+
+
+.dateLabel {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
+}
+
+.filterHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.smallResetBtn {
+  padding: 4px 8px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.smallResetBtn:hover {
+  background-color: #5a6268;
 }

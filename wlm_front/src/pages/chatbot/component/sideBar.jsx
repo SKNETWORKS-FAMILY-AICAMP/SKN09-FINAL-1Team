@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../css/SideBar.module.css';
 import FilterPanel from './FilterPanel';
-import DateSearch from '../../../statics/component/DateSearch.jsx'
 
 const mockData = [
   { date: '2025.05.09', keyword: '로그인 문제' },
@@ -47,11 +46,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           endDate={endDate}
           setEndDate={setEndDate}
         />
-
-        {/* 🔍 검색 버튼 추가 */}
-        {/* <div style={{ textAlign: 'center', margin: '0.5rem 0 1rem' }}>
-          <button className={styles.searchBtn}>검색</button>
-        </div>   */}
 
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, keywords], index) => (
