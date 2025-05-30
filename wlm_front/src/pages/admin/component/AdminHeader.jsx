@@ -6,7 +6,7 @@ function AdminHeader({ onCreateClick }) {
         <div className={styles.headerRow}>
             <h1 className={styles.title}>관리자 페이지</h1>
             <button className={styles.createButtonTop} onClick={onCreateClick}>
-                새 사용자 생성
+                새 사용자 등록
             </button>
         </div>
     );

@@ -117,3 +117,21 @@
 .cancelButton:hover {
     background-color: #e0e0e0;
 }
+
+.passwordNotice {
+    color: #ff0000;
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin-left: 8px;
+}
+
+.disabledInput {
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+}
