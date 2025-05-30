@@ -8,8 +8,7 @@ const UserCreate = ({ onSubmit, onCancel }) => {
         emp_email: '',
         emp_birth_date: '',
         role: '0', // 기본값을 일반(0)으로 설정
-        user_id: '',
-        password: ''
+        password: '1234' // 기본값을 1234로 설정
     });
 
     const handleChange = (e) => {
@@ -39,7 +38,7 @@ const UserCreate = ({ onSubmit, onCancel }) => {
 
     return (
         <div className={styles.createForm}>
-            <h2 className={styles.formTitle}>새 사용자 생성</h2>
+            <h2 className={styles.formTitle}>새 사용자 등록</h2>
             <form onSubmit={handleSubmit}>
                 <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
@@ -67,37 +66,19 @@ const UserCreate = ({ onSubmit, onCancel }) => {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="user_id">아이디</label>
+                        <label htmlFor="password">
+                            비밀번호
+                            <span className={styles.passwordNotice}>* 초기 비밀번호는 1234로 설정됩니다.</span>
+                        </label>
                         <input
                             type="text"
-                            id="user_id"
-                            name="user_id"
-                            value={formData.user_id}
-                            onChange={handleChange}
+                            id="password"
+                            name="password"
+                            value={formData.password}
+                            readOnly
+                            className={styles.disabledInput}
                             required
                         />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label htmlFor="password">비밀번호</label>
-                        <div className={styles.passwordGroup}>
-                            <input
-                                type="text"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                readOnly
-                                required
-                            />
-                            <button
-                                type="button"
-                                className={styles.generateButton}
-                                onClick={generateRandomPassword}
-                            >
-                                생성
-                            </button>
-                        </div>
                     </div>
 
                     <div className={styles.formGroup}>
@@ -141,7 +122,7 @@ const UserCreate = ({ onSubmit, onCancel }) => {
 
                 <div className={styles.buttonGroup}>
                     <button type="submit" className={styles.submitButton}>
-                        생성
+                        등록
                     </button>
                     <button
                         type="button"
