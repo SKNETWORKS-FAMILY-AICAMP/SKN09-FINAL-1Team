@@ -3,36 +3,37 @@ from typing import List, Optional, Literal, Any
 import tempfile
 import os
 import re
+import pymysql
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
-
 from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db 
-
 from fastapi.responses import JSONResponse
 import whisperx 
 import ollama
 import json
-
 from langchain_core.messages import get_buffer_string, AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langchain_ollama import ChatOllama
-
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from transformers import AutoTokenizer
-
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
-from langchain_core.tools import tool
+from langchain_core.tools import tool, StructuredTool
 import uuid
 
-# 공식 문서 기준 import
-from langgraph.checkpoint.mysql.pymysql import PyMySQLSaver
+# 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
+DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
+DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
+DB_USER = os.environ.get("MY_DB_USER", "woony")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
+DB_NAME = os.environ.get("MY_DB_NAME", "woony")
+DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8")
 
 class State(BaseModel):
     messages: List[Any] = []
@@ -56,16 +57,45 @@ class EmbeddingManager:
 class MemoryTools:
     def __init__(self, vector_store):
         self.vector_store = vector_store
-        self.save_recall_memory_tool = tool(self._save_recall_memory)
-        self.search_recall_memories_tool = tool(self._search_recall_memories)
+
+        # 1. docstring 방식
+        self.save_recall_memory_tool = tool(self._save_recall_memory_with_doc)
+        self.search_recall_memories_tool = tool(self._search_recall_memories_with_doc)
+
+        # 2. description 직접 지정 방식
+        self.save_recall_memory_tool2 = StructuredTool.from_function(
+            func=self._save_recall_memory_no_doc,
+            name="save_recall_memory",
+            description="Save user's long-term memory to vector storage."
+        )
+        self.search_recall_memories_tool2 = StructuredTool.from_function(
+            func=self._search_recall_memories_no_doc,
+            name="search_recall_memories",
+            description="Search memories by semantic similarity."
+        )
+
+        # 둘 중 하나만 tools로 사용하세요 (아래는 docstring 방식)
         self.tools = [self.save_recall_memory_tool, self.search_recall_memories_tool]
+        # self.tools = [self.save_recall_memory_tool2, self.search_recall_memories_tool2]
+
     def get_user_id(self, config: RunnableConfig) -> str:
         user_id = config["configurable"].get("user_id")
         if user_id is None:
             raise ValueError("User ID needs to be provided to save a memory.")
         return user_id
-    def _save_recall_memory(self, memory: str, config: RunnableConfig) -> str:
-        """사용자의 장기 기억을 벡터 저장소에 저장합니다."""
+
+    # 1. docstring 방식 (영어, Google-style)
+    def _save_recall_memory_with_doc(self, memory: str, config: RunnableConfig) -> str:
+        """
+        Save user's long-term memory to the vector store.
+
+        Args:
+            memory (str): The memory text to save.
+            config (RunnableConfig): Configuration containing user_id.
+
+        Returns:
+            str: The saved memory text.
+        """
         user_id = self.get_user_id(config)
         document = Document(
             page_content=memory,
@@ -74,8 +104,18 @@ class MemoryTools:
         )
         self.vector_store.add_documents([document])
         return memory
-    def _search_recall_memories(self, query: str, config: RunnableConfig) -> List[str]:
-        """저장된 기억을 유사도 검색으로 조회합니다."""
+
+    def _search_recall_memories_with_doc(self, query: str, config: RunnableConfig) -> list:
+        """
+        Search stored memories by semantic similarity.
+
+        Args:
+            query (str): The search query.
+            config (RunnableConfig): Configuration containing user_id.
+
+        Returns:
+            list: List of matched memory texts.
+        """
         user_id = self.get_user_id(config)
         def _filter_function(doc: Document) -> bool:
             return doc.metadata.get("user_id") == user_id
@@ -83,8 +123,97 @@ class MemoryTools:
             query, k=3, filter=_filter_function
         )
         return [document.page_content for document in documents]
+
+    # 2. description 방식 (docstring 없이)
+    def _save_recall_memory_no_doc(self, memory: str, config: RunnableConfig) -> str:
+        user_id = self.get_user_id(config)
+        document = Document(
+            page_content=memory,
+            id=str(uuid.uuid4()),
+            metadata={"user_id": user_id}
+        )
+        self.vector_store.add_documents([document])
+        return memory
+
+    def _search_recall_memories_no_doc(self, query: str, config: RunnableConfig) -> list:
+        user_id = self.get_user_id(config)
+        def _filter_function(doc: Document) -> bool:
+            return doc.metadata.get("user_id") == user_id
+        documents = self.vector_store.similarity_search(
+            query, k=3, filter=_filter_function
+        )
+        return [document.page_content for document in documents]
+
     def get_tools(self):
         return self.tools
+
+class MySQLCheckpoint:
+    """
+    PyMySQL 커넥션을 명시적으로 열고 닫는 커스텀 체크포인터 예시.
+    각 메서드 호출 시 새로운 커넥션을 생성하고 닫습니다.
+    """
+    def __init__(self, host, port, user, password, db, charset="utf8"):
+        self.db_config = {
+            "host": host,
+            "port": port,
+            "user": user,
+            "password": password,
+            "db": db,
+            "charset": charset
+        }
+    
+    def _get_connection(self):
+        return pymysql.connect(**self.db_config)
+
+    def get_tuple(self, config):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT messages, recall_memories FROM checkpoints WHERE user_id=%s", (config["configurable"]["user_id"],))
+                row = cursor.fetchone()
+                if row:
+                    # LangChain 메시지 객체로 역직렬화
+                    messages_data = json.loads(row[0])
+                    messages = []
+                    for msg in messages_data:
+                        if msg["type"] == "human":
+                            messages.append(HumanMessage(content=msg["content"]))
+                        elif msg["type"] == "ai":
+                            messages.append(AIMessage(content=msg["content"]))
+                    recall_memories = json.loads(row[1])
+                    return {"messages": messages, "recall_memories": recall_memories}
+                else:
+                    return {"messages": [], "recall_memories": []}
+        finally:
+            conn.close()
+
+    def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                # LangChain 메시지 객체를 직렬화 가능한 형태로 변환
+                serializable_messages = []
+                for msg in messages:
+                    if isinstance(msg, HumanMessage):
+                        serializable_messages.append({"type": "human", "content": msg.content})
+                    elif isinstance(msg, AIMessage):
+                        serializable_messages.append({"type": "ai", "content": msg.content})
+                    else:
+                        # 다른 타입의 메시지가 있다면, 적절히 처리하거나 에러를 발생시킬 수 있습니다.
+                        # 여기서는 단순히 문자열로 변환합니다.
+                        serializable_messages.append({"type": "unknown", "content": str(msg)})
+
+                cursor.execute(
+                    "REPLACE INTO checkpoints (user_id, messages, recall_memories) VALUES (%s, %s, %s)",
+                    (
+                        config["configurable"]["user_id"],
+                        json.dumps(serializable_messages),
+                        json.dumps(recall_memories),
+                    ),
+                )
+            conn.commit()
+        finally:
+            conn.close()
 
 class MemoryAgent:
     def __init__(self, model_name: str = "qwen2.5", tokenizer_name: str = "BM-K/KoSimCSE-roberta"):
@@ -92,8 +221,7 @@ class MemoryAgent:
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
         self.prompt = self._create_prompt()
         self.tools = None 
-        self.graph = None 
-        self.checkpointer = None  # 커넥션을 인스턴스 변수로 유지
+        self.model_with_tools = None
     def _create_prompt(self) -> ChatPromptTemplate:
         return ChatPromptTemplate.from_messages([
             (
@@ -171,21 +299,6 @@ class MemoryAgent:
             return "tools"
         return END
 
-    def create_graph(self, tools, db_uri=""):
-        builder = StateGraph(State)
-        builder.add_node("load_memories", self.load_memories)
-        builder.add_node("agent", self.agent)
-        builder.add_node("tools", ToolNode(tools))
-        builder.add_edge(START, "load_memories")
-        builder.add_edge("load_memories", "agent")
-        builder.add_conditional_edges("agent", self.route_tools, {"tools": "tools", END: END})
-        builder.add_edge("tools", "agent")
-        # with 블록 없이 인스턴스 변수로 커넥션 유지
-        with PyMySQLSaver.from_conn_string(db_uri) as checkpointer:
-            self.checkpointer = checkpointer
-        self.graph = builder.compile(checkpointer=self.checkpointer)
-        return self.graph
-
 router = APIRouter()
 prompt_extraction = PromptExtraction()
 
@@ -213,10 +326,6 @@ embedding_manager = EmbeddingManager()
 memory_tools = MemoryTools(embedding_manager.get_vector_store())
 memory_agent = MemoryAgent()
 memory_agent.setup_model_with_tools(memory_tools.get_tools())
-graph = memory_agent.create_graph(
-    memory_tools.get_tools(),
-    db_uri=""  # 실제 값으로 교체
-)
 
 def get_from_state(state, key, default):
     if hasattr(state, key):
@@ -240,9 +349,21 @@ async def ask(
     mode = classify_question_mode(question)
     config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
 
-    current_state_from_checkpoint = graph.get_state(config)
-    current_messages = get_from_state(current_state_from_checkpoint, "messages", [])
-    current_recall_memories = get_from_state(current_state_from_checkpoint, "recall_memories", [])
+    # MySQLCheckpoint 인스턴스를 요청마다 생성하여 연결을 명시적으로 관리
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    
+    current_state_from_checkpoint = checkpoint.get_tuple(config)
+    current_messages = current_state_from_checkpoint.get("messages", [])
+    current_recall_memories = current_state_from_checkpoint.get("recall_memories", [])
+
+    # Ensure current_messages is a list and append the new HumanMessage
     current_messages = list(current_messages)
     current_messages.append(HumanMessage(content=question))
 
@@ -276,7 +397,8 @@ async def ask(
                 ]
             )
 
-            final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
+            # 웹 검색 결과는 DB에 저장하지 않는 것으로 판단하여, 이전 메시지만 저장
+            checkpoint.save_tuple(config, current_messages, current_recall_memories)
             return {
                 "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
@@ -296,7 +418,7 @@ async def ask(
             answers.append(f" **{filename}** 에서의 응답:\n{answer}")
 
         agent_response_content = "\n\n---\n\n".join(answers)
-        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
+        checkpoint.save_tuple(config, current_messages, current_recall_memories)
         return {
             "answer": agent_response_content,
             "evaluation_criteria": evaluation_criteria
@@ -313,20 +435,29 @@ async def ask(
                 for res in results
             ]
         )
-        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
+        checkpoint.save_tuple(config, current_messages, current_recall_memories)
         return {
             "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
     else:
-        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
-        messages = get_from_state(final_state, "messages", [])
+        # 일반 대화 모드
+        agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
+        agent_response = memory_agent.agent(agent_state)
+        
+        # agent_response에서 AIMessage 객체만 추출하여 저장
+        messages_to_save = [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
+        
+        checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
+        
+        messages = get_from_state(agent_response, "messages", [])
         if not messages:
             raise RuntimeError("No messages found in final_state")
+        
         agent_response_message = messages[-1]
         agent_response_content = getattr(agent_response_message, "content", str(agent_response_message))
-
+        
         return {
             "answer": agent_response_content,
             "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다."
