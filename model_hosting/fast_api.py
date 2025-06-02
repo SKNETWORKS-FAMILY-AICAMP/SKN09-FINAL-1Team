@@ -1,27 +1,208 @@
-from fastapi import File, UploadFile, Form, APIRouter, Request
-from typing import List, Optional
+from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException
+from typing import List, Optional, Literal, Any
 import tempfile
 import os
 import re
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
+import aiosqlite
+
 from extraction.pdf_extraction import PDFExtraction
-from extraction.prompt_extraciont import PromptExtraction
+from extraction.prompt_extraciont import PromptExtraction # Corrected typo
 from ollama_load.ollama_hosting import OllamaHosting
-from data_loader.qdrant_loader import load_qdrant_db
+from data_loader.qdrant_loader import load_qdrant_db 
 
 from fastapi.responses import JSONResponse
-import whisperx
+import whisperx 
 import ollama
 import json
-from fastapi.responses import JSONResponse
 
+from langchain_core.messages import get_buffer_string, AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableConfig
+from langchain_ollama import ChatOllama
+
+from langgraph.graph import END, START, StateGraph
+from langgraph.prebuilt import ToolNode
+from transformers import AutoTokenizer
+
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_core.documents import Document
+from langchain_core.tools import tool
+import uuid
+
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+# --- MemoryAgent 관련 클래스 정의 시작 ---
+class State(BaseModel):
+    messages: List[Any] = []
+    recall_memories: List[str] = []
+
+class EmbeddingManager:
+    def __init__(self, model_name: str = "BM-K/KoSimCSE-roberta"):
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name=model_name,
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        self.vector_store = InMemoryVectorStore(
+            embedding=self.embeddings
+        )
+    def get_embeddings(self):
+        return self.embeddings
+    def get_vector_store(self):
+        return self.vector_store
+
+class MemoryTools:
+    def __init__(self, vector_store):
+        self.vector_store = vector_store
+        self.save_recall_memory_tool = tool(self._save_recall_memory)
+        self.search_recall_memories_tool = tool(self._search_recall_memories)
+        self.tools = [self.save_recall_memory_tool, self.search_recall_memories_tool]
+    def get_user_id(self, config: RunnableConfig) -> str:
+        user_id = config["configurable"].get("user_id")
+        if user_id is None:
+            raise ValueError("User ID needs to be provided to save a memory.")
+        return user_id
+    def _save_recall_memory(self, memory: str, config: RunnableConfig) -> str:
+        """벡터 저장소에 사용자 메모리를 저장합니다."""
+        user_id = self.get_user_id(config)
+        document = Document(
+            page_content=memory,
+            id=str(uuid.uuid4()),
+            metadata={"user_id": user_id}
+        )
+        self.vector_store.add_documents([document])
+        return memory
+    def _search_recall_memories(self, query: str, config: RunnableConfig) -> List[str]:
+        """사용자 관련 메모리를 벡터 저장소에서 검색합니다."""
+        user_id = self.get_user_id(config)
+        def _filter_function(doc: Document) -> bool:
+            return doc.metadata.get("user_id") == user_id
+        documents = self.vector_store.similarity_search(
+            query, k=3, filter=_filter_function
+        )
+        return [document.page_content for document in documents]
+    def get_tools(self):
+        return self.tools
+
+class MemoryAgent:
+    def __init__(self, model_name: str = "qwen2.5", tokenizer_name: str = "BM-K/KoSimCSE-roberta"):
+        self.model = ChatOllama(model=model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+        self.prompt = self._create_prompt()
+        self.tools = None 
+        self.graph = None 
+    def _create_prompt(self) -> ChatPromptTemplate:
+        return ChatPromptTemplate.from_messages([
+            (
+                "system",
+                "당신은 고급 장기 기억력을 가진 유용한 조수입니다."
+                " 기능. 한국어를 이해하는 LLM으로 구동되므로 답변은 한국어로 해야 합니다.."
+                " 대화 사이의 정보를 저장하는 외장 메모리가 있습니다."
+                " 사용 가능한 메모리 도구를 사용하여 저장하고 검색하세요"
+                " 사용자의 주의를 기울이는 데 도움이 되는 중요한 세부 사항"
+                "메모리 사용 지침:\n"
+                "1. 메모리 도구(save_recall_memory)를 적극적으로 사용하세요."
+                " 사용자에 대한 포괄적인 이해를 구축하기 위해.\n"
+                "2. 저장된 자료를 바탕으로 정보에 입각한 가정과 추정을 합니다."
+                " 추억.\n"
+                "3. 패턴을 식별하기 위해 과거 상호작용을 정기적으로 반성하고"
+                " 기본 설정.\n"
+                "4. 새로운 작품마다 사용자의 정신 모델을 업데이트하세요."
+                " 정보.\n"
+                "5. 새로운 정보와 기존 기억을 상호 참조하십시오."
+                " 일관성.\n"
+                "6. 감정적 맥락과 개인적 가치를 저장하는 것을 우선시합니다."
+                " 사실과 함께.\n"
+                "7. 기억을 사용하여 필요를 예측하고 이에 대한 응답을 맞춤화하세요."
+                " 사용자 스타일.\n"
+                "8. 사용자의 상황 변화를 인식하고 인정하기 또는"
+                " 시간에 따른 관점.\n"
+                "9. 기억을 활용하여 개인화된 예시를 제공합니다."
+                " 유추.\n"
+                "10. 과거의 도전이나 성공을 회상하여 현재를 알립니다."
+                " 문제 해결.\n\n"
+                "## 추억 회상\n"
+                "소환 기억은 현재를 기준으로 맥락적으로 검색됩니다."
+                " 대화:\n{recall_memories}\n\n"
+                "## 지침\n"
+                "신뢰할 수 있는 동료나 친구로서 자연스럽게 사용자와 소통하세요."
+                " 당신의 기억 능력을 명시적으로 언급할 필요는 없습니다."
+                " 대신 사용자에 대한 이해를 원활하게 통합하세요."
+                " 당신의 반응에 귀를 기울이세요. 미묘한 신호와 근본적인 정보에 주의하세요."
+                " 감정. 사용자의 의사소통 스타일에 맞게 조정하세요."
+                " 선호도와 현재 감정 상태. 지속하려면 도구를 사용하세요."
+                " 다음 대화에서 유지하고 싶은 정보. 만약 당신이"
+                " 도구 호출을 하세요. 도구 호출 앞에 있는 모든 텍스트는 내부 텍스트입니다"
+                " 메시지. 도구를 호출한 후 응답하세요"
+                " 도구가 성공적으로 완료되었는지 확인합니다.\n\n",
+            ),
+            ("placeholder", "{messages}"),
+        ])
+    def setup_model_with_tools(self, tools):
+        self.tools = tools
+        self.model_with_tools = self.model.bind_tools(tools)
+        return self.model_with_tools
+    def agent(self, state: State) -> State:
+        bound = self.prompt | self.model_with_tools
+        recall_str = (
+            "<recall_memory>\n" + "\n".join(state.recall_memories) + "\n</recall_memory>"
+        )
+        prediction = bound.invoke(
+            {
+                "messages": state.messages,
+                "recall_memories": recall_str,
+            }
+        )
+        return State(messages=[prediction], recall_memories=state.recall_memories)
+    def load_memories(self, state: State, config: RunnableConfig) -> State:
+        if not self.tools:
+            raise ValueError("Tools have not been set up. Call setup_model_with_tools first.")
+        convo_str = get_buffer_string(state.messages)
+        tokens = self.tokenizer(convo_str, truncation=True, max_length=2048)
+        truncated_text = self.tokenizer.decode(tokens['input_ids'])
+        recall_memories = self.tools[1].invoke(truncated_text, config=config)
+        return State(messages=state.messages, recall_memories=recall_memories)
+    def route_tools(self, state: State) -> Literal["tools", "__end__"]:
+        msg = state.messages[-1]
+        if getattr(msg, "tool_calls", None):
+            return "tools"
+        return END
+    def create_graph(self, tools):
+        builder = StateGraph(State)
+        builder.add_node("load_memories", self.load_memories)
+        builder.add_node("agent", self.agent)
+        builder.add_node("tools", ToolNode(tools))
+        builder.add_edge(START, "load_memories")
+        builder.add_edge("load_memories", "agent")
+        builder.add_conditional_edges("agent", self.route_tools, {"tools": "tools", "end": END})
+        builder.add_edge("tools", "agent")
+        memory = SqliteSaver(conn="sqlite:///langgraph_memory.sqlite") 
+        # langgraph 0.0.47 버전에서는 compile()에 configurable_keys 인자를 사용하지 않습니다.
+        # 대신, checkpointer가 config에서 user_id를 자동으로 찾아서 사용합니다.
+        self.graph = builder.compile(checkpointer=memory) 
+        return self.graph
+
+# --- MemoryAgent 관련 클래스 정의 끝 ---
 
 router = APIRouter()
-prompt_extraction = PromptExtraction()
+prompt_extraction = PromptExtraction() 
+
+def search_web_duckduckgo(query: str):
+    with DDGS() as ddgs:
+        results = ddgs.text(query, region='kr-kr', max_results=3)
+        return list(results)
+
+def summarize_body(body: str, max_len=150) -> str:
+    body = body.strip().replace("\n", " ")
+    if len(body) > max_len:
+        return body[:max_len].rstrip() + "..."
+    return body
 
 def clean_korean_only(text: str) -> str:
-    return re.sub(r"[^\uAC00-\uD7A3\u3131-\u318E\s0-9.,!?~\-]", "", text)
+    return re.sub(r"[^가-힣a-zA-Z0-9\s.,!?~\-]", "", text)
 
 def classify_question_mode(question: str) -> str:
     keywords = ["유사 사업", "인터넷에서 찾아", "웹 검색", "검색","검색해줘"]
@@ -29,50 +210,54 @@ def classify_question_mode(question: str) -> str:
         return "web_search"
     return "document"
 
-# DuckDuckGo 웹 검색 함수
-def search_web_duckduckgo(query: str):
-    with DDGS() as ddgs:
-        results = ddgs.text(query, region='kr-kr', max_results=3)
-        return list(results)
+embedding_manager = EmbeddingManager()
+memory_tools = MemoryTools(embedding_manager.get_vector_store())
+memory_agent = MemoryAgent()
+memory_agent.setup_model_with_tools(memory_tools.get_tools())
+graph = memory_agent.create_graph(memory_tools.get_tools())
 
-# 검색 결과 본문 길이 줄이기용 간단 함수
-def summarize_body(body: str, max_len=150) -> str:
-    body = body.strip().replace("\n", " ")
-    if len(body) > max_len:
-        return body[:max_len].rstrip() + "..."
-    return body
 @router.post("/ask")
 async def ask(
+    request: Request,
     question: str = Form(...),
     files: List[UploadFile] = File(None)
 ):
-    mode = classify_question_mode(question)
+    user_id = request.headers.get("x-user-id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="X-User-ID header is required.")
 
+    mode = classify_question_mode(question)
+    config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
+
+    # 1) 현재 상태 불러오기(체크포인트 저장된 이전 대화와 기억 포함)
+    current_state_from_checkpoint = graph.get_state(config)
+    current_messages = current_state_from_checkpoint.values.get("messages", []) if current_state_from_checkpoint else []
+    current_recall_memories = current_state_from_checkpoint.values.get("recall_memories", []) if current_state_from_checkpoint else []
+    current_messages.append(HumanMessage(content=question))
+
+    # 2) 업로드된 파일이 있을 경우 PDF 텍스트 추출 후 문서 기반 질의 처리
     if files:
         document_texts = []
         filenames = []
-
-        for file in files[:5]:  # 최대 5개 처리
+        for file in files[:5]:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(await file.read())
                 tmp_path = tmp.name
-
             pdf_extraction = PDFExtraction(tmp_path)
             pages = pdf_extraction.extract_text()
-            os.remove(tmp_path)
-
+            os.remove(tmp_path) 
             text = "\n\n".join([p['text'] for p in pages])
             document_texts.append((file.filename, text))
             filenames.append(file.filename)
 
-        # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
+            # 문서 내용을 바탕으로 키워드 추출 후 웹 검색
             first_text = document_texts[0][1]
             keyword_prompt = prompt_extraction.make_keyword_extraction_prompt(first_text)
             ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
             search_query = ollama_extract_keywords.get_model_response().strip()
-            results = search_web_duckduckgo(search_query)
 
+            results = search_web_duckduckgo(search_query)
             results_text = "\n\n".join(
                 [
                     f"제목: {res.get('title', '(제목없음)')}\n"
@@ -82,17 +267,16 @@ async def ask(
                 ]
             )
 
+            final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
             return {
                 "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 일반 문서 질의 응답 모드
+        # 문서 모드: 문서별 답변 및 평가 기준 추출
         answers = []
         evaluation_criteria = None
-
         for filename, text in document_texts:
-            # 한 번만 추출
             if evaluation_criteria is None:
                 criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(text)
                 criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
@@ -101,15 +285,16 @@ async def ask(
             qa_prompt = prompt_extraction.make_prompt_to_query_document(text, question)
             qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
             answer = qa_ollama.get_model_response().strip()
-
             answers.append(f" **{filename}** 에서의 응답:\n{answer}")
 
+        agent_response_content = "\n\n---\n\n".join(answers)
+        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
         return {
-            "answer": "\n\n---\n\n".join(answers),
+            "answer": agent_response_content,
             "evaluation_criteria": evaluation_criteria
         }
 
-    # 문서 없음 + 웹 검색
+    # 3) 파일이 없고 웹 검색 모드인 경우
     elif mode == "web_search":
         search_query = question.strip()
         results = search_web_duckduckgo(search_query)
@@ -121,23 +306,22 @@ async def ask(
                 for res in results
             ]
         )
-
+        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
         return {
             "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
-    # 문서 없음 + 일반 질문
+    # 4) 파일 없고 문서 모드(기억 기반 챗봇 응답 생성)
     else:
-        general_prompt = prompt_extraction.make_general_question_prompt(question)
-        ollama_general = OllamaHosting("qwen2.5", general_prompt)
-        response = ollama_general.get_model_response().strip()
+        final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
+        agent_response_message = final_state.messages[-1]
+        agent_response_content = agent_response_message.content
 
         return {
-            "answer": response,
-            "evaluation_criteria": "이 모드에서는 평가 기준이 필요하지 않습니다."
+            "answer": agent_response_content,
+            "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다."
         }
-
 
 
 @router.post("/transcribe_audio")
