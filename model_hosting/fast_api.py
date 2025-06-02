@@ -5,10 +5,9 @@ import os
 import re
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
-import aiosqlite
 
 from extraction.pdf_extraction import PDFExtraction
-from extraction.prompt_extraciont import PromptExtraction # Corrected typo
+from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 from data_loader.qdrant_loader import load_qdrant_db 
 
@@ -32,9 +31,9 @@ from langchain_core.documents import Document
 from langchain_core.tools import tool
 import uuid
 
-from langgraph.checkpoint.sqlite import SqliteSaver
+# 공식 문서 기준 import
+from langgraph.checkpoint.mysql.pymysql import PyMySQLSaver
 
-# --- MemoryAgent 관련 클래스 정의 시작 ---
 class State(BaseModel):
     messages: List[Any] = []
     recall_memories: List[str] = []
@@ -66,7 +65,7 @@ class MemoryTools:
             raise ValueError("User ID needs to be provided to save a memory.")
         return user_id
     def _save_recall_memory(self, memory: str, config: RunnableConfig) -> str:
-        """벡터 저장소에 사용자 메모리를 저장합니다."""
+        """사용자의 장기 기억을 벡터 저장소에 저장합니다."""
         user_id = self.get_user_id(config)
         document = Document(
             page_content=memory,
@@ -76,7 +75,7 @@ class MemoryTools:
         self.vector_store.add_documents([document])
         return memory
     def _search_recall_memories(self, query: str, config: RunnableConfig) -> List[str]:
-        """사용자 관련 메모리를 벡터 저장소에서 검색합니다."""
+        """저장된 기억을 유사도 검색으로 조회합니다."""
         user_id = self.get_user_id(config)
         def _filter_function(doc: Document) -> bool:
             return doc.metadata.get("user_id") == user_id
@@ -94,6 +93,7 @@ class MemoryAgent:
         self.prompt = self._create_prompt()
         self.tools = None 
         self.graph = None 
+        self.checkpointer = None  # 커넥션을 인스턴스 변수로 유지
     def _create_prompt(self) -> ChatPromptTemplate:
         return ChatPromptTemplate.from_messages([
             (
@@ -165,30 +165,29 @@ class MemoryAgent:
         truncated_text = self.tokenizer.decode(tokens['input_ids'])
         recall_memories = self.tools[1].invoke(truncated_text, config=config)
         return State(messages=state.messages, recall_memories=recall_memories)
-    def route_tools(self, state: State) -> Literal["tools", "__end__"]:
+    def route_tools(self, state: State) -> Literal["tools", END]:
         msg = state.messages[-1]
         if getattr(msg, "tool_calls", None):
             return "tools"
         return END
-    def create_graph(self, tools):
+
+    def create_graph(self, tools, db_uri=""):
         builder = StateGraph(State)
         builder.add_node("load_memories", self.load_memories)
         builder.add_node("agent", self.agent)
         builder.add_node("tools", ToolNode(tools))
         builder.add_edge(START, "load_memories")
         builder.add_edge("load_memories", "agent")
-        builder.add_conditional_edges("agent", self.route_tools, {"tools": "tools", "end": END})
+        builder.add_conditional_edges("agent", self.route_tools, {"tools": "tools", END: END})
         builder.add_edge("tools", "agent")
-        memory = SqliteSaver(conn="sqlite:///langgraph_memory.sqlite") 
-        # langgraph 0.0.47 버전에서는 compile()에 configurable_keys 인자를 사용하지 않습니다.
-        # 대신, checkpointer가 config에서 user_id를 자동으로 찾아서 사용합니다.
-        self.graph = builder.compile(checkpointer=memory) 
+        # with 블록 없이 인스턴스 변수로 커넥션 유지
+        with PyMySQLSaver.from_conn_string(db_uri) as checkpointer:
+            self.checkpointer = checkpointer
+        self.graph = builder.compile(checkpointer=self.checkpointer)
         return self.graph
 
-# --- MemoryAgent 관련 클래스 정의 끝 ---
-
 router = APIRouter()
-prompt_extraction = PromptExtraction() 
+prompt_extraction = PromptExtraction()
 
 def search_web_duckduckgo(query: str):
     with DDGS() as ddgs:
@@ -214,7 +213,19 @@ embedding_manager = EmbeddingManager()
 memory_tools = MemoryTools(embedding_manager.get_vector_store())
 memory_agent = MemoryAgent()
 memory_agent.setup_model_with_tools(memory_tools.get_tools())
-graph = memory_agent.create_graph(memory_tools.get_tools())
+graph = memory_agent.create_graph(
+    memory_tools.get_tools(),
+    db_uri=""  # 실제 값으로 교체
+)
+
+def get_from_state(state, key, default):
+    if hasattr(state, key):
+        return getattr(state, key, default)
+    elif isinstance(state, dict) and key in state:
+        return state[key]
+    elif hasattr(state, "values") and key in state.values:
+        return state.values.get(key, default)
+    return default
 
 @router.post("/ask")
 async def ask(
@@ -229,13 +240,12 @@ async def ask(
     mode = classify_question_mode(question)
     config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
 
-    # 1) 현재 상태 불러오기(체크포인트 저장된 이전 대화와 기억 포함)
     current_state_from_checkpoint = graph.get_state(config)
-    current_messages = current_state_from_checkpoint.values.get("messages", []) if current_state_from_checkpoint else []
-    current_recall_memories = current_state_from_checkpoint.values.get("recall_memories", []) if current_state_from_checkpoint else []
+    current_messages = get_from_state(current_state_from_checkpoint, "messages", [])
+    current_recall_memories = get_from_state(current_state_from_checkpoint, "recall_memories", [])
+    current_messages = list(current_messages)
     current_messages.append(HumanMessage(content=question))
 
-    # 2) 업로드된 파일이 있을 경우 PDF 텍스트 추출 후 문서 기반 질의 처리
     if files:
         document_texts = []
         filenames = []
@@ -251,7 +261,6 @@ async def ask(
             filenames.append(file.filename)
 
         if mode == "web_search":
-            # 문서 내용을 바탕으로 키워드 추출 후 웹 검색
             first_text = document_texts[0][1]
             keyword_prompt = prompt_extraction.make_keyword_extraction_prompt(first_text)
             ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
@@ -273,7 +282,6 @@ async def ask(
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 문서 모드: 문서별 답변 및 평가 기준 추출
         answers = []
         evaluation_criteria = None
         for filename, text in document_texts:
@@ -294,7 +302,6 @@ async def ask(
             "evaluation_criteria": evaluation_criteria
         }
 
-    # 3) 파일이 없고 웹 검색 모드인 경우
     elif mode == "web_search":
         search_query = question.strip()
         results = search_web_duckduckgo(search_query)
@@ -312,11 +319,13 @@ async def ask(
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
-    # 4) 파일 없고 문서 모드(기억 기반 챗봇 응답 생성)
     else:
         final_state = graph.invoke(State(messages=current_messages, recall_memories=current_recall_memories), config=config)
-        agent_response_message = final_state.messages[-1]
-        agent_response_content = agent_response_message.content
+        messages = get_from_state(final_state, "messages", [])
+        if not messages:
+            raise RuntimeError("No messages found in final_state")
+        agent_response_message = messages[-1]
+        agent_response_content = getattr(agent_response_message, "content", str(agent_response_message))
 
         return {
             "answer": agent_response_content,

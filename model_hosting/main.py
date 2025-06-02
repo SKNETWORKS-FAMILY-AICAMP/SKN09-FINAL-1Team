@@ -16,8 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
-app.include_router(email_router)
+app.include_router(router, prefix="/api")
+app.include_router(email_router, prefix="/api")
 
 
 ### uvicorn main:app --reload
