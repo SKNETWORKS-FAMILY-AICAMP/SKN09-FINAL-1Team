@@ -1,5 +1,4 @@
 from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException
-from fastapi.responses import JSONResponse
 from typing import List, Optional, Literal, Any
 import tempfile
 import os
@@ -7,14 +6,12 @@ import re
 import pymysql
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
-from extraction.file_base_extraction import get_extractor_by_extension
-# from extraction.pdf_extraction import PDFExtraction
+from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
-import requests
-import httpx
-
-import whisperx
+from data_loader.qdrant_loader import load_qdrant_db 
+from fastapi.responses import JSONResponse
+import whisperx 
 import ollama
 import json
 from langchain_core.messages import get_buffer_string, AIMessage, HumanMessage
@@ -29,7 +26,6 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
 import uuid
-
 
 # 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
@@ -374,50 +370,24 @@ async def ask(
     if files:
         document_texts = []
         filenames = []
-
-        for file in files[:5]:  # 최대 5개 처리
-            suffix = os.path.splitext(file.filename)[1]
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        for file in files[:5]:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(await file.read())
                 tmp_path = tmp.name
-
-            tmp.close()
-
-            extractor = get_extractor_by_extension(file.filename, tmp_path)
-            pages = extractor.extract_text()
-            os.remove(tmp_path)
-
+            pdf_extraction = PDFExtraction(tmp_path)
+            pages = pdf_extraction.extract_text()
+            os.remove(tmp_path) 
             text = "\n\n".join([p['text'] for p in pages])
             document_texts.append((file.filename, text))
             filenames.append(file.filename)
 
-            page_texts = [p['text'] for p in pages]
-            async with httpx.AsyncClient(timeout=300.0) as client:
-                await client.post(
-                    "http://localhost:8002/api/upload_vectors",
-                    json={"chunks": page_texts, "collection_name": "qdrant_temp"}
-                )
-
-
-        async with httpx.AsyncClient(timeout=300.0) as client:
-            search_resp = await client.post(
-                "http://localhost:8002/api/search_vectors",
-                json={"question": question, "collection_name": "qdrant_temp"}
-            )
-
-        search_data = search_resp.json()
-        context_texts = search_data.get("result", "")
-        context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
-
-
-        # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
             first_text = document_texts[0][1]
             keyword_prompt = prompt_extraction.make_keyword_extraction_prompt(first_text)
             ollama_extract_keywords = OllamaHosting("qwen2.5", keyword_prompt)
             search_query = ollama_extract_keywords.get_model_response().strip()
-            results = search_web_duckduckgo(search_query)
 
+            results = search_web_duckduckgo(search_query)
             results_text = "\n\n".join(
                 [
                     f"제목: {res.get('title', '(제목없음)')}\n"
@@ -426,6 +396,7 @@ async def ask(
                     for res in results
                 ]
             )
+
             # 웹 검색 결과는 DB에 저장하지 않는 것으로 판단하여, 이전 메시지만 저장
             checkpoint.save_tuple(config, current_messages, current_recall_memories)
             return {
@@ -433,26 +404,17 @@ async def ask(
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
             }
 
-        # 일반 문서 질의 응답 모드
         answers = []
         evaluation_criteria = None
-
         for filename, text in document_texts:
-            # 한 번만 추출
             if evaluation_criteria is None:
-                async with httpx.AsyncClient(timeout=300.0) as client:
-                    criteria_resp = await client.post(
-                        "http://localhost:8002/api/search_vectors",
-                        json={"question": "평가 기준", "collection_name": "qdrant_temp"}
-                    )
-                criteria_data = criteria_resp.json()
-                criteria_list = criteria_data.get("result", "")
-                evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
+                criteria_prompt = prompt_extraction.make_prompt_to_extract_criteria(text)
+                criteria_ollama = OllamaHosting("qwen2.5", criteria_prompt)
+                evaluation_criteria = criteria_ollama.get_model_response().strip()
 
-            qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question)
+            qa_prompt = prompt_extraction.make_prompt_to_query_document(text, question)
             qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
             answer = qa_ollama.get_model_response().strip()
-
             answers.append(f" **{filename}** 에서의 응답:\n{answer}")
 
         agent_response_content = "\n\n---\n\n".join(answers)
@@ -462,7 +424,6 @@ async def ask(
             "evaluation_criteria": evaluation_criteria
         }
 
-    # 문서 없음 + 웹 검색
     elif mode == "web_search":
         search_query = question.strip()
         results = search_web_duckduckgo(search_query)
@@ -480,7 +441,6 @@ async def ask(
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
         }
 
-    # 문서 없음 + 일반 질문
     else:
         # 일반 대화 모드
         agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
@@ -497,7 +457,7 @@ async def ask(
         
         agent_response_message = messages[-1]
         agent_response_content = getattr(agent_response_message, "content", str(agent_response_message))
-
+        
         return {
             "answer": agent_response_content,
             "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다."
@@ -670,13 +630,8 @@ class QuestionInput(BaseModel):
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
     query = input.question
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        search_resp = await client.post(
-            "http://localhost:8002/api/search_vectors",
-            json={"question": query, "collection_name": "wlmmate_vectors"}
-        )
+    raw_results = load_qdrant_db(query)
 
-    raw_results = search_resp.json().get("result", [])
     if isinstance(raw_results, str):
         raw_results = [raw_results]
 
