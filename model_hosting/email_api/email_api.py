@@ -39,8 +39,8 @@ async def send_proceedings_email_api(
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(sender, password)
             server.send_message(msg)
-            # print("📨 받은 제목:", subject)
-            # print("📝 받은 본문:", body)
-        return {"message": "✅ 이메일 전송 완료"}
+            # print("받은 제목:", subject)
+            # print("받은 본문:", body)
+        return {"message": "이메일 전송 완료"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

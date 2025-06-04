@@ -33,10 +33,15 @@ const ChatArea = () => {
       files.forEach((f) => {
         formData.append('files', f);
       });
+      for (let pair of formData.entries()) {
+      console.log(`[FormData] ${pair[0]}:`, pair[1]);
+      }
+
 
       const res = await fetch('http://localhost:8001/ask', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const data = await res.json();
@@ -69,11 +74,30 @@ const ChatArea = () => {
     }
   };
 
+
   const handleFileChange = (e) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+    const MAX_FILE_COUNT = 5;
+    const MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100MB
+  
+    if (!e.target.files) return;
+  
+    const selected = Array.from(e.target.files);
+    const fileCount = selected.length;
+    const totalSize = selected.reduce((acc, file) => acc + file.size, 0);
+  
+    if (fileCount > MAX_FILE_COUNT) {
+      alert(`최대 ${MAX_FILE_COUNT}개 파일까지만 업로드할 수 있습니다.`);
+      return;
     }
+  
+    if (totalSize > MAX_TOTAL_SIZE) {
+      alert("전체 파일 크기는 100MB를 초과할 수 없습니다.");
+      return;
+    }
+  
+    setFiles(selected);
   };
+
 
   const handleRemoveFile = (index) => {
     const updated = files.filter((_, i) => i !== index);

@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-secret = os.getenv("SESSION_SECRET")
+secret = os.getenv("SESSION_SECRET", "default_key")
 
 app = FastAPI()
 
@@ -15,24 +15,25 @@ origins = [
     "http://localhost:3306",  # 필요 시 다른 포트도 추가
 ]
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 세션 미들웨어 설정
-# max_age를 None으로 설정하여 브라우저 세션으로 만듦 (브라우저 종료 시 삭제)
+# 세션
 app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
     session_cookie="session",
-    max_age=None,  # 브라우저 세션으로 설정 (브라우저 종료 시 삭제)
-    same_site="lax",  # CSRF 보호
-    https_only=True  # HTTPS에서만 쿠키 전송
+    max_age=None,
+    same_site="lax",
+    https_only=False
 )
+
 
 app.include_router(employee_router, prefix="/api")
 

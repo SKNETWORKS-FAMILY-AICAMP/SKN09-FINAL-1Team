@@ -10,22 +10,20 @@ embedding_model_name = "BM-K/KoSimCSE-roberta"
 tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 model = AutoModel.from_pretrained(embedding_model_name)
 
-# 경로 설정
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-qdrant_path = os.path.join(BASE_DIR, "..", "data", "qdrant_db")
-json_docs_path = os.path.join(BASE_DIR, "..", "data", "preprocess")
 
-# KoSimCSE-roberta의 임베딩 차원
+qdrant_path = "./qdrant_data"
+json_docs_path = "../data/preprocess"
+client = QdrantClient(path=qdrant_path)
+
+# 임베딩 차원
 embedding_dim = 768
 
-# 텍스트 임베딩 함수
 def get_embedding(text: str):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
     with torch.no_grad():
         outputs = model(**inputs)
     return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
 
-# 문서 정제 함수 (wlmmate 전용)
 def clean_doc(doc):
     질문 = doc.get("질문", "").split("\n")[0].strip()
     답변 = doc.get("답변", "")
@@ -34,9 +32,7 @@ def clean_doc(doc):
     답변 = "\n".join(cleaned_lines).strip()
     return f"질문: {질문}\n답변: {답변}"
 
-# 일반 폴더 내 json 파일들을 Qdrant에 저장 (모두 wlmmate_vectors에 저장)
 def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="wlmmate_vectors"):
-    client = QdrantClient(path=qdrant_path)
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
@@ -63,9 +59,7 @@ def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="wlmmate
                 )
                 file_idx += 1
 
-# wlmmate_data.json을 Qdrant에 저장
 def init_qdrant_from_file(json_file_path, collection_name="wlmmate_vectors"):
-    client = QdrantClient(path=qdrant_path)
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
@@ -88,9 +82,7 @@ def init_qdrant_from_file(json_file_path, collection_name="wlmmate_vectors"):
         )
         file_idx += 1
 
-# Qdrant에서 질문 기반 검색 (collection_name을 wlmmate_vectors로 통일)
 def load_qdrant_db(question, collection_name="wlmmate_vectors"):
-    client = QdrantClient(path=qdrant_path)
     query_vector = get_embedding(question)
     search_results = client.search(
         collection_name=collection_name,
@@ -106,9 +98,7 @@ def load_qdrant_db(question, collection_name="wlmmate_vectors"):
         response = f"{question}'에 관한 문서가 존재하지 않습니다."
     return response
 
-# wlmmate 데이터 검색
 def search_wlmmate_law(question: str, collection_name="wlmmate_vectors"):
-    client = QdrantClient(path=qdrant_path)
     query_vector = get_embedding(question)
     results = client.search(
         collection_name=collection_name,
@@ -117,9 +107,42 @@ def search_wlmmate_law(question: str, collection_name="wlmmate_vectors"):
     )
     return results
 
-# 메인 실행
+def split_into_chunks(text, max_length=300):
+    text = text.strip()
+    chunks = []
+    while len(text) > max_length:
+        split_idx = text.rfind("\n", 0, max_length)
+        if split_idx == -1:
+            split_idx = max_length
+        chunks.append(text[:split_idx].strip())
+        text = text[split_idx:].strip()
+    if text:
+        chunks.append(text)
+    return chunks
+
+def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
+    if not client.collection_exists(collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    points = []
+    idx = 0
+
+    for block in text_blocks:
+        sub_chunks = split_into_chunks(block, max_length=600)
+        for chunk in sub_chunks:
+            embedding = get_embedding(chunk)
+            payload = {"content": chunk}
+            points.append(PointStruct(id=idx, vector=embedding.tolist(), payload=payload))
+            idx += 1
+
+    client.upsert(collection_name=collection_name, points=points)
+    return collection_name
+
+
 if __name__ == "__main__":
-    # 일반 문서 및 wlmmate 문서 모두 wlmmate_vectors 컬렉션에 저장
     init_qdrant_from_folder()
-    wlmmate_path = os.path.join(BASE_DIR, "..", "data", "civil_data.json")
+    wlmmate_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/civil_data.json"))
     init_qdrant_from_file(wlmmate_path)

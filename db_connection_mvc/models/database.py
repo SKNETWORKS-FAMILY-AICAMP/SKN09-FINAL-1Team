@@ -1,11 +1,20 @@
 import pymysql
 from typing import List, Dict, Any, Optional
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Database:
     def __init__(self):
         self.connection = pymysql.connect(
-            host="localhost", user="wlb_mate", password="wlb_mate", database="wlb_mate"
+            host=os.environ.get("MY_DB_HOST", "localhost"),
+            port=int(os.environ.get("MY_DB_PORT", 3306)),
+            user=os.environ.get("MY_DB_USER", "root"),
+            password=os.environ.get("MY_DB_PASSWORD", ""),
+            database=os.environ.get("MY_DB_NAME", "wlb_mate"),
+            charset=os.environ.get("MY_DB_CHARSET", "utf8mb4")
         )
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
