@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../css/login.css';
+import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import axios from 'axios';
@@ -8,6 +9,7 @@ const Login = () => {
   const [empCode, setEmpCode] = useState('');
   const [empPwd, setEmpPwd] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showReset, setShowReset] = useState(false); // 비밀번호 초기화 모달 상태
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -54,6 +56,7 @@ const Login = () => {
 
   return (
     <div className="container">
+      {showReset && <ForgotPasswordModal onClose={() => setShowReset(false)} />}
       <div className="top"></div>
       <div className="bottom"></div>
       <div className="center">
@@ -81,7 +84,7 @@ const Login = () => {
         )}
         <div
           className="forgot-password"
-          onClick={() => alert('비밀번호 찾기 기능은 준비 중입니다.')}
+          onClick={() => setShowReset(true)} // 클릭 시 모달 열림
         >
           Forgot Password?
         </div>

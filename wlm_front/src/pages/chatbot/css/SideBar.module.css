@@ -1,96 +1,138 @@
+/* 전체 래퍼 */
 .wrapper {
   display: flex;
   position: relative;
+  height: 100vh;
+  font-family: 'Rubik', sans-serif;
 }
 
+/* 토글 버튼 (사이드바 열림/닫힘) */
 .toggleButton {
   position: absolute;
-  top: 10px;
+  top: 12px;
   left: 88%;
   z-index: 10;
-  background-color: #e2e8f0;
+  background-color: #e3e8ef;
   border: none;
-  border-radius: 0 5px 5px 0;
-  padding: 6px 10px;
+  border-radius: 0 6px 6px 0;
+  padding: 6px 12px;
   font-size: 1rem;
   cursor: pointer;
 }
 
+/* 사이드바 기본 스타일 */
 .sidebar {
   width: 300px;
-  background-color: #f8fafc;
-  padding: 1rem;
-  border-right: 1px solid #ddd;
+  background-color: #f9fbfd;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #dde4ee;
   overflow-y: auto;
-  height: 100vh;
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition: all 0.3s ease;
 }
 
+/* 닫힌 상태 */
 .closed {
   width: 0;
   padding: 0;
   overflow: hidden;
 }
 
+/* 타이틀 (HISTORY) */
 .title {
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #3b4cca; /* 파랑 계열로 강조 */
 }
 
-.resultSection {
+/* --- 필터 & 검색 박스 --- */
+.searchArea {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* 체크박스 행 */
+.checkboxRow {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.details {
-  background-color: #ffffff;
-  border-radius: 0.8rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  padding: 0.8rem;
-}
-
-.date {
-  font-weight: bold;
-  font-size: 0.95rem;
+.checkboxRow label {
+  font-size: 0.92rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   cursor: pointer;
 }
 
-.item {
-  margin-top: 0.4rem;
-  padding-left: 1rem;
-  font-size: 0.88rem;
-  color: #333;
-}
-
-.btn {
-  width: 100%;
-  background-color: #4a90e2;
-  color: rgb(255, 255, 255);
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
+/* 검색 버튼 */
 .searchBtn {
-  background: #4a90e2;
-  color: #fff;
+  background-color: #839ce8; /* 엷은 보라-파랑 */
+  color: white;
   border: none;
   border-radius: 999px;
-  padding: 0.6rem 2rem;
+  padding: 0.6rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
-  margin: 0.5rem 0 1rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s ease;
+  width: 100%;
 }
 
 .searchBtn:hover {
-  background: #0076d6;
+  background-color: #6b8be0;
+}
+
+/* 필터 & 검색 박스와 결과 목록 사이의 구분선 */
+.divider {
+  height: 2px;
+  background-color: #4a90e2; /* 파랑-보라 계열 */
+  margin-bottom: 1rem;
+  border-radius: 1px;
+}
+
+/* --- 결과 섹션 --- */
+.resultSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* 개별 날짜 그룹 박스 */
+.details {
+  background-color: #ffffff;
+  border-radius: 0.8rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 0.8rem 1rem;
+}
+
+/* 날짜 텍스트 */
+.date {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #222;
+  margin-bottom: 0.5rem;
+}
+
+/* 키워드 항목 */
+.item {
+  font-size: 0.88rem;
+  padding: 6px 12px;
+  background-color: #f1f5fa;
+  color: #333;
+  border-radius: 8px;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.item:hover {
+  background-color: #e0ebf9;
 }

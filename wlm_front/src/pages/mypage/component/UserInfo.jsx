@@ -31,7 +31,7 @@ const UserInfo = ({ userData, onPasswordChange }) => {
                             <td>{userData.emp_code}</td>
                         </tr>
                         <tr>
-                            <th>역할</th>
+                            <th>부서</th>
                             <td>{getRoleName(userData.role)}</td>
                         </tr>
                         <tr>
@@ -47,7 +47,7 @@ const UserInfo = ({ userData, onPasswordChange }) => {
                             </td>
                         </tr>
                         <tr>
-                            <th>계정 생성일</th>
+                            <th>입사 날짜</th>
                             <td>
                                 {userData.emp_create_dt ? 
                                     new Date(userData.emp_create_dt).toLocaleDateString() : 
