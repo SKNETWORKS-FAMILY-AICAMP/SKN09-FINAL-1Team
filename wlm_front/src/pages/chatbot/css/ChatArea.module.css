@@ -26,8 +26,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-top: 1px solid #e0e6ed;
-  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.04);
 }
 
 .selectedFileList {
@@ -128,29 +126,51 @@
 }
 
 .sendButton {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #6b9df1, #4a90e2);
+  width: 44px;
+  height: 44px;
+  background-color: #4a90e2;           /* 메인 컬러 */
   border: none;
-  border-radius: 50%;
+  border-radius: 50%;                  /* 완전한 원형 */
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  /* 그림자 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+  /* 부드러운 전환 효과 */
+  transition: background-color 0.3s ease, 
+              transform 0.2s ease, 
+              box-shadow 0.3s ease;
 }
 
 .sendButton:hover {
-  background: #357ed5;
+  background-color: #357ed5;            /* 호버 시 살짝 진해지는 컬러 */
+  transform: translateY(-2px);           /* 살짝 띄워진 듯한 효과 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sendButton:active {
+  /* 클릭(눌렀을 때)에는 원래 자리로 되돌아오면서 그림자 살짝 축소 */
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .sendButton:disabled {
-  background-color: #cfd6e3;
+  background-color: #cfd6e3;             /* 비활성화 상태 컬러 */
   cursor: not-allowed;
+  box-shadow: none;                      /* 그림자 제거 */
 }
+
+/* 화살표 이미지를 적절한 크기로 조정 */
+.sendIcon {
+  width: 20px;           /* 원하시는 크기로 조절 가능 */
+  height: 20px;          /* 비율 유지되도록 width/height 동일 비율 사용 */
+  object-fit: contain;
+} 
 
 .message {
   max-width: 70%;

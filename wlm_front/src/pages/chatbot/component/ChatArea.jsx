@@ -2,16 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 import { FaFilePdf, FaTimes } from 'react-icons/fa';
-
+import upArrowIcon from '../../images/up_arrow.png'
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
-  const chatContentRef = useRef(null); // ✅ 스크롤용 ref 추가
+  const chatContentRef = useRef(null); // 
 
-  // ✅ messages가 바뀔 때마다 스크롤 맨 아래로
+
   useEffect(() => {
     if (chatContentRef.current) {
       chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
@@ -147,7 +147,11 @@ const ChatArea = () => {
             onClick={handleSend}
             disabled={sending}
           >
-            ^
+            <img
+              src={upArrowIcon}
+              alt="send"
+              className={styles.sendIcon}
+            />
           </button>
         </div>
       </div>
