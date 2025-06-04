@@ -13,6 +13,7 @@ from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 import requests
 import httpx
+from dotenv import load_dotenv
 
 import whisperx
 import ollama
@@ -31,13 +32,16 @@ from langchain_core.tools import tool, StructuredTool
 import uuid
 
 
+load_dotenv()
+secret = os.getenv("SESSION_SECRET")
+
 # 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "woony")
+DB_USER = os.environ.get("MY_DB_USER", "")
 DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
-DB_NAME = os.environ.get("MY_DB_NAME", "woony")
-DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8")
+DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
+DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
 class State(BaseModel):
     messages: List[Any] = []
@@ -170,54 +174,82 @@ class MySQLCheckpoint:
         return pymysql.connect(**self.db_config)
 
     def get_tuple(self, config):
+        emp_code = config["configurable"]["user_id"]
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT messages, recall_memories FROM checkpoints WHERE user_id=%s", (config["configurable"]["user_id"],))
-                row = cursor.fetchone()
-                if row:
-                    # LangChain 메시지 객체로 역직렬화
-                    messages_data = json.loads(row[0])
-                    messages = []
-                    for msg in messages_data:
-                        if msg["type"] == "human":
-                            messages.append(HumanMessage(content=msg["content"]))
-                        elif msg["type"] == "ai":
-                            messages.append(AIMessage(content=msg["content"]))
-                    recall_memories = json.loads(row[1])
-                    return {"messages": messages, "recall_memories": recall_memories}
-                else:
-                    return {"messages": [], "recall_memories": []}
+                cursor.execute("""
+                    SELECT log_text, log_speaker_sn
+                    FROM chat_log
+                    WHERE chat_no IN (
+                        SELECT chat_no FROM chat_mate WHERE emp_no = (
+                            SELECT emp_no FROM employee WHERE emp_code = %s
+                        )
+                    )
+                    ORDER BY log_create_dt
+                """, (emp_code,))
+                rows = cursor.fetchall()
+
+                messages = []
+                for log_text, speaker_sn in rows:
+                    if speaker_sn == 1:
+                        messages.append(HumanMessage(content=log_text))
+                    elif speaker_sn == 2:
+                        messages.append(AIMessage(content=log_text))
+
+                return {"messages": messages, "recall_memories": []}
         finally:
             conn.close()
 
     def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
+        emp_code = config["configurable"]["user_id"]
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                # LangChain 메시지 객체를 직렬화 가능한 형태로 변환
-                serializable_messages = []
-                for msg in messages:
-                    if isinstance(msg, HumanMessage):
-                        serializable_messages.append({"type": "human", "content": msg.content})
-                    elif isinstance(msg, AIMessage):
-                        serializable_messages.append({"type": "ai", "content": msg.content})
-                    else:
-                        # 다른 타입의 메시지가 있다면, 적절히 처리하거나 에러를 발생시킬 수 있습니다.
-                        # 여기서는 단순히 문자열로 변환합니다.
-                        serializable_messages.append({"type": "unknown", "content": str(msg)})
+                cursor.execute("""
+                    SELECT chat_no FROM chat_mate WHERE emp_no = (
+                        SELECT emp_no FROM employee WHERE emp_code = %s
+                    ) ORDER BY chat_create_dt DESC LIMIT 1
+                """, (emp_code,))
+                row = cursor.fetchone()
+                chat_no = row[0] if row else None
+                if not chat_no:
+                    print("❗ chat_no 없음 - 새 chat_mate 생성")
+                
+                    # 현재 해당 emp_code의 대화 개수 세기
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM chat_mate 
+                        WHERE emp_no = (SELECT emp_no FROM employee WHERE emp_code = %s)
+                    """, (emp_code,))
+                    count = cursor.fetchone()[0]
+                
+                    # 제목 만들기: 대화 1, 대화 2, ...
+                    title = f"대화 {count + 1}"
+                
+                    # chat_mate에 새 row 삽입
+                    cursor.execute("""
+                        INSERT INTO chat_mate (emp_no, chat_title)
+                        VALUES (
+                            (SELECT emp_no FROM employee WHERE emp_code = %s),
+                            %s
+                        )
+                    """, (emp_code, title))
+                    conn.commit()
+                
+                    # 방금 생성한 chat_no 가져오기
+                    cursor.execute("SELECT LAST_INSERT_ID()")
+                    chat_no = cursor.fetchone()[0]
 
-                cursor.execute(
-                    "REPLACE INTO checkpoints (user_id, messages, recall_memories) VALUES (%s, %s, %s)",
-                    (
-                        config["configurable"]["user_id"],
-                        json.dumps(serializable_messages),
-                        json.dumps(recall_memories),
-                    ),
-                )
+                for msg in messages:
+                    speaker_sn = 1 if isinstance(msg, HumanMessage) else 2
+                    cursor.execute("""
+                        INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
+                        VALUES (%s, %s, %s, NOW())
+                    """, (chat_no, msg.content, speaker_sn))
             conn.commit()
         finally:
             conn.close()
+
 
 class MemoryAgent:
     def __init__(self, model_name: str = "qwen2.5", tokenizer_name: str = "BM-K/KoSimCSE-roberta"):
@@ -346,9 +378,20 @@ async def ask(
     question: str = Form(...),
     files: List[UploadFile] = File(None)
 ):
-    user_id = request.headers.get("x-user-id")
-    if not user_id:
-        raise HTTPException(status_code=400, detail="X-User-ID header is required.")
+    
+    # 디버깅용 세션 로그 출력
+    print("🔍 request.session =", request.session)
+    print("🔍 session.get('employee') =", request.session.get("employee"))
+    print("🔍 request.cookies =", request.cookies)
+
+
+    employee = request.session.get("employee")
+    if not employee or "emp_code" not in employee:
+        print("❌ 세션 인증 실패 - 401 반환")
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+
+    user_id = employee["emp_code"]
+
 
     mode = classify_question_mode(question)
     config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
@@ -483,7 +526,9 @@ async def ask(
     # 문서 없음 + 일반 질문
     else:
         # 일반 대화 모드
-        agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
+        # agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
+        agent_state = State(messages=current_messages, recall_memories=[])
+        agent_state = memory_agent.load_memories(agent_state, config)
         agent_response = memory_agent.agent(agent_state)
         
         # agent_response에서 AIMessage 객체만 추출하여 저장

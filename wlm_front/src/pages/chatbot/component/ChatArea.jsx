@@ -41,6 +41,7 @@ const ChatArea = () => {
       const res = await fetch('http://localhost:8001/ask', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const data = await res.json();
