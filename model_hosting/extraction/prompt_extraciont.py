@@ -134,7 +134,7 @@ class PromptExtraction:
 # 답변
 """
     
-    def make_light_cleaning_prompt(text: str) -> str:
+    def make_light_cleaning_prompt(self, text: str) -> str:
         return f"""
 반드시 한국어로 대답하세요.        
 다음 텍스트는 회의 음성을 텍스트로 전사한 초안입니다. 이 텍스트에는 말의 흐름, 반복, 비문, 맞춤법 오류 등이 있을 수 있습니다.
@@ -156,7 +156,7 @@ class PromptExtraction:
 {text}
 """
     
-    def make_prompt(transcribed_text):
+    def make_prompt(self, transcribed_text):
         return f"""
 반드시 한국어로 대답하세요.        
 다음은 음성에서 텍스트로 변환된 원문입니다. 이 텍스트는 말의 흐름에 따라 작성되어 있으며, 반복, 군더더기, 비문 등이 포함되어 있을 수 있습니다.
