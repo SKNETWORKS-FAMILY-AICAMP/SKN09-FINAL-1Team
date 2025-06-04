@@ -1,3 +1,4 @@
+/* ────────────────────────────────────────────────────────── */
 /* 전체 래퍼 */
 .wrapper {
   display: flex;
@@ -6,7 +7,7 @@
   font-family: 'Rubik', sans-serif;
 }
 
-/* 토글 버튼 (사이드바 열림/닫힘) */
+/* ── 토글 버튼 */
 .toggleButton {
   position: absolute;
   top: 12px;
@@ -20,7 +21,7 @@
   cursor: pointer;
 }
 
-/* 사이드바 기본 스타일 */
+/* ── 사이드바 기본 스타일 */
 .sidebar {
   width: 300px;
   background-color: #f9fbfd;
@@ -30,82 +31,55 @@
   transition: all 0.3s ease;
 }
 
-/* 닫힌 상태 */
+/* ── 사이드바 닫힌 상태 */
 .closed {
   width: 0;
   padding: 0;
   overflow: hidden;
 }
 
-/* 타이틀 (HISTORY) */
+/* ── TITLE (HISTORY) */
 .title {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #3b4cca; /* 파랑 계열로 강조 */
+  color: #3b4cca; /* 짙은 파랑톤 */
+  margin-bottom: 1rem;
 }
 
-/* --- 필터 & 검색 박스 --- */
-.searchArea {
+/* ── 필터 & 검색 박스를 감싸는 흰색 카드 */
+.filterCard {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* 체크박스 행 */
-.checkboxRow {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+/* ── 필터 박스 내부 (FilterPanel이 어떤 구조든지 간에 이 영역 전체에 패딩을 주기 위함) */
+.filterCard :global(*) {
+  /* 
+    FilterPanel 컴포넌트 내부의 모든 요소에 대하여 
+    여기서 별도의 스타일을 주지 않아도, 외부 여백(padding)만 주면 
+    내부 콘텐츠가 카드 안에서 여유롭게 배치됩니다. 
+  */
 }
 
-.checkboxRow label {
-  font-size: 0.92rem;
-  color: #444;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-}
-
-/* 검색 버튼 */
-.searchBtn {
-  background-color: #839ce8; /* 엷은 보라-파랑 */
-  color: white;
-  border: none;
-  border-radius: 999px;
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s ease;
-  width: 100%;
-}
-
-.searchBtn:hover {
-  background-color: #6b8be0;
-}
-
-/* 필터 & 검색 박스와 결과 목록 사이의 구분선 */
+/* ── 필터 영역과 목록 사이 구분선 */
 .divider {
   height: 2px;
-  background-color: #4a90e2; /* 파랑-보라 계열 */
+  background-color: #4a90e2; /* 파란-보라 계열 라인 */
   margin-bottom: 1rem;
   border-radius: 1px;
 }
 
-/* --- 결과 섹션 --- */
+/* ── 결과 섹션 (날짜 + 키워드 목록) */
 .resultSection {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-/* 개별 날짜 그룹 박스 */
+/* ── 날짜 그룹 박스 */
 .details {
   background-color: #ffffff;
   border-radius: 0.8rem;
@@ -113,7 +87,7 @@
   padding: 0.8rem 1rem;
 }
 
-/* 날짜 텍스트 */
+/* ── 날짜 텍스트 */
 .date {
   font-weight: 600;
   font-size: 0.92rem;
@@ -121,7 +95,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* 키워드 항목 */
+/* ── 키워드 아이템 */
 .item {
   font-size: 0.88rem;
   padding: 6px 12px;
@@ -136,3 +110,9 @@
 .item:hover {
   background-color: #e0ebf9;
 }
+
+/* ────────────────────────────────────────────────────────── */
+
+/* FilterPanel 컴포넌트 내부에 쓰이는 스타일이 별도 필요하다면, 
+   FilterPanel.module.css를 사용해 그 안에서 정의해주세요. 
+   이 파일( SideBar.module.css )은 오로지 외곽 레이아웃만 담당합니다. */

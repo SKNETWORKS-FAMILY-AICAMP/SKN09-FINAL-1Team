@@ -9,7 +9,7 @@ const ChatArea = () => {
   const [sending, setSending] = useState(false);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
-  const chatContentRef = useRef(null); // 
+  const chatContentRef = useRef(null); 
 
 
   useEffect(() => {
