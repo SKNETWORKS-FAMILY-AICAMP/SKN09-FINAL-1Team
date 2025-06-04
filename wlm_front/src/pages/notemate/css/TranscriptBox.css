@@ -74,3 +74,82 @@ textarea {
   color: #666;
   cursor: not-allowed;
 }
+
+/* 파일 리스트 */
+.file-list-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  background: #f4f4f4;
+  border-radius: 6px;
+  padding: 4px 10px;
+  max-width: 240px;
+  overflow: hidden;
+  font-size: 0.9rem;
+  color: #333;
+  gap: 6px;
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+/* 업로드 버튼 및 상태 */
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.upload-label {
+  display: inline-block;
+  cursor: pointer;
+  margin: 8px 0 4px 0; 
+  padding: 6px 12px;
+  background-color: #e8f0fe;
+  color: #333;
+  border-radius: 999px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.upload-label:hover {
+  background-color: #c7dbfc;
+}
+
+.upload-label.disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 우측 정보 버튼 및 상태 텍스트 포함 */
+.upload-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-status {
+  color: #007bff;
+  font-weight: 500;
+  animation: fadeInOut 1.2s infinite;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}

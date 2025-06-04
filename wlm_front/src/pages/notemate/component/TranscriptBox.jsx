@@ -3,65 +3,112 @@ import axios from 'axios';
 import '../css/TranscriptBox.css';
 import InfoButton from './InfoButton.jsx';
 import InfoModal from './InfoModal.jsx';
+import { FaFileAudio } from 'react-icons/fa';
 
 const TranscriptBox = forwardRef((props, ref) => {
-  const { step, showTranscriptInfo, setShowTranscriptInfo } = props;
-  const [transcript, setTranscript] = useState("");
-  const [summary, setSummary] = useState("");
+  const { step, showTranscriptInfo, setShowTranscriptInfo, setStep } = props;
+  const [transcript, setTranscript] = useState('');
+  const [summary, setSummary] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
+
 
   useImperativeHandle(ref, () => ({
     getTextData: () => ({ transcript, summary }),
-    setExampleTranscript: (text) => setTranscript(text),
-    setExampleSummary: (text) => setSummary(text)
+    setTranscript: (text) => setTranscript(text),
+    setSummary: (text) => setSummary(text),
+    appendTranscript: (line) =>
+      setTranscript((prev) => prev.trim() + '\n' + line.trim()),
+    setExampleTranscript: (text) => setTranscript(text), 
   }));
 
-  // 오디오 파일 업로드 기능 주석 처리
-  // const handleLoadAudio = async (e) => {
-  //   const file = e.target.files[0];
-  //   if (!file) return;
-
-  //   const formData = new FormData();
-  //   formData.append("file", file);
-
-
-  //   try {
-  //     const response = await axios.post("http://localhost:8000/transcribe_audio", formData, {
-  //       headers: { "Content-Type": "multipart/form-data" }
-  //     });
-  //     setTranscript(response.data.transcription);
-  //   } catch (err) {
-  //     console.error("불러오기 실패:", err);
-  //   }
-  // };
-
-
-  const handleSummarize = async () => {
-    if (!transcript) return;
-    try {
-      const response = await axios.post("http://localhost:8001/summarize_text", {
-        text: transcript
-      });
-      setSummary(response.data.summary);
-    } catch (err) {
-      console.error("요약 실패:", err);
-    }
-  };
-
   const handleDownload = (text, filename) => {
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  const handleLoadAudio = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadedFileName(file.name);
+    setIsUploading(true);
+    setIsUploaded(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(
+        'http://localhost:8001/transcribe_audio',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+      setTranscript(response.data.transcription);
+      setStep && setStep('transcripted');
+    } catch (err) {
+      console.error('오디오 파일 전사 실패:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    if (!transcript) return;
+
+    try {
+      const response = await axios.post('http://localhost:8001/summarize_text', {
+        text: transcript,
+      });
+      setSummary(response.data.summary);
+      setStep && setStep('summarized');
+    } catch (err) {
+      console.error('요약 실패:', err);
+    }
+  };
+
   return (
     <div className="transcript-box">
-      {/* 상단 안내 및 InfoButton 제거 */}
+      {/* 업로드 영역 */}
+      <div className="upload-row">
+        <label
+          htmlFor="audio-upload"
+          className={`upload-label ${isUploaded ? 'disabled' : ''}`}
+          style={{ pointerEvents: isUploaded ? 'none' : 'auto', opacity: isUploaded ? 0.5 : 1 }}
+        >
+          🎧 음성 파일 업로드
+        </label>
 
+        {uploadedFileName && (
+          <div className="file-item">
+            <FaFileAudio style={{ marginRight: '6px', color: '#4f9ffb' }} />
+            <span className="file-name">{uploadedFileName}</span>
+          </div>
+        )}
 
+        <div className="upload-right">
+          {isUploading && <span className="upload-status">⏳ 변환 중...</span>}
+          <InfoButton onClick={() => setShowTranscriptInfo(true)} />
+        </div>
+      </div>
+
+      <input
+        id="audio-upload"
+        type="file"
+        accept=".mp3,.wav"
+        onChange={handleLoadAudio}
+        style={{ display: 'none' }}
+      />
+
+      {/* 변환 텍스트 영역 */}
       <textarea
         className="form-item"
         value={transcript}
@@ -75,19 +122,20 @@ const TranscriptBox = forwardRef((props, ref) => {
         <button
           className="transcript-btn"
           disabled={!(step === 'transcripted' || step === 'summarized') || !transcript}
-          onClick={() => handleDownload(transcript, "원본_전사.txt")}
+          onClick={() => handleDownload(transcript, '원본_전사.txt')}
         >
           원본 다운로드
         </button>
         <button
           className="transcript-btn"
-          onClick={props.onSummary}
+          onClick={handleSummarize}
           disabled={step !== 'transcripted'}
         >
           요약
         </button>
       </div>
 
+      {/* 요약 텍스트 영역 */}
       <textarea
         className="form-item"
         value={summary}
@@ -97,10 +145,9 @@ const TranscriptBox = forwardRef((props, ref) => {
         disabled={step !== 'summarized'}
       />
 
-
       <button
         className="transcript-btn"
-        onClick={() => handleDownload(summary, "요약본.txt")}
+        onClick={() => handleDownload(summary, '요약본.txt')}
         disabled={step !== 'summarized' || !summary}
       >
         요약본 다운로드

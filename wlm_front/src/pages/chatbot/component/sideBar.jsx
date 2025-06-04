@@ -47,6 +47,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           setEndDate={setEndDate}
         />
 
+        <div className={styles.divider} />
+
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, keywords], index) => (
             <details key={index} className={styles.details} open>

@@ -1,14 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
-import { FaFilePdf, FaTimes } from 'react-icons/fa'; // 아이콘
-
+import { FaFilePdf, FaTimes } from 'react-icons/fa';
+import upArrowIcon from '../../images/up_arrow.png'
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const chatContentRef = useRef(null); 
+
+
+  useEffect(() => {
+    if (chatContentRef.current) {
+      chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSend = async () => {
     if (sending) return;
@@ -20,8 +28,6 @@ const ChatArea = () => {
       setSending(false);
       return;
     }
-
-    console.log('handleSend called with input:', currentInput);
 
     const userMessage = { text: currentInput, isUser: true };
     setMessages(prev => [...prev, userMessage]);
@@ -106,17 +112,13 @@ const ChatArea = () => {
 
   return (
     <div className={styles.chatArea}>
-      <div className={styles.chatContent}>
+      <div className={styles.chatContent} ref={chatContentRef}> {/* ✅ ref 적용 */}
         {messages.map((msg, index) => (
           <div
             key={index}
             className={`${styles.message} ${msg.isUser ? styles.userMessage : styles.aiMessage}`}
           >
-            {msg.isUser ? (
-              msg.text
-            ) : (
-              <ReactMarkdown>{msg.text}</ReactMarkdown>
-            )}
+            {msg.isUser ? msg.text : <ReactMarkdown>{msg.text}</ReactMarkdown>}
           </div>
         ))}
       </div>
@@ -139,6 +141,7 @@ const ChatArea = () => {
             ))}
           </div>
         )}
+
         <div className={styles.inputRow}>
           <input
             type="text"
@@ -168,7 +171,11 @@ const ChatArea = () => {
             onClick={handleSend}
             disabled={sending}
           >
-            Send
+            <img
+              src={upArrowIcon}
+              alt="send"
+              className={styles.sendIcon}
+            />
           </button>
         </div>
       </div>
