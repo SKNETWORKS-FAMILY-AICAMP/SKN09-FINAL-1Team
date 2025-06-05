@@ -3,7 +3,7 @@
 .chatArea {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 50px);
   background: #edf1f7;
   flex: 1;
   padding: 1.5rem;

@@ -3,7 +3,7 @@
 .wrapper {
   display: flex;
   position: relative;
-  height: 100vh;
+  height: 100%;
   font-family: 'Rubik', sans-serif;
 }
 

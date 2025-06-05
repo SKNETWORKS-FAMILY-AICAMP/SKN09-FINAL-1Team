@@ -15,7 +15,7 @@ const Header = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-session', {
+        const response = await axios.get('http://15.164.95.149:5173//api/check-session', {
           withCredentials: true
         });
         setSessionInfo(response.data.employee);
@@ -29,7 +29,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       // 서버 세션 삭제를 위한 API 호출
-      await axios.post('http://localhost:8000/api/logout', {}, {
+      await axios.post('http://15.164.95.149:5173//api/logout', {}, {
         withCredentials: true
       });
 
