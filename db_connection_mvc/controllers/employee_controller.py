@@ -44,17 +44,8 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
         "emp_role": employee["emp_role"]
     }
     
+    # 세션에 사용자 정보 저장
     request.session["employee"] = user_data
-    
-    # 세션 쿠키가 제대로 설정되도록 응답 헤더 추가
-    response.set_cookie(
-        key="session",
-        value=request.session._session.session_id,
-        httponly=True,
-        samesite="lax",
-        max_age=3600,  # 1시간
-        path="/"
-    )
 
     return {
         'message': '로그인 성공',
