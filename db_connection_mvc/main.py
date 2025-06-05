@@ -24,16 +24,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Set-Cookie"]
+    expose_headers=["*"]
 )
 
 # 세션 설정
 app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
-    session_cookie="sessionid",  # 쿠키 이름 변경
-    max_age=3600,  # 1시간
-    same_site="none",
+    session_cookie="sessionid",
+    max_age=3600,  # 24시간으로 연장
+    same_site="lax",  # same_site 설정 변경
     https_only=False,
     path="/"
 )

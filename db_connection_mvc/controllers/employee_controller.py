@@ -56,16 +56,24 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
     print("세션 데이터:", request.session)
     print("==================")
 
-    return JSONResponse(
+    response = JSONResponse(
         content={
             'message': '로그인 성공',
             'employee': user_data
-        },
-        headers={
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Origin": "http://15.164.95.149:5173"
         }
     )
+    
+    # 세션 쿠키 설정
+    response.set_cookie(
+        key="sessionid",
+        value=request.session._session_id,
+        httponly=True,
+        max_age=86400,
+        path="/",
+        samesite="lax"
+    )
+    
+    return response
 
 @router.post("/logout")
 async def logout(request: Request):
@@ -81,12 +89,15 @@ async def logout(request: Request):
 async def check_session(request: Request):
     print("=== 세션 체크 ===")
     print("현재 세션:", request.session)
-    print("==================")
     
-    if not request.session.get("authenticated"):
+    # 세션 데이터 확인
+    employee = request.session.get("employee")
+    authenticated = request.session.get("authenticated")
+    
+    if not authenticated or not employee:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
-    return {"employee": request.session.get("employee")}
+    return {"employee": employee}
 
 @router.get("/mypage")
 async def get_mypage_info(request: Request):
