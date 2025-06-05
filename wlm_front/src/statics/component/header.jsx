@@ -19,8 +19,10 @@ const Header = () => {
           withCredentials: true,
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Credentials': 'true'
+          },
+          credentials: 'include'
         });
         console.log('세션 체크 응답:', response.data);  // 응답 데이터 확인
         setSessionInfo(response.data.employee);

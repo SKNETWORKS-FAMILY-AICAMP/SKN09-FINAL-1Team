@@ -17,15 +17,6 @@ origins = [
     "http://43.201.98.14:8000"
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["Set-Cookie"]
-)
-
 # 세션 설정
 app.add_middleware(
     SessionMiddleware, 
@@ -35,6 +26,16 @@ app.add_middleware(
     same_site="none",  # 크로스 도메인을 위해 none으로 설정
     https_only=False,  # 개발 환경이므로 false
     path="/",
+)
+
+# CORS는 세션 다음에 설정
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*", "Set-Cookie"],
 )
 
 app.include_router(employee_router, prefix="/api")
