@@ -18,7 +18,7 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('http://15.164.95.149:5173//api/login',
+      const response = await axios.post('http://15.164.95.149:5173/api/login',
         {
           emp_code: empCode,
           emp_pwd: empPwd
@@ -30,7 +30,7 @@ const Login = () => {
 
       if (response.data.message === '로그인 성공') {
         // 세션 정보 확인을 위한 API 호출
-        const sessionResponse = await axios.get('http://15.164.95.149:5173//api/check-session', {
+        const sessionResponse = await axios.get('http://15.164.95.149:5173/api/check-session', {
           withCredentials: true
         });
 
