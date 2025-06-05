@@ -28,13 +28,13 @@ async def get_all_employees():
 
 # 유저 로그인
 @router.post("/login")
-async def login(request: Request, login_data: LoginRequest):
+async def login(request: Request, response: Response, login_data: LoginRequest):
     employee = await employee_service.login(login_data.emp_code, login_data.emp_pwd)
     if not employee:
         raise HTTPException(status_code=401, detail="잘못된 사원번호나 비밀번호입니다.")
     
     # 세션에 저장할 사용자 정보 (비밀번호 제외)
-    request.session["employee"] = {
+    user_data = {
         "emp_no": employee["emp_no"],
         "emp_name": employee["emp_name"],
         "emp_code": employee["emp_code"],
@@ -43,8 +43,23 @@ async def login(request: Request, login_data: LoginRequest):
         "emp_birth_date": str(employee["emp_birth_date"]),
         "emp_role": employee["emp_role"]
     }
+    
+    request.session["employee"] = user_data
+    
+    # 세션 쿠키가 제대로 설정되도록 응답 헤더 추가
+    response.set_cookie(
+        key="session",
+        value=request.session._session.session_id,
+        httponly=True,
+        samesite="lax",
+        max_age=3600,  # 1시간
+        path="/"
+    )
 
-    return {'message': '로그인 성공'}
+    return {
+        'message': '로그인 성공',
+        'employee': user_data  # 사용자 정보도 함께 반환
+    }
 
 @router.post("/logout")
 async def logout(request: Request):

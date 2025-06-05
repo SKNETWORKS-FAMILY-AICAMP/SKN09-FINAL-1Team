@@ -28,9 +28,10 @@ app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
     session_cookie="session",
-    max_age=None,
-    same_site="none",
-    https_only=False
+    max_age=3600,  # 1시간
+    same_site="lax",  # lax로 변경
+    https_only=False,
+    path="/"  # 쿠키 경로 명시
 )
 
 
