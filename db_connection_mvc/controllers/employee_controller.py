@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Response, HTTPException
 from services.employee_service import EmployeeService
 from pydantic import BaseModel
+from fastapi.responses import JSONResponse
 
 # 로그인 요청 모델
 class LoginRequest(BaseModel):
@@ -54,10 +55,24 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
     print("세션 데이터:", request.session)
     print("==================")
 
-    return {
+    # JSONResponse를 사용하여 쿠키 설정을 명시적으로 제어
+    response = JSONResponse(content={
         'message': '로그인 성공',
         'employee': user_data
-    }
+    })
+    
+    # 쿠키 설정을 명시적으로 추가
+    response.set_cookie(
+        key="session",
+        value=request.session.get("session"),
+        httponly=True,
+        samesite="none",
+        secure=False,  # 개발 환경이므로 false
+        max_age=3600,
+        path="/"
+    )
+
+    return response
 
 @router.post("/logout")
 async def logout(request: Request):

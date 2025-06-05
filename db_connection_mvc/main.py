@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from controllers.employee_controller import router as employee_router
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import JSONResponse
 import os
 from dotenv import load_dotenv
 
@@ -16,6 +17,15 @@ origins = [
     "http://15.164.95.149:5173",
     "http://43.201.98.14:8000"
 ]
+
+# 커스텀 미들웨어 추가
+@app.middleware("http")
+async def add_cors_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "http://15.164.95.149:5173"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Expose-Headers"] = "Set-Cookie"
+    return response
 
 # 세션 설정
 app.add_middleware(
@@ -33,7 +43,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["*", "Set-Cookie"],
 )
