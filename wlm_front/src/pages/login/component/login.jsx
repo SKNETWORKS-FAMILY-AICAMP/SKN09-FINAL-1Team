@@ -18,7 +18,6 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      // 로그인 요청
       const response = await axios.post('http://43.201.98.14:8000/api/login',
         {
           emp_code: empCode,
@@ -30,33 +29,8 @@ const Login = () => {
       );
 
       if (response.data.message === '로그인 성공') {
-        console.log('로그인 응답:', response.data);
-        
-        // 세션이 설정될 시간을 주기 위해 잠시 대기
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        try {
-          // 세션 정보 확인을 위한 API 호출
-          const sessionResponse = await axios.get('http://43.201.98.14:8000/api/check-session', {
-            withCredentials: true
-          });
-
-          // 사용자 정보 콘솔 출력
-          console.log('=== 로그인 성공 ===');
-          console.log('이름:', sessionResponse.data.employee.emp_name);
-          console.log('사원코드:', sessionResponse.data.employee.emp_code);
-          console.log('이메일:', sessionResponse.data.employee.emp_email);
-          console.log('==================');
-
-          navigate('/main');
-        } catch (sessionError) {
-          console.error('세션 확인 오류:', sessionError);
-          if (sessionError.response?.status === 401) {
-            setErrorMessage('세션 인증에 실패했습니다. 다시 로그인해주세요.');
-          } else {
-            setErrorMessage('세션 확인 중 오류가 발생했습니다.');
-          }
-        }
+        console.log('=== 로그인 성공 ===');
+        navigate('/main');
       }
     } catch (error) {
       console.error('Login error:', error);
