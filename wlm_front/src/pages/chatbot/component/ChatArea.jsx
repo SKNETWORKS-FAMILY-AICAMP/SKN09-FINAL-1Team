@@ -3,20 +3,38 @@ import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 import { FaFilePdf, FaTimes } from 'react-icons/fa';
 import upArrowIcon from '../../images/up_arrow.png'
-const ChatArea = () => {
+const ChatArea = ({ chatNo }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [files, setFiles] = useState([]);
+  const [newChat, setNewChat] = useState(true);
   const fileInputRef = useRef(null);
   const chatContentRef = useRef(null); 
-
 
   useEffect(() => {
     if (chatContentRef.current) {
       chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (chatNo) {
+      fetch(`http://localhost:8001/api/chat_log?chat_no=${chatNo}`)
+        .then(res => res.json())
+        .then(data => {
+          const formatted = data.map(msg => ({
+            text: msg.text,
+            isUser: msg.sender === "user"
+          }));
+          setMessages(formatted);
+          setNewChat(false);
+        });
+    } else {
+      setNewChat(true);
+      setMessages([]);
+    }
+  }, [chatNo]);
 
   const handleSend = async () => {
     if (sending) return;
@@ -36,6 +54,7 @@ const ChatArea = () => {
     try {
       const formData = new FormData();
       formData.append('question', currentInput);
+      formData.append("new_chat", newChat.toString());
       files.forEach((f) => {
         formData.append('files', f);
       });
@@ -69,7 +88,7 @@ const ChatArea = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-
+    setNewChat(false);
     setSending(false);
   };
 

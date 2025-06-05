@@ -108,7 +108,7 @@ class PromptExtraction:
 # 출력 (평가 기준 항목 목록):
 """
 
-    def make_prompt_to_query_document(self, document_text, question):
+    def make_prompt_to_query_document(self, document_text, question, memory):
         return f"""
 당신은 사업 제안서 문서 내용을 기반으로 질문에 정확하고 정직하게 답변하는 지능형 비서입니다.
 
@@ -124,10 +124,14 @@ class PromptExtraction:
 # 제약 조건
 - 질문이 명확하지 않아도 문서에서 최대한 근거 있는 부분을 찾아 응답하세요.
 - 문서에 있는 내용 외에는 어떠한 추측이나 배경 지식을 사용하지 마세요.
+- 과거 대화 내용을 기반하여 사용자의 질문의 의도에 맞는 응답을 하세요.
 - 반드시 한국어로 응답하세요.
 
 # 입력 문서
 {document_text}
+
+#과거 대화 내용
+{memory}
 
 # 질문
 {question}

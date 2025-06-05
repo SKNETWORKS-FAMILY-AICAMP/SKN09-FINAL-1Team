@@ -1,30 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../css/SideBar.module.css';
 import FilterPanel from './FilterPanel';
 
-const mockData = [
-  { date: '2025.05.09', keyword: '로그인 문제' },
-  { date: '2025.05.09', keyword: 'API 오류' },
-  { date: '2025.05.08', keyword: '세션 종료' },
-  { date: '2025.05.08', keyword: '디자인 피드백' },
-  { date: '2025.05.08', keyword: '빌드 실패' },
-];
 
-const groupByDate = (data) => {
-  return data.reduce((acc, item) => {
-    if (!acc[item.date]) acc[item.date] = [];
-    acc[item.date].push(item.keyword);
-    return acc;
-  }, {});
-};
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen, setIsOpen, onSelectChat }) => {
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByKeyword, setFilterByKeyword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const groupedData = groupByDate(mockData);
+  const [groupedData, setGroupedData] = useState({});
+
+  console.log(document.cookie)
+
+  useEffect(() => {
+    // const isLoggedIn = Boolean(document.cookie.includes("session="));
+    // if (!isLoggedIn) return;
+
+    fetch("http://localhost:8001/api/chat_list", {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        const grouped = groupByDate(data);
+        setGroupedData(grouped);
+      });
+  }, []);
+
+
+  const groupByDate = (items) => {
+    return items.reduce((acc, item) => {
+      const date = item.chat_create_dt;
+      acc[date] = acc[date] || [];
+      acc[date].push(item);
+      return acc;
+    }, {});
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -50,11 +62,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className={styles.divider} />
 
         <div className={styles.resultSection}>
-          {Object.entries(groupedData).map(([date, keywords], index) => (
+          {Object.entries(groupedData).map(([date, chats], index) => (
             <details key={index} className={styles.details} open>
               <summary className={styles.date}>📅 {date}</summary>
-              {keywords.map((keyword, i) => (
-                <div key={i} className={styles.item}>💬 {keyword}</div>
+              {chats.map((chat) => (
+                <div key={chat.chat_no} className={styles.item} onClick={() => onSelectChat(chat.chat_no)}>💬 {chat.chat_title}</div>
               ))}
             </details>
           ))}

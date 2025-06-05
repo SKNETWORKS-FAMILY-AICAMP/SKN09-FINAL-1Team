@@ -5,12 +5,13 @@ import styles from './base.module.css';
 
 function Base() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [selectedChatNo, setSelectedChatNo] = useState(null);
 
   return (
     <div className={styles.container}>
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} onSelectChat={(chat_no) => setSelectedChatNo(chat_no)} />
       <div className={`${styles.chatArea} ${!isSidebarOpen ? styles.full : ''}`}>
-        <ChatArea />
+        <ChatArea chatNo={selectedChatNo} newChat={!selectedChatNo} />
       </div>
     </div>
   );

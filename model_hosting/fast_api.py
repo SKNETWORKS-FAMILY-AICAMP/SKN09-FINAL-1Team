@@ -8,7 +8,6 @@ import pymysql
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
 from extraction.file_base_extraction import get_extractor_by_extension
-# from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 import requests
@@ -30,7 +29,8 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
 import uuid
-
+from datetime import datetime
+from types import SimpleNamespace
 
 load_dotenv()
 secret = os.getenv("SESSION_SECRET")
@@ -174,6 +174,8 @@ class MySQLCheckpoint:
         return pymysql.connect(**self.db_config)
 
     def get_tuple(self, config):
+        if config["configurable"].get("new_chat"):
+            return {"messages": [], "recall_memories": []}
         emp_code = config["configurable"]["user_id"]
         conn = self._get_connection()
         try:
@@ -203,28 +205,25 @@ class MySQLCheckpoint:
 
     def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
         emp_code = config["configurable"]["user_id"]
+        force_new_chat = config["configurable"].get("new_chat", False)
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT chat_no FROM chat_mate WHERE emp_no = (
-                        SELECT emp_no FROM employee WHERE emp_code = %s
-                    ) ORDER BY chat_create_dt DESC LIMIT 1
-                """, (emp_code,))
-                row = cursor.fetchone()
-                chat_no = row[0] if row else None
+                chat_no = None
+
+                if not force_new_chat:
+                    cursor.execute("""
+                        SELECT chat_no FROM chat_mate WHERE emp_no = (
+                            SELECT emp_no FROM employee WHERE emp_code = %s
+                        ) ORDER BY chat_create_dt DESC LIMIT 1
+                    """, (emp_code,))
+                    row = cursor.fetchone()
+                    chat_no = row[0] if row else None
                 if not chat_no:
                     print("❗ chat_no 없음 - 새 chat_mate 생성")
                 
-                    # 현재 해당 emp_code의 대화 개수 세기
-                    cursor.execute("""
-                        SELECT COUNT(*) FROM chat_mate 
-                        WHERE emp_no = (SELECT emp_no FROM employee WHERE emp_code = %s)
-                    """, (emp_code,))
-                    count = cursor.fetchone()[0]
-                
-                    # 제목 만들기: 대화 1, 대화 2, ...
-                    title = f"대화 {count + 1}"
+                    # 현재 날짜, 시간 기반 대화방 제목 생성
+                    title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 
                     # chat_mate에 새 row 삽입
                     cursor.execute("""
@@ -241,14 +240,71 @@ class MySQLCheckpoint:
                     chat_no = cursor.fetchone()[0]
 
                 for msg in messages:
-                    speaker_sn = 1 if isinstance(msg, HumanMessage) else 2
+                    print(f"🧪 msg type: {type(msg)}, content: {getattr(msg, 'content', msg)}")  # 디버그 로그 추가
+                
+                    if isinstance(msg, HumanMessage):
+                        speaker_sn = 1
+                    elif isinstance(msg, AIMessage):
+                        speaker_sn = 2
+                    elif isinstance(msg, dict) and msg.get("sender") == "user":
+                        speaker_sn = 1
+                        msg = SimpleNamespace(content=msg.get("text", ""))
+                    elif isinstance(msg, dict) and msg.get("sender") == "bot":
+                        speaker_sn = 2
+                        msg = SimpleNamespace(content=msg.get("text", ""))
+                    else:
+                        print(f"⚠️ 저장 불가한 메시지 타입: {type(msg)} - {msg}")
+                        continue
                     cursor.execute("""
                         INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
                         VALUES (%s, %s, %s, NOW())
                     """, (chat_no, msg.content, speaker_sn))
             conn.commit()
+            print(f"저장_{speaker_sn}:{msg}")
+            return chat_no
         finally:
             conn.close()
+
+    def get_chat_list(self, emp_code):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT chat_no, chat_title, DATE_FORMAT(chat_create_dt, '%%Y.%%m.%%d') as chat_create_dt
+                    FROM chat_mate
+                    WHERE emp_no = (SELECT emp_no FROM employee WHERE emp_code = %s)
+                    ORDER BY chat_create_dt DESC
+                """, (emp_code,))
+                rows = cursor.fetchall()
+                return [
+                    {
+                        "chat_no": row[0],
+                        "chat_title": row[1],
+                        "chat_create_dt": row[2]
+                    } for row in rows
+                ]
+        finally:
+            conn.close()
+
+    def get_chat_log(self, chat_no):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT log_text, log_speaker_sn
+                    FROM chat_log
+                    WHERE chat_no = %s
+                    ORDER BY log_create_dt
+                """, (chat_no,))
+                rows = cursor.fetchall()
+
+                return [
+                    {"text": row[0], "sender": "user" if row[1] == 1 else "bot"}
+                    for row in rows
+                ]
+        finally:
+            conn.close()
+   
 
 
 class MemoryAgent:
@@ -384,6 +440,8 @@ async def ask(
     print("🔍 session.get('employee') =", request.session.get("employee"))
     print("🔍 request.cookies =", request.cookies)
 
+    form = await request.form()
+    new_chat_flag = form.get("new_chat", "false").lower() == "true"
 
     employee = request.session.get("employee")
     if not employee or "emp_code" not in employee:
@@ -394,7 +452,7 @@ async def ask(
 
 
     mode = classify_question_mode(question)
-    config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
+    config = {"configurable": {"user_id": user_id, "thread_id": user_id, "new_chat": new_chat_flag}}
 
     # MySQLCheckpoint 인스턴스를 요청마다 생성하여 연결을 명시적으로 관리
     checkpoint = MySQLCheckpoint(
@@ -492,7 +550,11 @@ async def ask(
                 criteria_list = criteria_data.get("result", "")
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
-            qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question)
+            agent_state = State(messages=current_messages, recall_memories=[])
+            agent_state = memory_agent.load_memories(agent_state, config)
+            recall_memories_text = "\n".join(agent_state.recall_memories)
+
+            qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question, recall_memories_text)
             qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
             answer = qa_ollama.get_model_response().strip()
 
@@ -531,11 +593,14 @@ async def ask(
         agent_state = memory_agent.load_memories(agent_state, config)
         agent_response = memory_agent.agent(agent_state)
         
-        # agent_response에서 AIMessage 객체만 추출하여 저장
-        messages_to_save = [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
-        
-        checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
-        
+        # # agent_response에서 AIMessage 객체만 추출하여 저장
+        # messages_to_save = [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
+        # checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
+        # 기존 유저 질문 포함해서 저장할 messages 재구성
+        all_messages = current_messages + [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
+        checkpoint.save_tuple(config, all_messages, agent_response.recall_memories)
+
+
         messages = get_from_state(agent_response, "messages", [])
         if not messages:
             raise RuntimeError("No messages found in final_state")
@@ -737,6 +802,34 @@ async def ask_query(input: QuestionInput):
 
     return {"answer": final_answer}
 
+
+
+@router.get("/api/chat_list")
+async def chat_list(request: Request):
+    employee = request.session.get("employee")
+    emp_code = employee["emp_code"]
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    return checkpoint.get_chat_list(emp_code)
+
+@router.get("/api/chat_log")
+async def chat_log(chat_no: int):
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    return checkpoint.get_chat_log(chat_no)
 
 
 ### uvicorn main:app --reload
