@@ -56,24 +56,15 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
     print("세션 데이터:", request.session)
     print("==================")
 
-    response = JSONResponse(
+    return JSONResponse(
         content={
             'message': '로그인 성공',
             'employee': user_data
+        },
+        headers={
+            "Access-Control-Allow-Credentials": "true"
         }
     )
-    
-    # 세션 쿠키 설정
-    response.set_cookie(
-        key="sessionid",
-        value=request.session._session_id,
-        httponly=True,
-        max_age=86400,
-        path="/",
-        samesite="lax"
-    )
-    
-    return response
 
 @router.post("/logout")
 async def logout(request: Request):
