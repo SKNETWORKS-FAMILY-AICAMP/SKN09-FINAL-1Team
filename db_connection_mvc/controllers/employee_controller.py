@@ -29,6 +29,9 @@ async def get_all_employees():
 # 유저 로그인
 @router.post("/login")
 async def login(request: Request, response: Response, login_data: LoginRequest):
+    print("=== 로그인 시도 ===")
+    print("요청된 사원번호:", login_data.emp_code)
+    
     employee = await employee_service.login(login_data.emp_code, login_data.emp_pwd)
     if not employee:
         raise HTTPException(status_code=401, detail="잘못된 사원번호나 비밀번호입니다.")
@@ -46,21 +49,34 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
     
     # 세션에 사용자 정보 저장
     request.session["employee"] = user_data
+    
+    print("=== 세션 저장 완료 ===")
+    print("세션 데이터:", request.session)
+    print("==================")
 
     return {
         'message': '로그인 성공',
-        'employee': user_data  # 사용자 정보도 함께 반환
+        'employee': user_data
     }
 
 @router.post("/logout")
 async def logout(request: Request):
+    print("=== 로그아웃 시도 ===")
+    print("세션 삭제 전:", request.session)
     # 세션 삭제
     request.session.clear()
+    print("세션 삭제 후:", request.session)
+    print("==================")
     return {"message": "로그아웃 성공"}
 
 @router.get("/check-session")
 async def check_session(request: Request):
+    print("=== 세션 체크 ===")
+    print("현재 세션:", request.session)
+    print("==================")
+    
     if "employee" not in request.session:
+        print("세션에 employee 정보 없음")
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
     return {"employee": request.session["employee"]}
