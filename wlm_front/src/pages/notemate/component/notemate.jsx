@@ -42,7 +42,7 @@ const NoteMate = ({ loginUserName }) => {  // 로그인 사용자 이름을 prop
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("http://15.164.95.149:5173/api/employees");
+        const res = await fetch("http://43.201.98.14:8000/api/employees");
         const result = await res.json();
         if (result.status === "success") {
           // 서버 응답에서 필요한 필드만 매핑해서 저장
