@@ -50,29 +50,22 @@ async def login(request: Request, response: Response, login_data: LoginRequest):
     
     # 세션에 사용자 정보 저장
     request.session["employee"] = user_data
+    request.session["authenticated"] = True
     
     print("=== 세션 저장 완료 ===")
     print("세션 데이터:", request.session)
     print("==================")
 
-    # JSONResponse를 사용하여 쿠키 설정을 명시적으로 제어
-    response = JSONResponse(content={
-        'message': '로그인 성공',
-        'employee': user_data
-    })
-    
-    # 쿠키 설정을 명시적으로 추가
-    response.set_cookie(
-        key="session",
-        value=request.session.get("session"),
-        httponly=True,
-        samesite="none",
-        secure=False,  # 개발 환경이므로 false
-        max_age=3600,
-        path="/"
+    return JSONResponse(
+        content={
+            'message': '로그인 성공',
+            'employee': user_data
+        },
+        headers={
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Origin": "http://15.164.95.149:5173"
+        }
     )
-
-    return response
 
 @router.post("/logout")
 async def logout(request: Request):
@@ -90,11 +83,10 @@ async def check_session(request: Request):
     print("현재 세션:", request.session)
     print("==================")
     
-    if "employee" not in request.session:
-        print("세션에 employee 정보 없음")
+    if not request.session.get("authenticated"):
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
-    return {"employee": request.session["employee"]}
+    return {"employee": request.session.get("employee")}
 
 @router.get("/mypage")
 async def get_mypage_info(request: Request):

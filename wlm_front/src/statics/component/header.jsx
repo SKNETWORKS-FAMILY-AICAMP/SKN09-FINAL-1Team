@@ -5,6 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import logoImage from '../../../src/pages/images/logo-image.png';
 import axios from 'axios';
 
+// axios 기본 설정
+axios.defaults.withCredentials = true;
+
 const Header = () => {
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
@@ -15,37 +18,28 @@ const Header = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await axios.get('http://43.201.98.14:8000/api/check-session', {
-          withCredentials: true,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Credentials': 'true'
-          },
-          credentials: 'include'
-        });
-        console.log('세션 체크 응답:', response.data);  // 응답 데이터 확인
+        const response = await axios.get('http://43.201.98.14:8000/api/check-session');
+        console.log('세션 체크 응답:', response.data);
         setSessionInfo(response.data.employee);
       } catch (error) {
-        console.error('세션 체크 에러:', error.response?.data || error.message);  // 자세한 에러 정보 출력
-        setSessionInfo(null);
+        console.error('세션 체크 에러:', error.response?.data || error.message);
+        if (error.response?.status === 401) {
+          setSessionInfo(null);
+          logout();  // 401 에러시 로그아웃 처리
+        }
       }
     };
-    checkSession();
-  }, []);
+    
+    if (isLoggedIn) {
+      checkSession();
+    }
+  }, [isLoggedIn, logout]);
 
   const handleLogout = async () => {
     try {
-      // 서버 세션 삭제를 위한 API 호출
-      await axios.post('http://43.201.98.14:8000/api/logout', {}, {
-        withCredentials: true
-      });
-
-      // 로컬 상태 초기화
+      await axios.post('http://43.201.98.14:8000/api/logout');
       logout();
       setSessionInfo(null);
-
-      // 로그인 페이지로 이동
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 중 오류 발생:', error);

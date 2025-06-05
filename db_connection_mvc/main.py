@@ -11,42 +11,31 @@ secret = os.getenv("SESSION_SECRET", "default_key")
 
 app = FastAPI()
 
-
-# CORS 설정을 먼저
+# CORS 설정
 origins = [
     "http://localhost:5173",
     "http://15.164.95.149:5173",
     "http://43.201.98.14:8000"
 ]
 
-# 커스텀 미들웨어 추가
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "http://15.164.95.149:5173"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Expose-Headers"] = "Set-Cookie"
-    return response
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Set-Cookie"]
+)
 
 # 세션 설정
 app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
-    session_cookie="session",
+    session_cookie="sessionid",  # 쿠키 이름 변경
     max_age=3600,  # 1시간
-    same_site="none",  # 크로스 도메인을 위해 none으로 설정
-    https_only=False,  # 개발 환경이므로 false
-    path="/",
-)
-
-# CORS는 세션 다음에 설정
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["*", "Set-Cookie"],
+    same_site="none",
+    https_only=False,
+    path="/"
 )
 
 app.include_router(employee_router, prefix="/api")
