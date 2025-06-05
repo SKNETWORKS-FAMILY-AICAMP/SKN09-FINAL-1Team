@@ -33,7 +33,7 @@ app.add_middleware(
     https_only=False  # 로컬에서는 False
 )
 
-app.include_router(router)
+app.include_router(router, prefix="/api")
 app.include_router(email_router)
 
 
