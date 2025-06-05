@@ -15,7 +15,8 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "http://15.164.95.149:5173",
-    "http://43.201.98.14:8000"
+    "http://43.201.98.14:8000",
+    "http://43.201.98.14"
 ]
 
 app.add_middleware(
@@ -24,7 +25,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
+    max_age=3600
 )
 
 # 세션 설정
@@ -32,8 +34,8 @@ app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
     session_cookie="sessionid",
-    max_age=3600,  # 24시간으로 연장
-    same_site="lax",  # same_site 설정 변경
+    max_age=3600,
+    same_site="none",  # CORS 요청을 위해 none으로 변경
     https_only=False,
     path="/"
 )
