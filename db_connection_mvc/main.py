@@ -11,6 +11,7 @@ secret = os.getenv("SESSION_SECRET", "default_key")
 
 app = FastAPI()
 
+
 # CORS 설정을 먼저
 origins = [
     "http://localhost:5173",
