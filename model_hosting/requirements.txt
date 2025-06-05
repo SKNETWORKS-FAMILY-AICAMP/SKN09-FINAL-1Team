@@ -103,7 +103,6 @@ python-multipart==0.0.20
 pytorch-lightning==2.5.1.post0
 pytorch-metric-learning==2.8.1
 pytz==2025.2
-pywin32==310
 PyYAML==6.0.2
 qdrant-client==1.14.2
 regex==2024.11.6

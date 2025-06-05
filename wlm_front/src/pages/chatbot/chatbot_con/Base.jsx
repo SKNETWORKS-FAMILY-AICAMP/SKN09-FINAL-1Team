@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../component/sideBar.jsx';
 import ChatArea from '../component/ChatArea.jsx';
-import styles from './base.module.css';
+import styles from './Base.module.css';
 
 function Base() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
