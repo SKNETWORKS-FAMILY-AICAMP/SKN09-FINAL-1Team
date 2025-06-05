@@ -10,15 +10,14 @@ secret = os.getenv("SESSION_SECRET", "default_key")
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",  # Vite dev server
-    "http://localhost:3306",  # 필요 시 다른 포트도 추가
-]
-
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://15.164.95.149:5173",
+        "http://43.201.98.14:8000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,7 +29,7 @@ app.add_middleware(
     secret_key=secret,
     session_cookie="session",
     max_age=None,
-    same_site="lax",
+    same_site="none",
     https_only=False
 )
 
