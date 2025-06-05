@@ -738,6 +738,285 @@ async def ask_query(input: QuestionInput):
     return {"answer": final_answer}
 
 
+#===========================================================================================
+
+
+from typing import List, Optional, Literal, Any, Dict
+
+def get_connection():
+    """
+    MySQL에 연결된 Connection 객체를 반환합니다.
+    환경변수(MY_DB_*)를 사용하여 pymysql.connect를 호출합니다.
+    """
+    return pymysql.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+
+class LoginRequest(BaseModel):
+    emp_code: str
+    emp_pwd: str
+
+
+class ResetPasswordRequest(BaseModel):
+    emp_code: str
+    new_password: str
+
+
+class VerifyPasswordRequest(BaseModel):
+    emp_pwd: str
+
+
+class ChangePasswordRequest(BaseModel):
+    new_password: str
+
+
+@router.post("/api/login", response_model=Dict[str, str])
+async def login_endpoint(body: LoginRequest, request: Request):
+    """
+    POST /login
+    ────────────────────────────────────
+    Request JSON body:
+      {
+        "emp_code": "1001",
+        "emp_pwd": "pass123"
+      }
+    성공 시:
+      세션에 "employee"라는 키로 { emp_code, emp_name, emp_email } 저장하고
+      {"message": "로그인 성공"} 반환
+    실패 시:
+      HTTP 401 에러 (사원번호/비밀번호 불일치)
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT emp_pwd, emp_name, emp_email
+                FROM employee
+                WHERE emp_code = %s
+                """,
+                (body.emp_code,)
+            )
+            row = cursor.fetchone()
+
+            if not row or row["emp_pwd"] != body.emp_pwd:
+                raise HTTPException(status_code=401, detail="사원번호 또는 비밀번호가 올바르지 않습니다")
+
+            # 세션에 employee 정보 저장
+            request.session["employee"] = {
+                "emp_code": body.emp_code,
+                "emp_name": row["emp_name"],
+                "emp_email": row["emp_email"],
+            }
+    finally:
+        conn.close()
+
+    return {"message": "로그인 성공"}
+
+
+@router.post("/api/reset-password", response_model=Dict[str, str])
+async def reset_password(body: ResetPasswordRequest):
+    """
+    POST /reset-password
+    ────────────────────────────────────
+    Request JSON body:
+      {
+        "emp_code": "1001",
+        "new_password": "newPass!"
+      }
+    성공 시:
+      {"message": "<emp_code> 비밀번호가 초기화되었습니다"} 반환
+    실제로는 DB에서 비밀번호를 업데이트해야 합니다.
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT emp_code FROM employee WHERE emp_code = %s", (body.emp_code,))
+            if cursor.fetchone() is None:
+                raise HTTPException(status_code=404, detail="존재하지 않는 사원코드입니다")
+
+            cursor.execute(
+                "UPDATE employee SET emp_pwd = %s WHERE emp_code = %s",
+                (body.new_password, body.emp_code)
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+    return {"message": f"{body.emp_code} 비밀번호가 초기화되었습니다"}
+
+
+@router.get("/api/check-session", response_model=Dict[str, Dict[str, str]])
+async def check_session(request: Request):
+    """
+    GET /check-session
+    ────────────────────────────────────
+    세션에서 "employee" 객체를 꺼내서 반환:
+      {
+        "employee": {
+          "emp_code": "1001",
+          "emp_name": "홍길동",
+          "emp_email": "hong@example.com"
+        }
+      }
+    세션이 없으면 HTTP 401 에러
+    """
+    employee = request.session.get("employee")
+    if not employee:
+        raise HTTPException(status_code=401, detail="로그인 세션이 없습니다")
+    return {"employee": employee}
+
+
+@router.get("/api/mypage", response_model=Dict[str, str])
+async def mypage_endpoint(request: Request):
+    """
+    GET /mypage
+    ────────────────────────────────────
+    세션에서 emp_code를 꺼낸 뒤,
+    해당 사원의 상세 정보를 반환:
+      {
+        "emp_name": "홍길동",
+        "emp_email": "hong@example.com",
+        "emp_dept":  "기획팀"
+      }
+    세션이 없으면 HTTP 401 에러
+    """
+    employee = request.session.get("employee")
+    if not employee or "emp_code" not in employee:
+        raise HTTPException(status_code=401, detail="로그인 세션이 없습니다")
+
+    emp_code = employee["emp_code"]
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT emp_name, emp_email, emp_dept
+                FROM employee
+                WHERE emp_code = %s
+                """,
+                (emp_code,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
+            return {
+                "emp_name":  row["emp_name"],
+                "emp_email": row["emp_email"],
+                "emp_dept":  row["emp_dept"],
+            }
+    finally:
+        conn.close()
+
+
+@router.post("/api/verify-password", response_model=Dict[str, str])
+async def verify_password(body: VerifyPasswordRequest, request: Request):
+    """
+    POST /verify-password
+    ────────────────────────────────────
+    Request JSON body:
+      {
+        "emp_pwd": "pass123"
+      }
+    세션에서 emp_code를 꺼내 와서 DB의 비밀번호와 비교
+    성공 시: {"message": "비밀번호 확인 완료"}
+    실패 시: HTTP 401 에러 (비밀번호 불일치)
+    """
+    employee = request.session.get("employee")
+    if not employee or "emp_code" not in employee:
+        raise HTTPException(status_code=401, detail="로그인 세션이 없습니다")
+
+    emp_code = employee["emp_code"]
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT emp_pwd FROM employee WHERE emp_code = %s", (emp_code,))
+            row = cursor.fetchone()
+            if not row or row["emp_pwd"] != body.emp_pwd:
+                raise HTTPException(status_code=401, detail="비밀번호가 틀렸습니다")
+    finally:
+        conn.close()
+
+    return {"message": "비밀번호 확인 완료"}
+
+
+@router.post("/api/change-password", response_model=Dict[str, str])
+async def change_password(body: ChangePasswordRequest, request: Request):
+    """
+    POST /change-password
+    ────────────────────────────────────
+    Request JSON body:
+      {
+        "new_password": "newPass!"
+      }
+    세션에서 emp_code를 꺼내 와서 DB의 비밀번호를 새로 설정
+    성공 시: {"message": "<emp_code> 비밀번호가 변경되었습니다"}
+    """
+    employee = request.session.get("employee")
+    if not employee or "emp_code" not in employee:
+        raise HTTPException(status_code=401, detail="로그인 세션이 없습니다")
+
+    emp_code = employee["emp_code"]
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE employee SET emp_pwd = %s WHERE emp_code = %s",
+                (body.new_password, emp_code)
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+    return {"message": f"{emp_code} 비밀번호가 변경되었습니다"}
+
+
+@router.get("/api/employees", response_model=List[Dict[str, str]])
+async def list_employees():
+    """
+    GET /employees
+    ────────────────────────────────────
+    전체 사원 목록을 반환:
+      [
+        { "emp_code": "1001", "emp_name": "홍길동", "dept": "기획팀" },
+        { "emp_code": "1002", "emp_name": "김영서", "dept": "개발팀" },
+        …
+      ]
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT emp_code, emp_name, emp_dept FROM employee")
+            rows = cursor.fetchall()
+            return [
+                {
+                    "emp_code": row["emp_code"],
+                    "emp_name": row["emp_name"],
+                    "dept":     row["emp_dept"],
+                }
+                for row in rows
+            ]
+    finally:
+        conn.close()
+
+
+@router.post("/api/logout", response_model=Dict[str, str])
+async def logout_endpoint(request: Request):
+    """
+    POST /logout
+    ────────────────────────────────────
+    세션을 비우고 로그아웃 처리:
+      {"message": "로그아웃 완료"} 반환
+    """
+    request.session.clear()
+    return {"message": "로그아웃 완료"}
 
 ### uvicorn main:app --reload
  

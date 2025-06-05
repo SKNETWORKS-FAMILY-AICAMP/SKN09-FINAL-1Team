@@ -33,9 +33,12 @@ app.add_middleware(
     https_only=False  # 로컬에서는 False
 )
 
-app.include_router(router, prefix="/api")
+app.include_router(router)
 app.include_router(email_router)
-
+#==========================================================
+@app.get("/")
+async def root():
+    return {"message": "FastAPI 서버가 정상 동작 중입니다."}
 
 ### uvicorn main:app --reload
 # uvicorn main:app --reload --port 8001
