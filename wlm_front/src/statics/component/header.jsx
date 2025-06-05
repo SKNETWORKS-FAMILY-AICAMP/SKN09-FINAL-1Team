@@ -9,37 +9,49 @@ import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 const Header = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, user, login, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sessionInfo, setSessionInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 세션 정보 확인
   useEffect(() => {
     const checkSession = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get('http://43.201.98.14:8000/api/check-session');
         console.log('세션 체크 응답:', response.data);
-        setSessionInfo(response.data.employee);
+        
+        if (response.data.employee) {
+          setSessionInfo(response.data.employee);
+          // 세션이 유효하면 로그인 상태 유지
+          if (!isLoggedIn) {
+            login(response.data.employee.emp_code);
+          }
+        }
       } catch (error) {
         console.error('세션 체크 에러:', error.response?.data || error.message);
         if (error.response?.status === 401) {
           setSessionInfo(null);
-          logout();  // 401 에러시 로그아웃 처리
+          logout();
+          if (location.pathname !== '/login') {
+            navigate('/login');
+          }
         }
+      } finally {
+        setIsLoading(false);
       }
     };
-    
-    if (isLoggedIn) {
-      checkSession();
-    }
-  }, [isLoggedIn, logout]);
+
+    checkSession();
+  }, [location.pathname, login, logout, navigate, isLoggedIn]);
 
   const handleLogout = async () => {
     try {
       await axios.post('http://43.201.98.14:8000/api/logout');
-      logout();
       setSessionInfo(null);
+      logout();
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 중 오류 발생:', error);
@@ -54,6 +66,11 @@ const Header = () => {
   ];
 
   const isMainPage = location.pathname === '/main';
+
+  // 로딩 중이면 로딩 표시
+  if (isLoading) {
+    return <div className="header">로딩 중...</div>;
+  }
 
   return (
     <div className="header">
