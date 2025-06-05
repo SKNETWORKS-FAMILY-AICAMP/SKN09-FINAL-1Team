@@ -10,36 +10,37 @@ secret = os.getenv("SESSION_SECRET", "default_key")
 
 app = FastAPI()
 
-# CORS
+# CORS 설정을 먼저
+origins = [
+    "http://localhost:5173",
+    "http://15.164.95.149:5173",
+    "http://43.201.98.14:8000"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://15.164.95.149:5173",
-        "http://43.201.98.14:8000"
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Set-Cookie"]
 )
 
-# 세션
+# 세션 설정
 app.add_middleware(
     SessionMiddleware, 
     secret_key=secret,
     session_cookie="session",
     max_age=3600,  # 1시간
-    same_site="lax",  # lax로 변경
-    https_only=False,
-    path="/"  # 쿠키 경로 명시
+    same_site="none",  # 크로스 도메인을 위해 none으로 설정
+    https_only=False,  # 개발 환경이므로 false
+    path="/",
 )
-
 
 app.include_router(employee_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 

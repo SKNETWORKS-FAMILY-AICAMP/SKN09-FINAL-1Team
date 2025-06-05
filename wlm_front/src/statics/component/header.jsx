@@ -16,10 +16,16 @@ const Header = () => {
     const checkSession = async () => {
       try {
         const response = await axios.get('http://43.201.98.14:8000/api/check-session', {
-          withCredentials: true
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
+        console.log('세션 체크 응답:', response.data);  // 응답 데이터 확인
         setSessionInfo(response.data.employee);
       } catch (error) {
+        console.error('세션 체크 에러:', error.response?.data || error.message);  // 자세한 에러 정보 출력
         setSessionInfo(null);
       }
     };
