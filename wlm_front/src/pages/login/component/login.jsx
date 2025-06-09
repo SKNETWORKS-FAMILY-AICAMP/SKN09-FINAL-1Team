@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/login.css';
 import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,24 @@ const Login = () => {
   const [showReset, setShowReset] = useState(false); // 비밀번호 초기화 모달 상태
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  // 세션 체크 및 리다이렉트
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/check-session', {
+          withCredentials: true
+        });
+        if (response.data.employee) {
+          navigate('/main');
+        }
+      } catch (error) {
+        // 세션이 없는 경우 로그인 페이지 유지
+        console.log('세션 없음');
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
