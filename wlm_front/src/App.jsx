@@ -7,7 +7,7 @@ import Base from './pages/chatbot/chatbot_con/Base.jsx';
 import Login from './pages/login/component/login.jsx';
 import Mainpage from './pages/mainpage/component/mainpage.jsx';
 import Footer from './statics/component/footer.jsx';
-import MyPage from './pages/mypage/component/mypage.jsx';
+import MyPage from './pages/mypage/component/MyPage.jsx';
 import CallMate from './pages/callmate/Callmate.jsx';
 import AdminPage from './pages/admin/AdminBase.jsx';
 import QueryMate from './pages/querymate/querymate.jsx'

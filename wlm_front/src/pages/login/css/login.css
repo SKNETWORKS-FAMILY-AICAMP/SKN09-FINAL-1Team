@@ -4,11 +4,11 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
   min-height: 100vh;
   font-family: 'Raleway', sans-serif;
-  background-color: #e0f7ff; /* 하늘색 테마 */
+  color: #000000;           /* 기본 글씨 흰색 */
 }
 
 .container {
@@ -16,6 +16,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background-color: #ffffff;
 }
 
 .container:hover .top:before,
@@ -54,7 +55,7 @@ body {
   z-index: 10;
   opacity: 0.8;
   transition-delay: 0.2s;
-  background-color: #d0ecff; /* 단색으로 */
+  background-color: #3a3a3a; /* 다크 그레이 */
 }
 
 .top:before { transform: rotate(45deg); }
@@ -84,6 +85,7 @@ body {
   opacity: 0;
   transform: translateY(-20px);
   transition: opacity 0.4s ease, transform 0.4s ease;
+  filter: brightness(1) invert(0); /* 로고가 있다면 밝기 반전 */
 }
 
 .container:hover .center img.login-logo,
@@ -95,7 +97,7 @@ body {
 .center h2 {
   margin-top: 5px;
   margin-bottom: 10px;
-  color: #007acc;
+  color: #000000; /* 흰색 텍스트 */
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
@@ -114,44 +116,79 @@ body {
   width: 280px;
 }
 
+/* 입력 필드 & 버튼 - 다크 모드 */
 .center input[type='text'],
-.center input[type='password'],
+.center input[type='password'] {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #555555;      /* 어두운 회색 테두리 */
+  background-color: #2a2a2a;      /* 다크 그레이 배경 */
+  color: #ffffff;                  /* 입력 글씨 흰색 */
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.center input[type='text']::placeholder,
+.center input[type='password']::placeholder {
+  color: #bbbbbb; /* 연한 회색 플레이스홀더 */
+}
+
+.center input[type='text']:focus,
+.center input[type='password']:focus {
+  outline: none;
+  border-color: #ffffff; /* 흰색 포커스 */
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
 .center input[type='submit'] {
   width: 100%;
   padding: 12px;
   margin: 6px 0;
   border-radius: 6px;
-  border: 1px solid #ccc; 
+  border: 1px solid #444444;      /* 진한 회색 테두리 */
+  background-color: #444444;      /* 진한 회색 버튼 */
+  color: #ffffff;                 /* 흰색 텍스트 */
+  cursor: pointer;  
   font-family: inherit;
   font-size: 16px;
-}
-
-.center input[type='submit'] {
-  background-color: #4da6ff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .center input[type='submit']:hover {
-  background-color: #1e80d0;
+  background-color: #ffffff;      /* 흰색 배경으로 반전 */
+  color: #000000;                /* 다크 텍스트 */
+  border-color: #dddddd;         /* 연한 회색 테두리 */
+}
+
+.center input[type='submit']:active {
+  background-color: #bbbbbb;      /* 연회색 */
+  color: #222222;                /* 다크 텍스트 */
 }
 
 .center .forgot-password {
   margin-top: 10px;
-  color: #007acc;
+  color: #5b5a5a;  /* 연한 회색 링크 */
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
+  transition: color 0.2s;
 }
 
 .center .forgot-password:hover {
-  color: #005b9f;
+  color: #474545; /* 흰색 호버 */
 }
 
 .error-message {
-  color: red;
+  color: #e74c3c; /* 진한 빨간색 에러 메시지 */
   font-size: 14px;
   margin-top: 10px;
+}
+
+/* 화면이 작아질 때 중앙 정렬 유지 */
+@media (max-width: 600px) {
+  .center {
+    width: 90%;
+  }
 }

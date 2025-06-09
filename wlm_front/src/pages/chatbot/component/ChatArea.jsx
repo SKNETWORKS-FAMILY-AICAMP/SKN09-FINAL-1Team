@@ -163,7 +163,7 @@ const ChatArea = () => {
             disabled={sending}
           />
           <label htmlFor="pdf-upload" className={styles.uploadButton} title="PDF 업로드">
-            💾
+            ➕
           </label>
           <button
             type="button"

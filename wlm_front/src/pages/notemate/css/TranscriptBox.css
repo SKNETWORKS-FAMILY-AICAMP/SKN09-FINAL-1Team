@@ -6,10 +6,11 @@
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  background-color: #f7fbff;
+  background-color: #2a2a2a;                 /* 다크 그레이 배경 */
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.05);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);   /* 진한 그림자 */
   box-sizing: border-box;
+  color: #ffffff;                            /* 흰색 텍스트 */
 }
 
 /* 텍스트 영역 */
@@ -19,28 +20,30 @@
   padding: 12px;
   font-size: 15px;
   line-height: 1.5;
-  border: 1px solid #a0c4ff;
+  border: 1px solid #555555;                 /* 중간 회색 테두리 */
   border-radius: 6px;
-  background-color: #ffffff;
+  background-color: #3a3a3a;                 /* 다크 그레이 필드 */
+  color: #ffffff;                            /* 흰색 입력 텍스트 */
   resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-item:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.2);
+  border-color: #ffffff;                     /* 흰색 포커스 */
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
 }
 
 .form-item:disabled {
-  background-color: #f0f0f0;
-  color: #222;
+  background-color: #222222;                 /* 더 어두운 배경 */
+  color: #888888;                            /* 연한 회색 텍스트 */
 }
 
 textarea {
   min-height: 160px;
   font-family: 'Inter', sans-serif;
-  color: #222;
+  color: #ffffff;                            /* 흰색 텍스트 */
+  background-color: #3a3a3a;                 /* 필드 배경 */
 }
 
 /* 버튼 가로 정렬 */
@@ -53,11 +56,10 @@ textarea {
 }
 
 .transcript-btn {
-  padding: 0.5rem 1rem;
-  background-color: #4f9ffb;
-  color: white;
-  border: none;
   padding: 0.6rem 1.5rem;
+  background-color: #555555;                 /* 진회색 버튼 */
+  color: #ffffff;                            /* 흰색 텍스트 */
+  border: none;
   font-size: 1rem;
   font-weight: 500;
   border-radius: 999px;
@@ -66,12 +68,12 @@ textarea {
 }
 
 .transcript-btn:hover {
-  background-color: #0076d6;
+  background-color: #777777;                 /* 연한 회색 호버 */
 }
 
 .transcript-btn:disabled {
-  background-color: #ccc;
-  color: #666;
+  background-color: #333333;                 /* 비활성 진회색 */
+  color: #888888;                            /* 연한 회색 텍스트 */
   cursor: not-allowed;
 }
 
@@ -87,13 +89,13 @@ textarea {
 .file-item {
   display: flex;
   align-items: center;
-  background: #f4f4f4;
+  background: #3a3a3a;                       /* 다크 그레이 배경 */
   border-radius: 6px;
   padding: 4px 10px;
   max-width: 240px;
   overflow: hidden;
   font-size: 0.9rem;
-  color: #333;
+  color: #ffffff;                            /* 흰색 텍스트 */
   gap: 6px;
 }
 
@@ -116,21 +118,21 @@ textarea {
 .upload-label {
   display: inline-block;
   cursor: pointer;
-  margin: 8px 0 4px 0; 
+  margin: 8px 0 4px 0;
   padding: 6px 12px;
-  background-color: #e8f0fe;
-  color: #333;
+  background-color: #555555;                 /* 진회색 */
+  color: #ffffff;                            /* 흰색 텍스트 */
   border-radius: 999px;
   font-weight: 500;
   transition: background-color 0.3s ease;
 }
 
 .upload-label:hover {
-  background-color: #c7dbfc;
+  background-color: #777777;                 /* 연한 회색 호버 */
 }
 
 .upload-label.disabled {
-  background-color: #e0e0e0;
+  background-color: #333333;                 /* 비활성 진회색 */
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -143,7 +145,7 @@ textarea {
 }
 
 .upload-status {
-  color: #007bff;
+  color: #ffffff;                            /* 흰색 텍스트 */
   font-weight: 500;
   animation: fadeInOut 1.2s infinite;
 }

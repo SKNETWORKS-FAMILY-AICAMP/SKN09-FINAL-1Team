@@ -2,16 +2,17 @@
   width: 320px;
   height: 100vh;
   padding: 20px;
-  background-color: white;
-  border-right: 1px solid #cce0f5;
+  background-color: #5C5C5C;          /* 약간 밝은 다크 그레이 배경 */
+  border-right: 1px solid #444444;    /* 중간 회색 구분선 */
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.7);
+  color: #ffffff;                     /* 흰색 텍스트 */
 }
 
 .sidebar h3 {
   font-size: 1.2rem;
-  color: #0077cc;
+  color: #ffffff;                     /* 흰색 */
   margin-bottom: 1.5rem;
 }
 
@@ -21,22 +22,29 @@
   margin-bottom: 1.2rem;
   padding: 8px 12px;
   font-size: 14px;
-  border: 1px solid #ddd;
+  border: 1px solid #555555;         /* 중간 회색 테두리 */
   border-radius: 6px;
-  background-color: white;
+  background-color: #3c3c3c;          /* 약간 밝은 다크 그레이 필드 */
+  color: #ffffff;                     /* 흰색 입력 텍스트 */
   transition: border-color 0.2s;
+}
+
+.sidebar input::placeholder,
+.sidebar select::placeholder {
+  color: #888888;                     /* 연한 회색 플레이스홀더 */
 }
 
 .sidebar input:focus,
 .sidebar select:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
+  border-color: #ffffff;              /* 흰색 포커스 */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
+.sidebar label,
 .filterSection label {
   font-size: 14px;
-  color: #666;
+  color: #cccccc;                     /* 연한 회색 */
   display: block;
   margin-bottom: 10px;
 }
@@ -45,8 +53,8 @@
 .resetBtn {
   width: 100%;
   padding: 10px;
-  background-color: #4a90e2;
-  color: white;
+  background-color: #666666;          /* 연한 진회색 버튼 */
+  color: #ffffff;                     /* 흰색 텍스트 */
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -57,7 +65,15 @@
 
 .searchBtn:hover,
 .resetBtn:hover {
-  background-color: #357abd;
+  background-color: #888888;          /* 연한 회색 호버 */
+}
+
+.resetBtn {
+  background-color: #777777;          /* 중간 회색 */
+}
+
+.resetBtn:hover {
+  background-color: #999999;
 }
 
 .btnGroupRow {
@@ -67,35 +83,20 @@
   margin-top: 20px;
 }
 
-.resetBtn {
-  background-color: #6c757d;
-}
-
-.resetBtn:hover {
-  background-color: #5a6268;
-}
-
 .dateSearchContainer {
   margin-bottom: 1.2rem;
-}
-
-.sidebar label {
-  font-size: 14px;
-  color: #666;
-  display: block;
-  margin-bottom: 10px;
 }
 
 .statusLegend {
   margin-top: 60px;
   padding: 10px;
   border-radius: 8px;
-  background-color: #f8f9fa;
+  background-color: #3c3c3c;          /* 약간 밝은 다크 그레이 */
 }
 
 .statusLegendTitle {
   font-size: 14px;
-  color: #666;
+  color: #cccccc;                     /* 연한 회색 */
   margin-bottom: 10px;
 }
 
@@ -104,6 +105,7 @@
   align-items: center;
   margin-bottom: 8px;
   font-size: 13px;
+  color: #ffffff;                     /* 흰색 텍스트 */
 }
 
 .statusColor {
@@ -113,42 +115,44 @@
   border-radius: 4px;
 }
 
+/* 상태 색상은 원본대로 유지 */
 .statusColor.대기 {
-  background-color: #808080;
+  background-color: #808080;          /* 회색 */
 }
 
 .statusColor.승인 {
-  background-color: #4CAF50;
+  background-color: #4CAF50;          /* 초록색 */
 }
 
 .statusColor.수정완료 {
-  background-color: #FFD700;
+  background-color: #FFD700;          /* 금색 */
 }
 
 .dateInputContainer {
   margin-bottom: 15px;
 }
 
-
 .dateLabel {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: #cccccc;                     /* 연한 회색 */
   margin-bottom: 5px;
 }
 
 .dateInput {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #555555;         /* 중간 회색 테두리 */
   border-radius: 6px;
   font-size: 14px;
+  background-color: #3c3c3c;          /* 약간 밝은 다크 그레이 필드 */
+  color: #ffffff;                     /* 흰색 텍스트 */
 }
 
 .dateInput:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
+  border-color: #ffffff;              /* 흰색 포커스 */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
 .filterHeaderRow {
@@ -160,8 +164,8 @@
 
 .smallResetBtn {
   padding: 4px 8px;
-  background-color: #6c757d;
-  color: white;
+  background-color: #777777;          /* 중간 회색 */
+  color: #ffffff;                     /* 흰색 텍스트 */
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -170,5 +174,5 @@
 }
 
 .smallResetBtn:hover {
-  background-color: #5a6268;
+  background-color: #999999;          /* 연한 회색 호버 */
 }

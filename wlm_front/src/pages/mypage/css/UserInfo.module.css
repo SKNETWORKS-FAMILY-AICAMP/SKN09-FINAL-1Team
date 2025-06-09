@@ -1,75 +1,75 @@
 .userInfoContainer {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 122, 204, 0.1);
-    overflow: hidden;
-    border: 1px solid rgba(0, 122, 204, 0.1);
+  background: #FFFFFF; /* 흰색 */
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 연회색 그림자 */
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1); /* 연회색 테두리 */
 }
 
 .header {
-    padding: 15px;
-    background: rgba(0, 122, 204, 0.08);
-    border-bottom: 2px solid #007acc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.05); /* 매우 연한 회색 배경 */
+  border-bottom: 2px solid #CCCCCC; /* 연회색 구분선 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title {
-    margin: 0;
-    color: #007acc;
-    font-size: 1.25rem;
-    font-weight: 700;
+  margin: 0;
+  color: #2A2A2A;      /* 진회색 텍스트 */
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .passwordChangeButton {
-    padding: 0.45rem 1.2rem;
-    background-color: #007acc;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.2s;
+  padding: 0.45rem 1.2rem;
+  background-color: #555555; /* 진회색 버튼 */
+  color: #FFFFFF;            /* 흰색 텍스트 */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .passwordChangeButton:hover {
-    background-color: #0069b3;
+  background-color: #333333; /* 더 진한 회색 */
 }
 
 .content {
-    padding: 15px;
+  padding: 15px;
 }
 
 .infoTable {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .infoTable th,
 .infoTable td {
-    padding: 15px;
-    border-bottom: 1px solid rgba(0, 122, 204, 0.1);
-    text-align: left;
+  padding: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* 연회색 구분선 */
+  text-align: left;
 }
 
 .infoTable th {
-    width: 120px;
-    color: #007acc;
-    font-weight: 600;
-    background-color: rgba(0, 122, 204, 0.05);
+  width: 120px;
+  color: #2A2A2A;                 /* 진회색 텍스트 */
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.05); /* 매우 연한 회색 배경 */
 }
 
 .infoTable td {
-    color: #333;
+  color: #333333; /* 다크 그레이 텍스트 */
 }
 
 .infoTable tr:last-child th,
 .infoTable tr:last-child td {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .infoTable tr:hover td {
-    background-color: rgba(0, 122, 204, 0.02);
-} 
+  background-color: rgba(0, 0, 0, 0.02); /* 매우 연한 회색 호버 */
+}
