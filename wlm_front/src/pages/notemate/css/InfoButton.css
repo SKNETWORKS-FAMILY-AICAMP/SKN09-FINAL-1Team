@@ -2,9 +2,9 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 2px solid #4a90e2;
+    border: 2px solid #000000;
     background: #fff;
-    color: #4a90e2;
+    color: #000000;
     font-size: 18px;
     font-weight: bold;
     display: flex;
@@ -17,5 +17,5 @@
 
 .info-btn:hover {
     background: #eaf4ff;
-    border-color: #007ccc;
+    border-color: #393939;
 }

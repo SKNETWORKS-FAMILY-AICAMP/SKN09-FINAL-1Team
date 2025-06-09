@@ -13,7 +13,7 @@
   top: 12px;
   left: 88%;
   z-index: 10;
-  background-color: #e3e8ef;
+  background-color: #f0f0f0;     /* 밝은 무채색 */
   border: none;
   border-radius: 0 6px 6px 0;
   padding: 6px 12px;
@@ -24,9 +24,9 @@
 /* ── 사이드바 기본 스타일 */
 .sidebar {
   width: 300px;
-  background-color: #f9fbfd;
+  background-color: #4c4c4c;     /* 조금 더 밝은 무채색 */
   padding: 1.5rem 1rem;
-  border-right: 1px solid #dde4ee;
+  border-right: 1px solid #000000; /* 옅은 무채색 구분선 */
   overflow-y: auto;
   transition: all 0.3s ease;
 }
@@ -42,37 +42,28 @@
 .title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #3b4cca; /* 짙은 파랑톤 */
+  color: #ffffff;                /* 중간 무채색 텍스트 */
   margin-bottom: 1rem;
 }
 
-/* ── 필터 & 검색 박스를 감싸는 흰색 카드 */
+/* ── 필터 & 검색 박스를 감싸는 카드 */
 .filterCard {
-  background-color: #ffffff;
+  background-color: #ffffff;     /* 순백 */
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 1rem;
-}
-
-/* ── 필터 박스 내부 (FilterPanel이 어떤 구조든지 간에 이 영역 전체에 패딩을 주기 위함) */
-.filterCard :global(*) {
-  /* 
-    FilterPanel 컴포넌트 내부의 모든 요소에 대하여 
-    여기서 별도의 스타일을 주지 않아도, 외부 여백(padding)만 주면 
-    내부 콘텐츠가 카드 안에서 여유롭게 배치됩니다. 
-  */
 }
 
 /* ── 필터 영역과 목록 사이 구분선 */
 .divider {
   height: 2px;
-  background-color: #4a90e2; /* 파란-보라 계열 라인 */
+  background-color: #cccccc;     /* 연한 회색 라인 */
   margin-bottom: 1rem;
   border-radius: 1px;
 }
 
-/* ── 결과 섹션 (날짜 + 키워드 목록) */
+/* ── 결과 섹션 */
 .resultSection {
   display: flex;
   flex-direction: column;
@@ -81,7 +72,7 @@
 
 /* ── 날짜 그룹 박스 */
 .details {
-  background-color: #ffffff;
+  background-color: #ffffff;     /* 순백 */
   border-radius: 0.8rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   padding: 0.8rem 1rem;
@@ -91,7 +82,7 @@
 .date {
   font-weight: 600;
   font-size: 0.92rem;
-  color: #222;
+  color: #333333;                /* 중간 무채색 텍스트 */
   margin-bottom: 0.5rem;
 }
 
@@ -99,8 +90,8 @@
 .item {
   font-size: 0.88rem;
   padding: 6px 12px;
-  background-color: #f1f5fa;
-  color: #333;
+  background-color: #ebebeb;     /* 밝은 무채색 배경 */
+  color: #333333;
   border-radius: 8px;
   margin-top: 4px;
   cursor: pointer;
@@ -108,11 +99,9 @@
 }
 
 .item:hover {
-  background-color: #e0ebf9;
+  background-color: #dddddd;     /* 살짝 어두운 무채색 */
 }
 
 /* ────────────────────────────────────────────────────────── */
 
-/* FilterPanel 컴포넌트 내부에 쓰이는 스타일이 별도 필요하다면, 
-   FilterPanel.module.css를 사용해 그 안에서 정의해주세요. 
-   이 파일( SideBar.module.css )은 오로지 외곽 레이아웃만 담당합니다. */
+/* FilterPanel 내부 스타일은 별도 파일에 정의해주세요. */

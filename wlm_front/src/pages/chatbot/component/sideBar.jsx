@@ -52,9 +52,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, keywords], index) => (
             <details key={index} className={styles.details} open>
-              <summary className={styles.date}>📅 {date}</summary>
+              <summary className={styles.date}> {date}</summary>
               {keywords.map((keyword, i) => (
-                <div key={i} className={styles.item}>💬 {keyword}</div>
+                <div key={i} className={styles.item}> {keyword}</div>
               ))}
             </details>
           ))}

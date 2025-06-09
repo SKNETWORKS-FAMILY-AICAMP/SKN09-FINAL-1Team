@@ -1,19 +1,23 @@
-/* mainpage.css */
+/* mainpage.css (Dark Mode) */
 * {
   box-sizing: border-box;
 }
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #F4FAFF;
+  background-color: #888888;
+  color: #ffffff;           /* 기본 글씨 흰색 */
 }
+
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
+
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -65,7 +69,7 @@ html, body {
   overflow: hidden;
 }
 
-/* �ㅻⅨ履� 40vw留� 諛곌꼍 �대�吏�, ��/�꾨옒/�ㅻⅨ履� �щ갚 */
+/* 배경 이미지: 흐림 + 밝기 조절, 다크 마스크 */
 .bg-img-right {
   position: absolute;
   top: 0;
@@ -74,10 +78,10 @@ html, body {
   height: 100%;
   background-size: cover;
   background-position: center;
-  filter: blur(3px) brightness(0.85);
+  filter: blur(3px) brightness(0.6);
   transition: background-image 0.3s;
-  mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
-  -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 100%);
+  mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 100%);
 }
 
 .body-section {
@@ -89,7 +93,7 @@ html, body {
   gap: 24px;
 }
 
-/* �ㅻⅨ履� �띿뒪��: 諛뺤뒪 �놁씠, �ш퀬 援듦쾶, �꾩븘�� �щ갚 以꾩엫 */
+/* 우측 텍스트 전용 섹션: 중앙 정렬, 투명 배경 */
 .right-text-only {
   flex: 1.1;
   display: flex;
@@ -111,63 +115,59 @@ html, body {
     max-width: 40vw;
     width: 40vw;
     margin-left: auto;
-    margin-right: 80px; /* �ㅻⅨ履� �щ갚 80px */
+    margin-right: 80px;
     padding: 0 14px;
   }
 }
+
 @media (max-width: 1400px) {
   .content-container {
     padding: 0 80px;
   }
 }
+
 @media (max-width: 900px) {
   .content-container {
     padding: 0 40px;
-  }
-  
-  .content-container {
     flex-direction: column;
     gap: 20px;
   }
-  
   .left-content,
   .right-content {
     flex: none;
     width: 100%;
   }
-  
   .right-content {
     min-height: 300px;
   }
 }
+
 @media (max-width: 600px) {
   .main-wrapper {
     padding: 3vh 20px;
   }
-  
   .right-content {
     min-height: 250px;
   }
-  
   .desc-text-only {
     font-size: 1.2rem;
   }
 }
 
-/* �ㅻ챸 �띿뒪��: 諛뺤뒪 �놁씠, �ш퀬 援듦쾶, 洹몃┝�� */
+/* 플로팅 텍스트 박스: 흰색 텍스트 + 진한 그림자 */
 .desc-text-only {
   position: relative;
   z-index: 2;
   font-size: 1.6rem;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 0 3px 12px rgba(23,65,134,0.25), 0 1px 0 #0a3d91;
+  color: #ffffff; /* 흰색 텍스트 */
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.7), 0 1px 0 #000000;
   text-align: center;
   padding: 20px;
   max-width: 90%;
 }
 
-/* �섏쁺 硫붿떆吏��� 諛뺤뒪+媛��낆꽦 �ㅽ��� + 湲��� �� �� */
+/* 웰컴 박스: 투명 배경, 둥근 모서리 */
 .welcome-box {
   width: 100%;
   padding: 40px 20px;
@@ -185,20 +185,22 @@ html, body {
 .welcome-text-top {
   font-size: 3.2rem;
   font-weight: 700;
-  color: #2a2a2a;
+  color: #ffffff; /* 흰색 */
   margin-bottom: 32px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   user-select: none;
   line-height: 1.2;
 }
+
 .welcome-text-bottom {
   font-size: 3.8rem;
   font-weight: 700;
-  color: #0a3d91;
+  color: #fcfcfc; /* 중간 연회색 */
   margin-top: 36px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   user-select: none;
 }
+
 .logo-img {
   width: 50%;
   max-width: 200px;
@@ -206,8 +208,9 @@ html, body {
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 4px 16px rgba(23,65,134,0.25));
+  filter: brightness(0) invert(1); /* 로고를 밝게 보이게 반전 */
 }
+
 .welcome-text-top .greeting {
   display: block;
   margin-bottom: 20px;
@@ -215,54 +218,60 @@ html, body {
   font-weight: 700;
 }
 
-/* �쇱そ 移대뱶 �곸뿭 諛� 湲고� 湲곗〈 �ㅽ��쇱� �먮옒��濡� */
+/* 카드 컴포넌트: 다크 그레이 배경, 진한 그림자, 흰색 텍스트 */
 .card {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #fefefe;
+  background-color: #2a2a2a; /* 다크 그레이 */
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  border: 1px solid #e1e4e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7); /* 진한 그림자 */
+  border: 1px solid #444444; /* 중간 회색 테두리 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.25s, box-shadow 0.25s, transform 0.2s;
-  color: #222;
+  color: #ffffff; /* 흰색 텍스트 */
   user-select: none;
   overflow: hidden;
   text-decoration: none;
   outline: none;
 }
+
 .card:focus {
-  outline: 2px solid #0a3d91;
+  outline: 2px solid #888888; /* 연회색 포커스 링 */
   outline-offset: 2px;
 }
+
 .card:active {
   transform: scale(0.97) rotate(-1deg);
 }
+
 .card:hover {
-  background-color: #ebf3ff;
-  box-shadow: 0 10px 30px rgba(0, 108, 255, 0.25);
+  background-color: #3a3a3a; /* 호버 시 밝은 회색 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
   transform: translateY(-4px) scale(1.03);
 }
+
 .card-title {
   position: relative;
   font-weight: 700;
   font-size: 1.7rem;
-  color: #222;
+  color: #ffffff; /* 흰색 */
   text-align: center;
   width: 100%;
   opacity: 0.9;
   z-index: 3;
   transition: color 0.2s;
 }
+
 .card:hover .card-title,
 .card:focus .card-title {
-  color: #0a3d91;
+  color: #cccccc; /* 연한 그레이 */
 }
+
 .card-bg {
   position: absolute;
   top: 0; left: 0;
@@ -271,9 +280,15 @@ html, body {
   z-index: 1;
   transition: background 0.3s;
 }
-.chat-bg, .note-bg, .query-bg, .call-bg {
-  background: #cee4ff88;
+
+/* 카드 배경 색상: 매우 어두운 그레이 그라데이션 */
+.chat-bg,
+.note-bg,
+.query-bg,
+.call-bg {
+  background: rgba(40, 40, 40, 0.6);
 }
+
 .card:hover .chat-bg,
 .card:focus .chat-bg,
 .card:hover .note-bg,
@@ -282,8 +297,9 @@ html, body {
 .card:focus .query-bg,
 .card:hover .call-bg,
 .card:focus .call-bg {
-  background: #a4c9ffcc;
+  background: rgba(60, 60, 60, 0.8);
 }
+
 .card-img {
   position: relative;
   width: 35%;
@@ -295,12 +311,16 @@ html, body {
   opacity: 0.85;
   margin-bottom: 12px;
   transition: opacity 0.25s;
+  filter: brightness(0) invert(1); /* 아이콘을 흰색으로 반전 */
 }
+
 .card:hover .card-img,
 .card:focus .card-img {
   opacity: 1;
 }
-.card-img.chat { background-image: url('chat.png'); }
-.card-img.note { background-image: url('note.png'); }
-.card-img.query { background-image: url('query.png'); }
-.card-img.call { background-image: url('call.png'); }
+
+/* 카드별 아이콘: 다크 모드용 반전 이미지 사용 */
+.card-img.chat { background-image: url('../../images/chatbot-dark-light.png'); }
+.card-img.note { background-image: url('../../images/notemate-dark-light.png'); }
+.card-img.query { background-image: url('../../images/querymate-dark-light.png'); }
+.card-img.call { background-image: url('../../images/callbot-dark-light.png'); }

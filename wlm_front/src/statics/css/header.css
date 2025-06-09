@@ -2,15 +2,17 @@
   position: relative;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;       /* 전체 너비 */
+  min-width: 1280px;  /* 필요시 최소 너비 지정 */
   height: 50px;
-  background-color: #ffffff;
+  background-color: #1e1e1e; /* 흰색 → 다크 그레이 */
+  color: #ffffff;            /* 검은색 텍스트 → 흰색 */
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
   z-index: 999;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.1); /* 그림자 반전 */
 }
 
 /* 로고 */
@@ -21,6 +23,7 @@
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
+  filter: brightness(0) invert(1); 
 }
 
 /* 메뉴바 */
@@ -38,8 +41,8 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #000;
-  background: #fff;
+  background: #1e1e1e;    /* 흰색 → 다크 그레이 */
+  color: #ffffff;         /* 검은 → 흰색 */
   padding: 3px 18px;
   border-radius: 10px 10px 0 0;
   transition: color 0.4s ease;
@@ -56,7 +59,7 @@
   left: 0;
   width: 0%;
   height: 100%;
-  background-color: #4a90e2;
+  background-color: #cccccc; /* 짙은 회색 → 연한 회색 */
   z-index: 0;
   transition: width 0.4s ease;
 }
@@ -66,10 +69,10 @@
   width: 100%;
 }
 .menu-group:hover .menu-label {
-  color: #fff;
+  color: #1e1e1e;          /* 흰 → 다크 그레이 */
 }
 .menu-group:hover .menu-icon {
-  background-image: var(--icon-light);
+  background-image: var(--icon-dark);
 }
 
 /* 텍스트 & 아이콘 공통 스타일 */
@@ -80,6 +83,7 @@
   font-weight: bold;
   font-size: 14px;
   transition: all 0.4s ease;
+  color: inherit;
 }
 
 .menu-icon {
@@ -91,37 +95,36 @@
   background-position: center;
 }
 
-/* 기본 어두운 아이콘 + 밝은 hover용 */
+/* 기본 밝은 아이콘 + 어두운 hover용 */
 .menu-icon.chat {
-  --icon-light: url('../../pages/images/chatbot-dark-light.png');
-  background-image: url('../../pages/images/chatbot-image.png');
+  --icon-dark: url('../../pages/images/chatbot-image.png');
+  background-image: url('../../pages/images/chatbot-dark-light.png');
 }
 .menu-icon.note {
-  --icon-light: url('../../pages/images/notemate-dark-light.png');
-  background-image: url('../../pages/images/notemate-image.png');
+  --icon-dark: url('../../pages/images/notemate-image.png');
+  background-image: url('../../pages/images/notemate-dark-light.png');
 }
 .menu-icon.claim {
-  --icon-light: url('../../pages/images/querymate-dark-light.png');
-  background-image: url('../../pages/images/querymate-image.png');
+  --icon-dark: url('../../pages/images/querymate-image.png');
+  background-image: url('../../pages/images/querymate-dark-light.png');
 }
 .menu-icon.call {
-  --icon-light: url('../../pages/images/callbot-dark-light.png');
-  background-image: url('../../pages/images/callbot-image.png');
+  --icon-dark: url('../../pages/images/callbot-image.png');
+  background-image: url('../../pages/images/callbot-dark-light.png');
 }
 
 /* 활성화 탭 유지 */
 .menu-group.active {
-  background-color: #4a90e2;
-  color: #fff;
-  box-shadow: 0px -3px 0px #4a90e2 inset;
+  background-color: #cccccc;   /* 다크 그레이 → 연한 회색 */
+  color: #1e1e1e;              /* 흰 → 다크 그레이 */
+  box-shadow: 0px -3px 0px #cccccc inset;
 }
 .menu-group.active .menu-label,
 .menu-group.active .menu-icon {
-  color: #fff;
-  background-image: var(--icon-light);
+  background-image: var(--icon-dark);
 }
 
-/* 버튼 */
+/* 버튼 그룹 */
 .header-buttons {
   display: flex;
   gap: 10px;
@@ -132,10 +135,11 @@
   align-items: center;
 }
 
+/* 버튼 */
 .header-btn {
   padding: 6px 14px;
-  background-color: #4a90e2;
-  color: #fff;
+  background-color: #ffffff;  /* 다크 → 흰색 */
+  color: #1e1e1e;             /* 흰 → 다크 그레이 */
   border: none;
   border-radius: 25px;
   font-size: 14px;
@@ -144,57 +148,20 @@
 }
 
 .header-btn:hover {
-  background-color: #007CCC;
+  background-color: #eeeeee;  /* 호버 시 연한 흰색 */
 }
 
-/* 공통 아이콘 스타일 */
-.menu-icon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 2px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  transition: background-image 0.4s ease;
-  position: relative;
-  z-index: 1;
-}
-
-/* Chatbot 아이콘 */
-.menu-icon.chat {
-  --icon-light: url('../../pages/images/chatbot-dark-light.png');
-  background-image: url('../../pages/images/chatbot-image.png');
-}
-
-/* Notemate 아이콘 */
-.menu-icon.note {
-  --icon-light: url('../../pages/images/notemate-dark-light.png');
-  background-image: url('../../pages/images/notemate-image.png');
-}
-
-/* Querymate 아이콘 */
-.menu-icon.claim {
-  --icon-light: url('../../pages/images/querymate-dark-light.png');
-  background-image: url('../../pages/images/querymate-image.png');
-}
-
-/* Callbot 아이콘 */
-.menu-icon.call {
-  --icon-light: url('../../pages/images/callbot-dark-light.png');
-  background-image: url('../../pages/images/callbot-image.png');
-}
-
-/* Hover or Active 상태에서 밝은 버전 아이콘으로 전환 */
+/* Hover or Active 상태에서 아이콘 전환 */
 .menu-group:hover .menu-icon,
 .menu-group.active .menu-icon {
-  background-image: var(--icon-light);
+  background-image: var(--icon-dark);
 }
 
 /* 가운데 문구 (main 전용) */
 .header-center-text {
   font-size: 20px;
   font-weight: 700;
-  color: #000;
+  color: #ffffff;             /* 검은 → 흰색 */
   text-align: center;
   flex-grow: 1;
   display: flex;
@@ -202,12 +169,3 @@
   align-items: center;
   white-space: nowrap;
 }
-
-.header {
-  width: 100vw;   /* 또는 width: 100%; */
-  min-width: 1280px; /* 필요시 최소 너비 지정 */
-  box-sizing: border-box;
-  position: relative; /* 필요에 따라 fixed, sticky 등 */
-}
-
-

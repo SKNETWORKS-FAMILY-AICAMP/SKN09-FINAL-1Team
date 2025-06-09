@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import '../css/header.css';
 import { useAuth } from '../../context/AuthContext';
-import logoImage from '../../../src/pages/images/logo-image.png';
+import logoImage from '../../pages/mainpage/css/wlbmate_logo.png';
 import axios from 'axios';
 
 const Header = () => {
