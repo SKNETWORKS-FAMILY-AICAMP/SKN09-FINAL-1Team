@@ -4,11 +4,12 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #edf1f7;
+  background: #9d9d9d;           /* 조금 더 밝은 그레이 */
   flex: 1;
   padding: 1.5rem;
   box-sizing: border-box;
   font-family: 'Rubik', sans-serif;
+  color: #ffffff;
 }
 
 .chatContent {
@@ -21,7 +22,7 @@
 }
 
 .inputWrapper {
-  background: #edf1f7;
+  background: #9d9d9d;           /* 약간 밝게 */
   padding-top: 10px;
   display: flex;
   flex-direction: column;
@@ -39,18 +40,18 @@
 .fileItem {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #dee5ef;
+  background: #4a4a4a;           /* 밝은 그레이 */
+  border: 1px solid #666666;     /* 경계선도 밝게 */
   border-radius: 20px;
   padding: 6px 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   max-width: 220px;
   min-height: 36px;
   font-size: 0.85rem;
 }
 
 .fileIcon {
-  color: #e74c3c;
+  color: #e74c3c;                /* 원본 빨강 유지 */
   font-size: 1rem;
 }
 
@@ -60,41 +61,34 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: #333;
+  color: #dddddd;
 }
 
 .removeIcon {
   cursor: pointer;
-  color: #bbb;
+  color: #aaaaaa;                /* 연하게 */
   font-size: 1rem;
   transition: color 0.2s ease;
 }
 
 .removeIcon:hover {
-  color: #e74c3c;
+  color: #ffffff;
 }
 
 .inputRow {
   display: flex;
   align-items: center;
   border-radius: 999px;
-  background: white;
+  background: #4a4a4a;           /* 밝은 그레이 */
   padding: 0.5rem 1rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   gap: 12px;
   justify-content: space-between;
 }
 
-.inputRow > *:first-child {
-  order: 1; /* 업로드 버튼 왼쪽 */
-}
-.inputRow > .input {
-  order: 2;
-  flex: 1;
-}
-.inputRow > .sendButton {
-  order: 3;
-}
+.inputRow > *:first-child { order: 1; }
+.inputRow > .input       { order: 2; flex: 1; }
+.inputRow > .sendButton  { order: 3; }
 
 .input {
   padding: 12px 16px;
@@ -103,74 +97,75 @@
   font-size: 1rem;
   border-radius: 999px;
   background: transparent;
-  color: #333;
+  color: #ffffff;
   transition: box-shadow 0.2s ease, border 0.2s ease;
 }
 
+.input::placeholder {
+  color: #aaaaaa;
+}
+
 .input:focus {
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
-  border: 1px solid #4a90e2;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  border: 1px solid #ffffff;
 }
 
 .uploadButton {
   font-size: 1.1rem;
-  color: #777;
+  color: #cccccc;                /* 밝게 */
   cursor: pointer;
   background: none;
   border: none;
   transition: color 0.3s;
+  filter:brightness(0)invert(1)
 }
 
 .uploadButton:hover {
-  color: #4a90e2;
+  color: #ffffff;
 }
 
 .sendButton {
   width: 44px;
   height: 44px;
-  background-color: #4a90e2;           /* 메인 컬러 */
+  background-color: #f2f2f2;     /* 밝은 버튼 */
   border: none;
-  border-radius: 50%;                  /* 완전한 원형 */
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   font-size: 1.2rem;
   cursor: pointer;
-
-  /* 그림자 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-
-  /* 부드러운 전환 효과 */
-  transition: background-color 0.3s ease, 
-              transform 0.2s ease, 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  transition: background-color 0.3s ease,
+              transform 0.2s ease,
               box-shadow 0.3s ease;
 }
 
 .sendButton:hover {
-  background-color: #357ed5;            /* 호버 시 살짝 진해지는 컬러 */
-  transform: translateY(-2px);           /* 살짝 띄워진 듯한 효과 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #f9f9f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
 .sendButton:active {
-  /* 클릭(눌렀을 때)에는 원래 자리로 되돌아오면서 그림자 살짝 축소 */
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  background-color: #555555;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .sendButton:disabled {
-  background-color: #cfd6e3;             /* 비활성화 상태 컬러 */
+  background-color: #444444;
   cursor: not-allowed;
-  box-shadow: none;                      /* 그림자 제거 */
+  box-shadow: none;
+  color: #bbbbbb;
 }
 
-/* 화살표 이미지를 적절한 크기로 조정 */
 .sendIcon {
-  width: 20px;           /* 원하시는 크기로 조절 가능 */
-  height: 20px;          /* 비율 유지되도록 width/height 동일 비율 사용 */
+  width: 20px;
+  height: 20px;
   object-fit: contain;
-} 
+}
 
 .message {
   max-width: 70%;
@@ -179,19 +174,19 @@
   font-size: 15px;
   line-height: 1.5;
   word-break: break-word;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
 .userMessage {
   align-self: flex-end;
-  background-color: #4a90e2;
+  background-color: #3c3c3c;
   color: white;
   border-bottom-right-radius: 4px;
 }
 
 .aiMessage {
   align-self: flex-start;
-  background-color: #ffffff;
-  color: #333;
+  background-color: #2c2c2c;
+  color: #ffffff;
   border-bottom-left-radius: 4px;
 }

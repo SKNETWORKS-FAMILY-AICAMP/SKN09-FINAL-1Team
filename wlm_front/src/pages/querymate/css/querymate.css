@@ -1,10 +1,13 @@
 .querymate-container {
   display: flex;
-  background: #f0f8ff;
+  background: #2f2f2f;          /* 다크 그레이 배경 */
   font-family: 'Inter', sans-serif;
+  color: #ffffff;              /* 흰색 텍스트 */
 }
 
 .main-content {
   flex: 1;
   padding: 2rem;
+  background: transparent;     /* 부모의 다크 배경을 그대로 사용 */
+  color: #ffffff;              /* 흰색 텍스트 */
 }

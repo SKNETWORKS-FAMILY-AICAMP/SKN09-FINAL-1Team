@@ -64,9 +64,9 @@ const Sidebar = ({ isOpen, setIsOpen, onSelectChat }) => {
         <div className={styles.resultSection}>
           {Object.entries(groupedData).map(([date, chats], index) => (
             <details key={index} className={styles.details} open>
-              <summary className={styles.date}>📅 {date}</summary>
+              <summary className={styles.date}> {date}</summary>
               {chats.map((chat) => (
-                <div key={chat.chat_no} className={styles.item} onClick={() => onSelectChat(chat.chat_no)}>💬 {chat.chat_title}</div>
+                <div key={chat.chat_no} className={styles.item} onClick={() => onSelectChat(chat.chat_no)}> {chat.chat_title}</div>
               ))}
             </details>
           ))}

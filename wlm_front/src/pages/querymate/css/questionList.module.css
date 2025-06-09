@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: 20px;
   padding: 20px;
+  background-color: #2F2F2F;          /* 다크 그레이 배경 */
+  color: #ffffff;                     /* 흰색 텍스트 */
 }
 
 .headerSection {
@@ -14,7 +16,7 @@
 
 .title {
   font-size: 24px;
-  color: #333;
+  color: #ffffff;                     /* 흰색 */
   margin: 0;
 }
 
@@ -24,9 +26,9 @@
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  color: white;
-  background-color: #0077cc;
-  box-shadow: 0px 4px 0px #004d85;
+  color: #ffffff;                     /* 흰색 텍스트 */
+  background-color: #555555;          /* 진회색 버튼 */
+  box-shadow: 0px 4px 0px #444444;    /* 중간 회색 그림자 */
   opacity: 0.95;
   transform: scale(1);
   transition:
@@ -38,20 +40,22 @@
 .generateButton:hover {
   transform: scale(1.03);
   opacity: 1;
+  background-color: #777777;          /* 연한 회색 호버 */
+  box-shadow: 0px 4px 0px #666666;
 }
 
 .generateButton:active {
   transform: scale(0.98);
   opacity: 0.8;
-  background-color: #388E3C;
-  box-shadow: 0 0 #2E7D32;
+  background-color: #444444;          /* 더 진한 회색 */
+  box-shadow: none;
 }
 
 .noResults {
-  color: #888;
+  color: #bbbbbb;                     /* 연한 회색 텍스트 */
   text-align: center;
   padding: 20px;
-  background: #f8f9fa;
+  background: #3a3a3a;                /* 다크 그레이 박스 */
   border-radius: 8px;
   margin: 20px 0;
 }
@@ -62,17 +66,17 @@
   gap: 16px;
   overflow-y: auto;
   flex: 1;
-  padding-right: 10px; /* 스크롤바 여백 */
+  padding-right: 10px;                /* 스크롤바 여백 */
 }
 
 .questionItem {
   position: relative;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
+  padding: 15px 15px 15px 30px;       /* 왼쪽 여백 증가 */
+  border: 1px solid #2F2F2F;          /* 중간 회색 테두리 */
+  border-radius: 16px;
+  background: #2a2a2a;                /* 다크 그레이 */
   margin-bottom: 10px;
-  padding-left: 30px;  /* 왼쪽 여백 증가 */
+  color: #ffffff;                     /* 흰색 텍스트 */
 }
 
 .statusBar {
@@ -80,28 +84,26 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 20px;  /* 너비 증가 */
+  width: 20px;                        /* 너비 증가 */
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
 }
 
+/* 상태 색상은 원본대로 유지 */
 .statusBar.대기 {
-  background-color: #808080;  /* 회색 */
+  background-color: #808080;          /* 회색 */
 }
-
 .statusBar.승인 {
-  background-color: #4CAF50;  /* 초록색 */
+  background-color: #4CAF50;          /* 초록색 */
 }
-
 .statusBar.수정완료 {
-  background-color: #FFD700;  /* 노란색 */
+  background-color: #FFD700;          /* 노란색 */
 }
 
-/* 페이지네이션 컨테이너 스타일 */
+/* 페이지네이션 컨테이너 */
 .paginationContainer {
   margin-top: auto;
   padding: 15px 0;
-  
   display: flex;
   justify-content: center;
-} 
+}

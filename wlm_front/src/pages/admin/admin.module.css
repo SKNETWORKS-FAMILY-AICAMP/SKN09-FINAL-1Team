@@ -1,12 +1,12 @@
 /** 전체 배경 및 기본 폰트 */
-body {
+.body {
     overflow-x: hidden;
     width: 100vw;
     max-width: none;
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: #f4faff;
+    background: #6b6b6b;
     font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
 }
 

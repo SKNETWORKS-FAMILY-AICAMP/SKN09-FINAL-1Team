@@ -1,10 +1,10 @@
 .question-item {
-  background: #ffffff;
-  border: 1px solid #ccc;
+  background: #4C4C4C;                     /* 다크 그레이 배경 */
+  border: 1px solid #444444;              /* 중간 회색 테두리 */
   border-radius: 10px;
   margin-bottom: 1.5rem;
   padding: 1.2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7); /* 진한 그림자 */
 }
 
 .question-header {
@@ -16,7 +16,7 @@
 .question-text {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #2c2c2c;
+  color: #ffffff;                         /* 흰색 텍스트 */
 }
 
 .question-meta {
@@ -28,7 +28,7 @@
 
 .date {
   font-size: 0.85rem;
-  color: #555;
+  color: #bbbbbb;                         /* 연한 회색 */
 }
 
 .status-dot {
@@ -37,21 +37,20 @@
   border-radius: 50%;
 }
 
+/* 상태 색상은 원본대로 유지 */
 .status-dot.승인 {
   background-color: #4CAF50;
 }
-
 .status-dot.수정완료 {
   background-color: #FFD700;
 }
-
 .status-dot.대기 {
   background-color: #808080;
 }
 
 .answer-box {
   margin-top: 1rem;
-  background: #f5faff;
+  background: #3a3a3a;                    /* 다크 그레이 */
   padding: 1rem;
   border-radius: 6px;
 }
@@ -62,12 +61,13 @@
   padding: 0.8rem;
   font-size: 0.95rem;
   margin-top: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid #555555;              /* 중간 회색 테두리 */
   border-radius: 5px;
+  background-color: #2a2a2a;              /* 다크 그레이 필드 */
+  color: #ffffff;                         /* 흰색 텍스트 */
   resize: vertical;
 }
 
-/* 버튼 그룹 */
 .btn-group {
   margin-top: 1rem;
   display: flex;
@@ -75,14 +75,16 @@
   gap: 1rem;
 }
 
-/* ===== 공통 버튼 스타일 (fade 스타일 적용) ===== */
+/* 공통 버튼 스타일 (무채색) */
 .btn {
   padding: 10px 18px;
   font-size: 0.9rem;
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  color: white;
+  color: #ffffff;                         /* 흰색 텍스트 */
+  background-color: #555555;              /* 진회색 버튼 */
+  box-shadow: 0px 4px 0px #444444;        /* 중간 회색 그림자 */
   opacity: 0.95;
   transform: scale(1);
   transition:
@@ -94,38 +96,41 @@
 .btn:hover {
   transform: scale(1.03);
   opacity: 1;
+  background-color: #777777;              /* 연한 회색 호버 */
+  box-shadow: 0px 4px 0px #666666;
 }
 
 .btn:active {
   transform: scale(0.98);
   opacity: 0.8;
+  background-color: #444444;              /* 더 진한 회색 */
+  box-shadow: none;
 }
 
-/* 승인: 초록색 */
+/* 등록 버튼 (녹색) */
 .btn.green {
-  background-color: #07cc00;
+  background-color: #07cc00;        /* 원래 녹색 */
   box-shadow: 0px 4px 0px #009900;
+  color: #ffffff;
+  opacity: 0.95;
+}
+.btn.green:hover {
+  background-color: #28d538;        /* 약간 밝은 녹색 호버 */
 }
 .btn.green:active {
   background-color: #00a336;
   box-shadow: 0 0 #006600;
 }
 
-/* 거부: 빨간색 */
-.btn.red {
-  background-color: #e74c3c;
-  box-shadow: 0px 4px 0px #c0392b;
-}
-.btn.red:active {
-  background-color: #c0392b;
-  box-shadow: 0 0 #922b21;
-}
-
-/* 수정: 노란색 */
+/* 수정 버튼 (노란색) */
 .btn.yellow {
-  background-color: #f1c40f;
+  background-color: #f1c40f;        /* 원래 노란색 */
   box-shadow: 0px 4px 0px #d4ac0d;
-  color: white;
+  color: #ffffff;
+  opacity: 0.95;
+}
+.btn.yellow:hover {
+  background-color: #f9d858;        /* 약간 밝은 노랑 호버 */
 }
 .btn.yellow:active {
   background-color: #d4ac0d;

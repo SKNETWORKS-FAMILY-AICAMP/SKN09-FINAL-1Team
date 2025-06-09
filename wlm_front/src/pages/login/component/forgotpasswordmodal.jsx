@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../css/forgotPasswordModal.css';
+import '../css/forgotpasswordmodal.css';
 import axios from 'axios';
 
 const ForgotPasswordModal = ({ onClose }) => {
