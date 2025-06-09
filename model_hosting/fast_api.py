@@ -38,8 +38,8 @@ secret = os.getenv("SESSION_SECRET")
 # 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
+DB_USER = os.environ.get("MY_DB_USER", "root")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "7276")  # 실제 비밀번호로 교체
 DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
@@ -173,97 +173,228 @@ class MySQLCheckpoint:
     def _get_connection(self):
         return pymysql.connect(**self.db_config)
 
-    def get_tuple(self, config):
-        if config["configurable"].get("new_chat"):
-            return {"messages": [], "recall_memories": []}
-        emp_code = config["configurable"]["user_id"]
+    def is_chat_owner(self, chat_no: int, emp_code: str) -> bool:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
                 cursor.execute("""
+                    SELECT 1
+                    FROM chat_mate m
+                    JOIN employee e ON m.emp_no = e.emp_no
+                    WHERE m.chat_no = %s AND e.emp_code = %s
+                """, (chat_no, emp_code))
+                return cursor.fetchone() is not None
+        finally:
+            conn.close()
+
+    # def get_tuple(self, config):
+    #     if config["configurable"].get("new_chat"):
+    #         return {"messages": [], "recall_memories": []}
+    #     emp_code = config["configurable"]["user_id"]
+    #     chat_no = config["configurable"].get("chat_no")
+    #     conn = self._get_connection()
+    #     try:
+    #         with conn.cursor() as cursor:
+    #             if not chat_no:
+    #                 cursor.execute("""
+    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
+    #                         SELECT emp_no FROM employee WHERE emp_code = %s
+    #                     )
+    #                     ORDER BY chat_create_dt DESC LIMIT 1          
+    #                 """, (emp_code,))
+    #                 row = cursor.fetchone()
+    #                 if not row:
+    #                     return {"messages": [], "recall_memories": []}
+    #                 chat_no = row[0]
+
+    #             cursor.execute("""
+    #                 SELECT log_text, log_speaker_sn
+    #                 FROM chat_log
+    #                 WHERE chat_no IN (
+    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
+    #                         SELECT emp_no FROM employee WHERE emp_code = %s
+    #                     )
+    #                 )
+    #                 ORDER BY log_create_dt
+    #             """, (emp_code,))
+    #             rows = cursor.fetchall()
+
+    #             messages = []
+    #             for log_text, speaker_sn in rows:
+    #                 if speaker_sn == 1:
+    #                     messages.append(HumanMessage(content=log_text))
+    #                 elif speaker_sn == 2:
+    #                     messages.append(AIMessage(content=log_text))
+
+    #             return {"messages": messages, "recall_memories": []}
+    #     finally:
+    #         conn.close()
+
+    def get_tuple(self, config):
+        if config["configurable"].get("new_chat"):
+            return {"messages": [], "recall_memories": []}
+
+        emp_code = config["configurable"]["user_id"]
+        chat_no = config["configurable"].get("chat_no")
+
+        conn = self._get_connection()
+
+        if not chat_no:
+            return {"messages": [], "recall_memories": []}
+        
+        try:
+            with conn.cursor() as cursor:
+                # chat_no 유효성 확인
+                if not self.is_chat_owner(chat_no, emp_code):
+                    raise ValueError("권한이 없는 채팅방입니다.")
+
+                # 메시지 조회
+                cursor.execute("""
                     SELECT log_text, log_speaker_sn
                     FROM chat_log
-                    WHERE chat_no IN (
-                        SELECT chat_no FROM chat_mate WHERE emp_no = (
-                            SELECT emp_no FROM employee WHERE emp_code = %s
-                        )
-                    )
+                    WHERE chat_no = %s
                     ORDER BY log_create_dt
-                """, (emp_code,))
+                """, (chat_no,))
                 rows = cursor.fetchall()
 
-                messages = []
-                for log_text, speaker_sn in rows:
-                    if speaker_sn == 1:
-                        messages.append(HumanMessage(content=log_text))
-                    elif speaker_sn == 2:
-                        messages.append(AIMessage(content=log_text))
-
+                messages = [
+                    HumanMessage(content=log) if speaker == 1 else AIMessage(content=log)
+                    for log, speaker in rows
+                ]
                 return {"messages": messages, "recall_memories": []}
         finally:
             conn.close()
 
+    # def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
+    #     emp_code = config["configurable"]["user_id"]
+    #     force_new_chat = config["configurable"].get("new_chat", False)
+    #     chat_no = config["configurable"].get("chat_no")
+    #     conn = self._get_connection()
+    #     try:
+    #         with conn.cursor() as cursor:
+
+    #             if not force_new_chat:
+    #                 cursor.execute("""
+    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
+    #                         SELECT emp_no FROM employee WHERE emp_code = %s
+    #                     ) ORDER BY chat_create_dt DESC LIMIT 1
+    #                 """, (emp_code,))
+    #                 row = cursor.fetchone()
+    #                 chat_no = row[0] if row else None
+    #             if chat_no is None:
+    #                 print("❗ chat_no 없음 - 새 chat_mate 생성")
+                
+    #                 # 현재 날짜, 시간 기반 대화방 제목 생성
+    #                 title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                
+    #                 # chat_mate에 새 row 삽입
+    #                 cursor.execute("""
+    #                     INSERT INTO chat_mate (emp_no, chat_title)
+    #                     VALUES (
+    #                         (SELECT emp_no FROM employee WHERE emp_code = %s),
+    #                         %s
+    #                     )
+    #                 """, (emp_code, title))
+    #                 conn.commit()
+                
+    #                 # 방금 생성한 chat_no 가져오기
+    #                 cursor.execute("SELECT LAST_INSERT_ID()")
+    #                 chat_no = cursor.fetchone()[0]
+
+    #             cursor.execute("SELECT COUNT(*) FROM chat_log WHERE chat_no = %s", (chat_no,))
+    #             saved_count = cursor.fetchone()[0]
+    #             new_messages = messages[saved_count:]
+
+    #             for msg in new_messages:
+    #                 print(f"🧪 msg type: {type(msg)}, content: {getattr(msg, 'content', msg)}")  # 디버그 로그 추가
+                
+    #                 if isinstance(msg, HumanMessage):
+    #                     speaker_sn = 1
+    #                 elif isinstance(msg, AIMessage):
+    #                     speaker_sn = 2
+    #                 elif isinstance(msg, dict):
+    #                     if msg.get("sender") == "user":
+    #                         speaker_sn = 1
+    #                     elif msg.get("sender") == "bot":
+    #                         speaker_sn = 2
+    #                     else:
+    #                         continue
+    #                     msg = SimpleNamespace(content=msg.get("text", ""))
+    #                 else:
+    #                     print(f"⚠️ 저장 불가한 메시지 타입: {type(msg)} - {msg}")
+    #                     continue
+
+    #                 cursor.execute("""
+    #                     INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
+    #                     VALUES (%s, %s, %s, NOW())
+    #                 """, (chat_no, msg.content, speaker_sn))
+    #         conn.commit()
+    #         print(f"저장_{speaker_sn}:{msg}")
+    #         return chat_no
+    #     finally:
+    #         conn.close()
+
     def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
         emp_code = config["configurable"]["user_id"]
         force_new_chat = config["configurable"].get("new_chat", False)
+        chat_no = config["configurable"].get("chat_no")
+
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                chat_no = None
+                # chat_no 유효성 검증
+                if chat_no and not self.is_chat_owner(chat_no, emp_code):
+                    raise ValueError("권한이 없는 채팅방입니다.")
 
-                if not force_new_chat:
-                    cursor.execute("""
-                        SELECT chat_no FROM chat_mate WHERE emp_no = (
-                            SELECT emp_no FROM employee WHERE emp_code = %s
-                        ) ORDER BY chat_create_dt DESC LIMIT 1
-                    """, (emp_code,))
-                    row = cursor.fetchone()
-                    chat_no = row[0] if row else None
+                # chat_no가 없으면 가장 최근 것을 찾거나 새로 생성
                 if not chat_no:
-                    print("❗ chat_no 없음 - 새 chat_mate 생성")
-                
-                    # 현재 날짜, 시간 기반 대화방 제목 생성
-                    title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                
-                    # chat_mate에 새 row 삽입
+                    first_two = messages[:2]
+                    user_msg = first_two[0].content if len(first_two) > 0 and isinstance(first_two[0], HumanMessage) else ""
+                    bot_msg = first_two[1].content if len(first_two) > 1 and isinstance(first_two[1], AIMessage) else ""
+                    title_prompt = prompt_extraction.make_chat_title_prompt(user_msg, bot_msg)
+                    try:
+                        title = OllamaHosting("qwen2.5", title_prompt).get_model_response().strip()
+                        print("=> 생성된 제목:", title)
+                    except Exception as e:
+                        print("=> 제목 생성 실패:", e)
+                        title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     cursor.execute("""
-                        INSERT INTO chat_mate (emp_no, chat_title)
-                        VALUES (
-                            (SELECT emp_no FROM employee WHERE emp_code = %s),
-                            %s
-                        )
-                    """, (emp_code, title))
-                    conn.commit()
-                
-                    # 방금 생성한 chat_no 가져오기
-                    cursor.execute("SELECT LAST_INSERT_ID()")
-                    chat_no = cursor.fetchone()[0]
+                    INSERT INTO chat_mate (emp_no, chat_title)
+                    SELECT emp_no, %s FROM employee WHERE emp_code = %s
+                    """, (title, emp_code))
+                    chat_no = cursor.lastrowid
 
-                for msg in messages:
-                    print(f"🧪 msg type: {type(msg)}, content: {getattr(msg, 'content', msg)}")  # 디버그 로그 추가
-                
+                # 저장된 메시지 이후만 저장
+                cursor.execute("SELECT COUNT(*) FROM chat_log WHERE chat_no = %s", (chat_no,))
+                saved_count = cursor.fetchone()[0]
+                new_messages = messages[saved_count:]
+
+                for msg in new_messages:
                     if isinstance(msg, HumanMessage):
                         speaker_sn = 1
                     elif isinstance(msg, AIMessage):
                         speaker_sn = 2
-                    elif isinstance(msg, dict) and msg.get("sender") == "user":
-                        speaker_sn = 1
-                        msg = SimpleNamespace(content=msg.get("text", ""))
-                    elif isinstance(msg, dict) and msg.get("sender") == "bot":
-                        speaker_sn = 2
+                    elif isinstance(msg, dict):
+                        if msg.get("sender") == "user":
+                            speaker_sn = 1
+                        elif msg.get("sender") == "bot":
+                            speaker_sn = 2
+                        else:
+                            continue
                         msg = SimpleNamespace(content=msg.get("text", ""))
                     else:
-                        print(f"⚠️ 저장 불가한 메시지 타입: {type(msg)} - {msg}")
                         continue
+
                     cursor.execute("""
                         INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
                         VALUES (%s, %s, %s, NOW())
                     """, (chat_no, msg.content, speaker_sn))
             conn.commit()
-            print(f"저장_{speaker_sn}:{msg}")
             return chat_no
         finally:
             conn.close()
+
+
 
     def get_chat_list(self, emp_code):
         conn = self._get_connection()
@@ -443,6 +574,9 @@ async def ask(
     form = await request.form()
     new_chat_flag = form.get("new_chat", "false").lower() == "true"
 
+    print("=>new_chat =", form.get("new_chat"))
+    print("=>chat_no =", form.get("chat_no"))
+
     employee = request.session.get("employee")
     if not employee or "emp_code" not in employee:
         print("❌ 세션 인증 실패 - 401 반환")
@@ -450,9 +584,11 @@ async def ask(
 
     user_id = employee["emp_code"]
 
+    chat_no_str = form.get("chat_no", "").strip()
+    chat_no = int(chat_no_str) if chat_no_str.isdigit() else None
 
     mode = classify_question_mode(question)
-    config = {"configurable": {"user_id": user_id, "thread_id": user_id, "new_chat": new_chat_flag}}
+    config = {"configurable": {"user_id": user_id, "thread_id": user_id, "new_chat": new_chat_flag, "chat_no": chat_no}}
 
     # MySQLCheckpoint 인스턴스를 요청마다 생성하여 연결을 명시적으로 관리
     checkpoint = MySQLCheckpoint(
@@ -528,10 +664,11 @@ async def ask(
                 ]
             )
             # 웹 검색 결과는 DB에 저장하지 않는 것으로 판단하여, 이전 메시지만 저장
-            checkpoint.save_tuple(config, current_messages, current_recall_memories)
+            chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
             return {
                 "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
-                "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+                "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
+                "chat_no": chat_no
             }
 
         # 일반 문서 질의 응답 모드
@@ -550,7 +687,7 @@ async def ask(
                 criteria_list = criteria_data.get("result", "")
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
-            agent_state = State(messages=current_messages, recall_memories=[])
+            agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
             agent_state = memory_agent.load_memories(agent_state, config)
             recall_memories_text = "\n".join(agent_state.recall_memories)
 
@@ -561,10 +698,13 @@ async def ask(
             answers.append(f" **{filename}** 에서의 응답:\n{answer}")
 
         agent_response_content = "\n\n---\n\n".join(answers)
-        checkpoint.save_tuple(config, current_messages, current_recall_memories)
+        ai_message = AIMessage(content=agent_response_content)
+        all_messages = current_messages + [ai_message]
+        chat_no = checkpoint.save_tuple(config, all_messages, current_recall_memories)
         return {
             "answer": agent_response_content,
-            "evaluation_criteria": evaluation_criteria
+            "evaluation_criteria": evaluation_criteria,
+            "chat_no": chat_no
         }
 
     # 문서 없음 + 웹 검색
@@ -579,17 +719,18 @@ async def ask(
                 for res in results
             ]
         )
-        checkpoint.save_tuple(config, current_messages, current_recall_memories)
+        chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
         return {
             "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
-            "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+            "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
+            "chat_no": chat_no
         }
 
     # 문서 없음 + 일반 질문
     else:
         # 일반 대화 모드
         # agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
-        agent_state = State(messages=current_messages, recall_memories=[])
+        agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
         agent_state = memory_agent.load_memories(agent_state, config)
         agent_response = memory_agent.agent(agent_state)
         
@@ -598,7 +739,7 @@ async def ask(
         # checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
         # 기존 유저 질문 포함해서 저장할 messages 재구성
         all_messages = current_messages + [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
-        checkpoint.save_tuple(config, all_messages, agent_response.recall_memories)
+        chat_no = checkpoint.save_tuple(config, all_messages, agent_response.recall_memories)
 
 
         messages = get_from_state(agent_response, "messages", [])
@@ -610,7 +751,8 @@ async def ask(
 
         return {
             "answer": agent_response_content,
-            "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다."
+            "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다.",
+            "chat_no": chat_no
         }
 
 

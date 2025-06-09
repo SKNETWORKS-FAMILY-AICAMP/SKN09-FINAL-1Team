@@ -3,12 +3,11 @@ import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 import { FaFilePdf, FaTimes } from 'react-icons/fa';
 import upArrowIcon from '../../images/up_arrow.png'
-const ChatArea = ({ chatNo }) => {
+const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [files, setFiles] = useState([]);
-  const [newChat, setNewChat] = useState(true);
   const fileInputRef = useRef(null);
   const chatContentRef = useRef(null); 
 
@@ -28,10 +27,8 @@ const ChatArea = ({ chatNo }) => {
             isUser: msg.sender === "user"
           }));
           setMessages(formatted);
-          setNewChat(false);
         });
     } else {
-      setNewChat(true);
       setMessages([]);
     }
   }, [chatNo]);
@@ -49,12 +46,21 @@ const ChatArea = ({ chatNo }) => {
 
     const userMessage = { text: currentInput, isUser: true };
     setMessages(prev => [...prev, userMessage]);
+    if (onFirstMessageSent) onFirstMessageSent();
     setInput('');
 
     try {
       const formData = new FormData();
       formData.append('question', currentInput);
       formData.append("new_chat", newChat.toString());
+
+      if (chatNo !== null && chatNo !== undefined) {
+        formData.append("chat_no", chatNo.toString());
+        console.log("chat_no:", chatNo);
+      } else {
+        console.log("chat_no 없음 - 새 채팅");
+      }
+
       files.forEach((f) => {
         formData.append('files', f);
       });
@@ -70,6 +76,10 @@ const ChatArea = ({ chatNo }) => {
       });
 
       const data = await res.json();
+      if (data.chat_no) {
+        console.log("chat_no:", data.chat_no);
+        setChatNo(data.chat_no);
+      }
 
       const aiResponse = {
         text: data.answer || data.error || '응답이 없습니다.',
@@ -88,7 +98,6 @@ const ChatArea = ({ chatNo }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setNewChat(false);
     setSending(false);
   };
 
