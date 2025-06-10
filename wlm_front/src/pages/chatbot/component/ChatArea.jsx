@@ -94,10 +94,11 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
       setMessages(prev => [...prev, errorMsg]);
     }
 
-    setFiles([]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    // 파일 보낸 후 파일 리스트 초기화 비활성화
+    // setFiles([]);
+    // if (fileInputRef.current) {
+    //   fileInputRef.current.value = '';
+    // }
     setSending(false);
   };
 

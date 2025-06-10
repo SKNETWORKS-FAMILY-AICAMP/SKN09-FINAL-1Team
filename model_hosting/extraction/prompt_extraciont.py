@@ -221,11 +221,14 @@ class PromptExtraction:
     {text}
     """
 
-    def make_general_question_prompt(self, question: str) -> str:
+    def make_general_question_prompt(self, question: str, recall: str = "") -> str:
         return f"""
-    반드시 한국어로 대답하세요.       
+    반드시 한국어만을 이용하여 대답하세요.       
     다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
-
+    이전 대화내역의 기억이 있다면 맥락을 파악하여, 사용자의 상황에 알맞은 답변을 제공하세요. 
+    <이전 대화>
+    {recall}
+    </이전 대화>
     질문: {question}
     """
 
@@ -275,7 +278,7 @@ class PromptExtraction:
         return f"""
     다음 대화는 질문과 답변으로 이루어져 있습니다.
     이 대화를 핵심 키워드로 요약하여 간결한 제목을 만드세요.    
-    제목은 반드시 특수문자 없이 20자 이하의 **한국어**만을 이용하여 작성하세요.
+    제목은 반드시 특수문자 없이 **한국어**만을 이용하여 작성하세요.
     예시: 공모전 평가기준
 
     질문:

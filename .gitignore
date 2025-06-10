@@ -34,3 +34,7 @@ __pycache__/
 **/.env
 */.env
 
+# qdrant_data
+**/qdrant_data/
+*/qdrant_data/
+qdrant_data/

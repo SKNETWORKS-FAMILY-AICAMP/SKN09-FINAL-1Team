@@ -187,48 +187,6 @@ class MySQLCheckpoint:
         finally:
             conn.close()
 
-    # def get_tuple(self, config):
-    #     if config["configurable"].get("new_chat"):
-    #         return {"messages": [], "recall_memories": []}
-    #     emp_code = config["configurable"]["user_id"]
-    #     chat_no = config["configurable"].get("chat_no")
-    #     conn = self._get_connection()
-    #     try:
-    #         with conn.cursor() as cursor:
-    #             if not chat_no:
-    #                 cursor.execute("""
-    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
-    #                         SELECT emp_no FROM employee WHERE emp_code = %s
-    #                     )
-    #                     ORDER BY chat_create_dt DESC LIMIT 1          
-    #                 """, (emp_code,))
-    #                 row = cursor.fetchone()
-    #                 if not row:
-    #                     return {"messages": [], "recall_memories": []}
-    #                 chat_no = row[0]
-
-    #             cursor.execute("""
-    #                 SELECT log_text, log_speaker_sn
-    #                 FROM chat_log
-    #                 WHERE chat_no IN (
-    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
-    #                         SELECT emp_no FROM employee WHERE emp_code = %s
-    #                     )
-    #                 )
-    #                 ORDER BY log_create_dt
-    #             """, (emp_code,))
-    #             rows = cursor.fetchall()
-
-    #             messages = []
-    #             for log_text, speaker_sn in rows:
-    #                 if speaker_sn == 1:
-    #                     messages.append(HumanMessage(content=log_text))
-    #                 elif speaker_sn == 2:
-    #                     messages.append(AIMessage(content=log_text))
-
-    #             return {"messages": messages, "recall_memories": []}
-    #     finally:
-    #         conn.close()
 
     def get_tuple(self, config):
         if config["configurable"].get("new_chat"):
@@ -265,74 +223,6 @@ class MySQLCheckpoint:
         finally:
             conn.close()
 
-    # def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
-    #     emp_code = config["configurable"]["user_id"]
-    #     force_new_chat = config["configurable"].get("new_chat", False)
-    #     chat_no = config["configurable"].get("chat_no")
-    #     conn = self._get_connection()
-    #     try:
-    #         with conn.cursor() as cursor:
-
-    #             if not force_new_chat:
-    #                 cursor.execute("""
-    #                     SELECT chat_no FROM chat_mate WHERE emp_no = (
-    #                         SELECT emp_no FROM employee WHERE emp_code = %s
-    #                     ) ORDER BY chat_create_dt DESC LIMIT 1
-    #                 """, (emp_code,))
-    #                 row = cursor.fetchone()
-    #                 chat_no = row[0] if row else None
-    #             if chat_no is None:
-    #                 print("❗ chat_no 없음 - 새 chat_mate 생성")
-                
-    #                 # 현재 날짜, 시간 기반 대화방 제목 생성
-    #                 title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                
-    #                 # chat_mate에 새 row 삽입
-    #                 cursor.execute("""
-    #                     INSERT INTO chat_mate (emp_no, chat_title)
-    #                     VALUES (
-    #                         (SELECT emp_no FROM employee WHERE emp_code = %s),
-    #                         %s
-    #                     )
-    #                 """, (emp_code, title))
-    #                 conn.commit()
-                
-    #                 # 방금 생성한 chat_no 가져오기
-    #                 cursor.execute("SELECT LAST_INSERT_ID()")
-    #                 chat_no = cursor.fetchone()[0]
-
-    #             cursor.execute("SELECT COUNT(*) FROM chat_log WHERE chat_no = %s", (chat_no,))
-    #             saved_count = cursor.fetchone()[0]
-    #             new_messages = messages[saved_count:]
-
-    #             for msg in new_messages:
-    #                 print(f"🧪 msg type: {type(msg)}, content: {getattr(msg, 'content', msg)}")  # 디버그 로그 추가
-                
-    #                 if isinstance(msg, HumanMessage):
-    #                     speaker_sn = 1
-    #                 elif isinstance(msg, AIMessage):
-    #                     speaker_sn = 2
-    #                 elif isinstance(msg, dict):
-    #                     if msg.get("sender") == "user":
-    #                         speaker_sn = 1
-    #                     elif msg.get("sender") == "bot":
-    #                         speaker_sn = 2
-    #                     else:
-    #                         continue
-    #                     msg = SimpleNamespace(content=msg.get("text", ""))
-    #                 else:
-    #                     print(f"⚠️ 저장 불가한 메시지 타입: {type(msg)} - {msg}")
-    #                     continue
-
-    #                 cursor.execute("""
-    #                     INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
-    #                     VALUES (%s, %s, %s, NOW())
-    #                 """, (chat_no, msg.content, speaker_sn))
-    #         conn.commit()
-    #         print(f"저장_{speaker_sn}:{msg}")
-    #         return chat_no
-    #     finally:
-    #         conn.close()
 
     def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
         emp_code = config["configurable"]["user_id"]
@@ -491,6 +381,11 @@ class MemoryAgent:
                 " 도구가 성공적으로 완료되었는지 확인합니다.\n\n",
             ),
             ("placeholder", "{messages}"),
+        ])
+    def set_prompt(self, system_template: str):
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", system_template),
+            ("placeholder", "{messages}")
         ])
     def setup_model_with_tools(self, tools):
         self.tools = tools
@@ -692,10 +587,12 @@ async def ask(
             recall_memories_text = "\n".join(agent_state.recall_memories)
 
             qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question, recall_memories_text)
-            qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
-            answer = qa_ollama.get_model_response().strip()
+            memory_agent.set_prompt(qa_prompt)
 
-            answers.append(f" **{filename}** 에서의 응답:\n{answer}")
+            agent_response = memory_agent.agent(agent_state)
+            answer = get_from_state(agent_response, "messages", [])[-1].content.strip()
+
+            answers.append(f"{answer}\n\n**출처: {filename}**")
 
         agent_response_content = "\n\n---\n\n".join(answers)
         ai_message = AIMessage(content=agent_response_content)
@@ -729,18 +626,15 @@ async def ask(
     # 문서 없음 + 일반 질문
     else:
         # 일반 대화 모드
-        # agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
         agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
         agent_state = memory_agent.load_memories(agent_state, config)
+        recall_text = "\n".join(agent_state.recall_memories)
+        system_prompt = prompt_extraction.make_general_question_prompt(question, recall_text)
+        memory_agent.set_prompt(system_prompt)
         agent_response = memory_agent.agent(agent_state)
-        
-        # # agent_response에서 AIMessage 객체만 추출하여 저장
-        # messages_to_save = [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
-        # checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
-        # 기존 유저 질문 포함해서 저장할 messages 재구성
+
         all_messages = current_messages + [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
         chat_no = checkpoint.save_tuple(config, all_messages, agent_response.recall_memories)
-
 
         messages = get_from_state(agent_response, "messages", [])
         if not messages:
@@ -751,7 +645,7 @@ async def ask(
 
         return {
             "answer": agent_response_content,
-            "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다.",
+            "evaluation_criteria": "",
             "chat_no": chat_no
         }
 
@@ -972,6 +866,34 @@ async def chat_log(chat_no: int):
         charset=DB_CHARSET
     )
     return checkpoint.get_chat_log(chat_no)
+
+@router.delete("/api/delete_chat_room")
+async def delete_chat_room(chat_no: int, request: Request):
+    employee = request.session.get("employee")
+    emp_code = employee["emp_code"]
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+
+    if not checkpoint.is_chat_owner(chat_no, emp_code):
+        raise HTTPException(status_code=403, detail="해당 채팅방에 대한 삭제 권한이 없습니다.")
+
+    conn = checkpoint._get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM chat_log WHERE chat_no = %s", (chat_no,))
+            cursor.execute("DELETE FROM chat_mate WHERE chat_no = %s", (chat_no,))
+        conn.commit()
+        return {"success": True}
+    finally:
+        conn.close()
+
 
 
 ### uvicorn main:app --reload
