@@ -1,0 +1,44 @@
+.chatHistory {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.aiMessage {
+  background-color: #e9ecef;
+  color: #333;
+  margin-right: auto;
+}
+
+.userMessage {
+  background-color: #007bff;
+  color: white;
+  margin-left: auto;
+}
+
+/* 스크롤바 스타일링 */
+.chatHistory::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatHistory::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.chatHistory::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.chatHistory::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
