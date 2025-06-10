@@ -13,3 +13,7 @@ sudo apt update
 sudo apt install -y docker-ce
 
 sudo docker --version
+
+sudo docker build -t wlm_front .
+
+sudo docker run -d -p 5173:5173 --name wlm_front wlm_front
