@@ -44,13 +44,21 @@ class EmployeeService:
         except Exception as e:
             return self.format_error(str(e))
         
-    # yj    
+    # # yj    
+    # async def create_employee(self, employee_data: Dict[str, Any]) -> Dict[str, Any]:
+    #     try:
+    #         self.db.create_employee(employee_data)
+    #         return {"status": "success", "message": "직원 등록 성공"}
+    #     except Exception as e:
+    #         return self.format_error(str(e))
+
     async def create_employee(self, employee_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            self.db.create_employee(employee_data)
-            return {"status": "success", "message": "직원 등록 성공"}
+            emp_no = self.db.create_employee(employee_data)
+            return {"status": "success", "message": "직원 등록 성공", "emp_no": emp_no}
         except Exception as e:
             return self.format_error(str(e))
+
 
     async def delete_employee(self, emp_no: int) -> Dict[str, Any]:
         try:

@@ -76,24 +76,45 @@ class Database:
             self.connection.close()
 
 # yj
-    def create_employee(self, employee_data: Dict[str, Any]) -> None:
-        try:
-            query = """
-                INSERT INTO employee (emp_name, emp_code, emp_email, emp_pwd, emp_birth_date, emp_role)
-                VALUES (%s, %s, %s, %s, %s, %s)
+    # def create_employee(self, employee_data: Dict[str, Any]) -> None:
+    #     try:
+    #         query = """
+    #             INSERT INTO employee (emp_name, emp_code, emp_email, emp_pwd, emp_birth_date, emp_role)
+    #             VALUES (%s, %s, %s, %s, %s, %s)
+    #         """
+    #         self.cursor.execute(query, (
+    #             employee_data["emp_name"],
+    #             employee_data["emp_code"],
+    #             employee_data["emp_email"],
+    #             employee_data["emp_pwd"],
+    #             employee_data["emp_birth_date"],
+    #             employee_data["emp_role"]
+    #         ))
+    #         self.connection.commit()
+    #     except Exception as e:
+    #         print(f"직원 등록 오류: {e}")
+    #         self.connection.rollback()
+
+
+    def create_employee(self, employee_data: Dict[str, Any]) -> int:
+        cursor = self.connection.cursor()
+        cursor.execute(
             """
-            self.cursor.execute(query, (
+            INSERT INTO employee (emp_name, emp_code, emp_pwd, emp_email, emp_birth_date, emp_role)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (
                 employee_data["emp_name"],
                 employee_data["emp_code"],
-                employee_data["emp_email"],
                 employee_data["emp_pwd"],
+                employee_data["emp_email"],
                 employee_data["emp_birth_date"],
-                employee_data["emp_role"]
-            ))
-            self.connection.commit()
-        except Exception as e:
-            print(f"직원 등록 오류: {e}")
-            self.connection.rollback()
+                employee_data["emp_role"],
+            )
+        )
+        self.connection.commit()
+        return cursor.lastrowid  # 새로 생성된 emp_no 반환
+
 
     def delete_employee(self, emp_no: int) -> None:
         try:

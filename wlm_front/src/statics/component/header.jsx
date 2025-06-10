@@ -88,7 +88,7 @@ const Header = () => {
           <>
             <div className="header-btn-wrap">
               <Link to="/mypage">
-                <button className="header-btn">내정보</button>
+                {/* <button className="header-btn">내정보</button> */}
               </Link>
             </div>
             <div className="header-btn-wrap">

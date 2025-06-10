@@ -2,12 +2,12 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 1.5rem;
-    background: white;
+    background: #5a6268;
     border-radius: 8px;
 }
 
 .formTitle {
-    color: #007acc;
+    color: #fff;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
     font-weight: 600;
@@ -27,7 +27,7 @@
 .formGroup label {
     display: block;
     margin-bottom: 0.4rem;
-    color: #333;
+    color: #fff;
     font-weight: 500;
 }
 

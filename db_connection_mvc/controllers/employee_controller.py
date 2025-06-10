@@ -27,7 +27,7 @@ class EmployeeCreate(BaseModel):
     emp_code: str
     emp_pwd: str
     emp_email: str
-    emp_birth_date: date  # YYYY-MM-DD
+    emp_birth_date: str  # YYYY-MM-DD
     emp_role: int
 
 # 비밀번호 초기화 요청 모델
@@ -116,13 +116,36 @@ async def change_password(request: Request, password_change_request: PasswordCha
     
 # yj
 # 사원 추가
+# @router.post("/employees")
+# async def create_employee(employee_data: EmployeeCreate):
+#     try:
+#         new_employee = await employee_service.create_employee(employee_data)
+#         return new_employee
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+# 사원 추가 수정
+# @router.post("/employees")
+# async def create_employee(employee_data: EmployeeCreate):
+#     try:
+#         new_employee = await employee_service.create_employee(employee_data)
+#         if new_employee["status"] != "success":
+#             raise HTTPException(status_code=500, detail=new_employee["message"])
+#         return {"message": new_employee["message"], "emp_no": new_employee["emp_no"]}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"직원 등록 오류: {str(e)}")
+
 @router.post("/employees")
 async def create_employee(employee_data: EmployeeCreate):
     try:
-        new_employee = await employee_service.create_employee(employee_data)
-        return new_employee
+        new_employee = await employee_service.create_employee(employee_data.dict())
+        if new_employee["status"] != "success":
+            raise HTTPException(status_code=500, detail=new_employee["message"])
+        return {"message": new_employee["message"], "emp_no": new_employee.get("emp_no")}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()  # 에러 스택 트레이스 출력
+        raise HTTPException(status_code=500, detail=f"직원 등록 오류: {str(e)}")
 
 # 사원 삭제
 @router.delete("/employees/{emp_no}")

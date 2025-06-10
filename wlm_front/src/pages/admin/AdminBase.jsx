@@ -52,18 +52,32 @@ function AdminBase() {
     }, [users, searchText, searchType]);
 
     // 🔹 사원 생성
+    // const handleCreateUser = async (userData) => {
+    //     try {
+    //         const response = await axios.post('http://localhost:8000/api/employees', userData, {
+    //             withCredentials: true,
+    //         });
+    //         setUsers(prev => [...prev, response.data]);
+    //         setShowCreateForm(false);
+    //     } catch (error) {
+    //         console.error('사원 생성 실패:', error);
+    //         alert('사원 생성에 실패했습니다.');
+    //     }
+    // };
+
     const handleCreateUser = async (userData) => {
-        try {
-            const response = await axios.post('http://localhost:8000/api/employees', userData, {
-                withCredentials: true,
-            });
-            setUsers(prev => [...prev, response.data]);
-            setShowCreateForm(false);
-        } catch (error) {
-            console.error('사원 생성 실패:', error);
-            alert('사원 생성에 실패했습니다.');
-        }
-    };
+  console.log('전송 데이터:', userData);
+  try {
+    const response = await axios.post('http://localhost:8000/api/employees', userData, {
+      withCredentials: true,
+    });
+    setUsers(prev => [...prev, response.data]);
+    setShowCreateForm(false);
+  } catch (error) {
+    console.error('사원 생성 실패:', error.response?.data || error.message);
+    alert('사원 생성에 실패했습니다.');
+  }
+};
 
     // 🔹 사원 삭제
     const handleDeleteUser = async (emp_no) => {

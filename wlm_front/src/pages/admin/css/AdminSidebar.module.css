@@ -2,7 +2,7 @@
     width: 100%;
     max-width: 400px;
     height: 100%;
-    background: transparent;
+    background: #3a3a3a;  
     padding: 1rem;
     display: flex;
     flex-direction: column;
