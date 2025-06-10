@@ -15,6 +15,7 @@ import requests
 import httpx
 from dotenv import load_dotenv
 
+
 import whisperx
 import ollama
 import json
@@ -38,8 +39,8 @@ secret = os.getenv("SESSION_SECRET")
 # 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
+DB_USER = os.environ.get("MY_DB_USER", "root")  # 실제 사용자로 교체
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "1234")  # 실제 비밀번호로 교체
 DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
@@ -737,7 +738,12 @@ async def ask_query(input: QuestionInput):
 
     return {"answer": final_answer}
 
-
+@router.get("/check-session")
+async def check_session(request: Request):
+    if "employee" not in request.session:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    return {"employee": request.session["employee"]}
 
 ### uvicorn main:app --reload
  
