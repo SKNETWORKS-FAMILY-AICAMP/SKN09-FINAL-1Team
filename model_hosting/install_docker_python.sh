@@ -2,6 +2,14 @@
 
 apt update
 
+# python3-venv 설치
+apt install -y python3-venv
+
+python3 -m venv myvenv
+
+source ./myvenv/bin/activate
+
+# docker 설치
 apt install -y apt-transport-https ca-certificates curl software-properties-common
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
