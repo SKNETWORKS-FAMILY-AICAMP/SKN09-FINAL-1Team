@@ -9,7 +9,7 @@
 //   const [empCode, setEmpCode] = useState('');
 //   const [empPwd, setEmpPwd] = useState('');
 //   const [errorMessage, setErrorMessage] = useState('');
-//   const [showReset, setShowReset] = useState(false); // 비밀번호 초기화 모달 상태
+//    
 //   const navigate = useNavigate();
 //   const { login } = useAuth();
 
@@ -94,30 +94,37 @@
 // };
 
 // export default Login;
+import '../css/login.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx'; // AuthContext 경로 확인 필수
+import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth(); // AuthContext의 login 함수 가져오기
+  const [showReset, setShowReset] = useState(false); // 비밀번호 초기화 모달 상태z
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
     try {
-      const response = await fetch('http://localhost:8000/api/login', { // 🚨 로그인 백엔드 엔드포인트 확인
+      const response = await fetch('http://localhost:8000/api/login', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
-        credentials: 'include' // 🌟 로그인 요청에도 이 옵션이 필요할 수 있습니다.
+        credentials: 'include'
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data)
         console.log("Login 성공 응답:", data);
 
         if (data.employee) {
@@ -148,31 +155,44 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      {/* 여기에 로그인 폼 UI를 구성하세요. */}
-      <div>
-        <label htmlFor="username">아이디/이메일:</label>
-        <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+    <div className="container">
+      {showReset && <ForgotPasswordModal onClose={() => setShowReset(false)} />}
+      <div className="top"></div>
+      <div className="bottom"></div>
+      <div className="center">
+        <img src="/images/wlbmate_logo.png" alt="WLB MATE" className="login-logo" />
+        <h2>&nbsp;Please Sign In</h2>
+        <form onSubmit={handleLogin}>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              placeholder="사원번호"
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              id="password"
+              value={password}
+              placeholder="비밀번호"
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          <input type="submit" value="Login" />
+        </form>
+        {errorMessage && (
+          <div className="error-message">{errorMessage}</div>
+        )}
+        <div
+          className="forgot-password"
+          onClick={() => setShowReset(true)} // 클릭 시 모달 열림
+        >
+          Forgot Password?
+        </div>
+        </div>
       </div>
-      <div>
-        <label htmlFor="password">비밀번호:</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit">로그인</button>
-    </form>
-  );
+    );
 };
 
 export default Login;
