@@ -96,26 +96,55 @@ class Database:
     #         self.connection.rollback()
 
 
+    # def create_employee(self, employee_data: Dict[str, Any]) -> int:
+    #     cursor = self.connection.cursor()
+    #     cursor.execute(
+    #         """
+    #         INSERT INTO employee (emp_name, emp_code, emp_pwd, emp_email, emp_birth_date, emp_role)
+    #         VALUES (%s, %s, %s, %s, %s, %s)
+    #         """,
+    #         (
+    #             employee_data["emp_name"],
+    #             employee_data["emp_code"],
+    #             employee_data["emp_pwd"],
+    #             employee_data["emp_email"],
+    #             employee_data["emp_birth_date"],
+    #             employee_data["emp_role"],
+    #         )
+    #     )
+    #     self.connection.commit()
+    #     return cursor.lastrowid  # 새로 생성된 emp_no 반환
+
+    def employee_exists(self, emp_code: str, emp_name: str, emp_birth_date: str) -> bool:
+        self.cursor.execute("""
+            SELECT 1
+            FROM employee
+            WHERE emp_code = %s OR (emp_name = %s AND emp_birth_date = %s)
+        """, (emp_code, emp_name, emp_birth_date))
+        return self.cursor.fetchone() is not None
+
     def create_employee(self, employee_data: Dict[str, Any]) -> int:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
+        if self.employee_exists(
+            employee_data["emp_code"],
+            employee_data["emp_name"],
+            employee_data["emp_birth_date"]
+        ):
+            raise ValueError("중복된 사번 또는 동명이인이 존재합니다.")
+
+        self.cursor.execute("""
             INSERT INTO employee (emp_name, emp_code, emp_pwd, emp_email, emp_birth_date, emp_role)
             VALUES (%s, %s, %s, %s, %s, %s)
-            """,
-            (
-                employee_data["emp_name"],
-                employee_data["emp_code"],
-                employee_data["emp_pwd"],
-                employee_data["emp_email"],
-                employee_data["emp_birth_date"],
-                employee_data["emp_role"],
-            )
-        )
+        """, (
+            employee_data["emp_name"],
+            employee_data["emp_code"],
+            employee_data["emp_pwd"],
+            employee_data["emp_email"],
+            employee_data["emp_birth_date"],
+            employee_data["emp_role"],
+        ))
         self.connection.commit()
-        return cursor.lastrowid  # 새로 생성된 emp_no 반환
-
-
+        return self.cursor.lastrowid
+    
     def delete_employee(self, emp_no: int) -> None:
         try:
             query = "DELETE FROM employee WHERE emp_no = %s"

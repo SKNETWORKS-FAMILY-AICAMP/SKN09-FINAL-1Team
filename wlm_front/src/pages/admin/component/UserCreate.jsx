@@ -32,12 +32,12 @@ const UserCreate = ({ onSubmit, onCancel }) => {
         e.preventDefault();
         try {
             await axios.post("http://localhost:8000/api/employees", {
-                emp_name: formData.emp_name,
-                emp_code: formData.emp_code,
-                emp_email: formData.emp_email,
-                emp_pwd: formData.emp_pwd,
-                emp_birth_date: formData.emp_birth_date,
-                emp_role: parseInt(formData.emp_role)
+                "emp_name": employee["emp_name"],
+                "emp_code": employee["emp_code"],
+                "emp_email": employee["emp_email"],
+                "emp_birth_date": employee["emp_birth_date"],
+                "emp_create_dt": employee["emp_create_dt"],
+                "emp_role": employee["emp_role"]
             });
             alert('사용자가 등록되었습니다!');
             if (onSubmit) onSubmit();

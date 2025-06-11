@@ -3,6 +3,7 @@ from services.employee_service import EmployeeService
 from pydantic import BaseModel
 from datetime import date
 
+router = APIRouter()
 
 # 로그인 요청 모델
 class LoginRequest(BaseModel):
@@ -33,7 +34,6 @@ class EmployeeCreate(BaseModel):
 # 비밀번호 초기화 요청 모델
 class PasswordResetRequest(BaseModel):
     newPassword: str
-
 
 
 # 유저 목록 조회
@@ -117,27 +117,7 @@ async def change_password(request: Request, password_change_request: PasswordCha
         raise HTTPException(status_code=500, detail=str(e))
     
 # yj
-# 사원 추가
-# @router.post("/employees")
-# async def create_employee(employee_data: EmployeeCreate):
-#     try:
-#         new_employee = await employee_service.create_employee(employee_data)
-#         return new_employee
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# 사원 추가 수정
-# @router.post("/employees")
-# async def create_employee(employee_data: EmployeeCreate):
-#     try:
-#         new_employee = await employee_service.create_employee(employee_data)
-#         if new_employee["status"] != "success":
-#             raise HTTPException(status_code=500, detail=new_employee["message"])
-#         return {"message": new_employee["message"], "emp_no": new_employee["emp_no"]}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"직원 등록 오류: {str(e)}")
-
-@router.post("/employees")
+@router.post("/api/employees")
 async def create_employee(employee_data: EmployeeCreate):
     try:
         new_employee = await employee_service.create_employee(employee_data.dict())
@@ -150,7 +130,7 @@ async def create_employee(employee_data: EmployeeCreate):
         raise HTTPException(status_code=500, detail=f"직원 등록 오류: {str(e)}")
 
 # 사원 삭제
-@router.delete("/employees/{emp_no}")
+@router.delete("api/employees/{emp_no}")
 async def delete_employee(emp_no: int):
     try:
         await employee_service.delete_employee(emp_no)
@@ -159,7 +139,7 @@ async def delete_employee(emp_no: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 # 사원 비밀번호 초기화 (관리자 기능 등에서 사용)
-@router.put("/employees/{emp_no}/reset-password")
+@router.put("api/employees/{emp_no}/reset-password")
 async def reset_password(emp_no: int, data: PasswordResetRequest):
     try:
         await employee_service.change_password_by_emp_no(emp_no, data.newPassword)

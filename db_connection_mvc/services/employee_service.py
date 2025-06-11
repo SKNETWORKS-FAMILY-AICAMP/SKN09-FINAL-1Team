@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 from models.database import Database
+from fastapi import HTTPException
 
 class EmployeeService:
     def __init__(self):
@@ -23,13 +24,19 @@ class EmployeeService:
         except Exception as e:
             return self.format_error(str(e))
         
-    async def login(self, emp_code: str, emp_pwd: str) -> Dict[str, Any]:
-        try:
-            employee = self.db.verify_employee_login(emp_code, emp_pwd)
-            return employee
-        except Exception as e:
-            return self.format_error(str(e))
+    # async def login(self, emp_code: str, emp_pwd: str) -> Dict[str, Any]:
+    #     try:
+    #         employee = self.db.verify_employee_login(emp_code, emp_pwd)
+    #         return employee
+    #     except Exception as e:
+    #         return self.format_error(str(e))
         
+    async def login(self, emp_code: str, emp_pwd: str) -> Dict[str, Any] | None:
+        try:
+            return self.db.verify_employee_login(emp_code, emp_pwd)
+        except Exception:
+            return None
+
     async def get_emp_pwd(self, emp_code: str) -> Dict[str, Any]:
         try:
             emp_pwd = self.db.get_emp_pwd(emp_code)
@@ -52,13 +59,17 @@ class EmployeeService:
     #     except Exception as e:
     #         return self.format_error(str(e))
 
+    async def create_employee(self, employee_data: Dict[str, Any]) -> Dict[str, Any]:from fastapi import HTTPException
+
     async def create_employee(self, employee_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             emp_no = self.db.create_employee(employee_data)
             return {"status": "success", "message": "직원 등록 성공", "emp_no": emp_no}
+        except ValueError as ve:
+            # 중복된 사번 또는 동명이인 => 409 Conflict
+            raise HTTPException(status_code=409, detail=str(ve))
         except Exception as e:
             return self.format_error(str(e))
-
 
     async def delete_employee(self, emp_no: int) -> Dict[str, Any]:
         try:
