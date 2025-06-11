@@ -29,7 +29,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       try {
-        await fetch("http://localhost:8002/api/delete_temp_vectors", {
+        fetch("http://localhost:8002/api/delete_temp_vectors", {
           method: 'DELETE',
         });
         console.log("=> Qdrant 컬렉션 삭제 완료");
