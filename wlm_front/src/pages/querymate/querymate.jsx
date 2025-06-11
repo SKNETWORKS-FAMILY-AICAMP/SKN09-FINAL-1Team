@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './css/querymate.css';
 import Sidebar from './component/Sidebar';
 import QuestionList from './component/QuestionList';
+import MessageButton from '../../statics/chat_modal/component/MessageButton.jsx';
 
 const QueryMate = () => {
   const [searchParams, setSearchParams] = useState({
@@ -16,6 +17,7 @@ const QueryMate = () => {
       <div className="main-content">
         <QuestionList searchParams={searchParams} />
       </div>
+      <MessageButton />
     </div>
   );
 };
