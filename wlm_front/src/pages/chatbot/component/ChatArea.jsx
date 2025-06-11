@@ -134,10 +134,22 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
   };
 
 
-  const handleRemoveFile = (index) => {
+  const handleRemoveFile = async (index) => {
+    try {
+      // Qdrant 고정 컬렉션 삭제 요청
+      await fetch("http://localhost:8002/api/delete_temp_vectors", {
+        method: 'DELETE',
+      });
+      console.log("=> qdrant_temp 컬렉션 삭제 완료");
+    } catch (err) {
+      console.error("=> Qdrant 컬렉션 삭제 실패:", err);
+    }
+
+    // 프론트 파일 리스트에서도 제거
     const updated = files.filter((_, i) => i !== index);
     setFiles(updated);
   };
+
 
   return (
     <div className={styles.chatArea}>

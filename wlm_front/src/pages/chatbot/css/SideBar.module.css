@@ -121,10 +121,15 @@
   font-size: 1rem;
   cursor: pointer;
   z-index: 2;
+  display: none;
 }
 
 .deleteButton:hover {
   color: #ff4444;
+}
+
+.itemContainer:hover .deleteButton {
+  display: inline;
 }
 
 
