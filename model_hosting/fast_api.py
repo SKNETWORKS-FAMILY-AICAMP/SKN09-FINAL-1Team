@@ -231,6 +231,35 @@ async def ask(
         }
 
 
+@router.post("/miniask")
+async def miniask(input: QuestionInput):
+    question = input.question.strip()
+
+    # 벡터 검색
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        search_resp = await client.post(
+            "http://localhost:8002/api/search_vectors",
+            json={"question": question, "collection_name": "wlmmate_vectors"}
+        )
+
+    raw_results = search_resp.json().get("result", [])
+    if isinstance(raw_results, str):
+        raw_results = [raw_results]
+
+    context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
+
+    # 프롬프트 생성
+    if not context_text or len(context_text) < 30:
+        prompt = prompt_extraction.make_fallback_prompt(question)
+    else:
+        prompt = prompt_extraction.make_contextual_prompt(question, context_text)
+
+    # 모델 호출
+    ollama_instance = OllamaHosting(model="qwen2.5", prompt=prompt)
+    answer = ollama_instance.get_model_response().strip()
+
+    return {"answer": answer}
+    
     
 @router.post("/transcribe_audio_chunked")
 async def transcribe_audio_chunked(file: UploadFile = File(...)):
@@ -338,176 +367,6 @@ async def upload_audio(file: UploadFile = File(...)):
     # 2. WhisperX + LLM Q&A 추출
     qna_data = await process_audio_and_extract_qna(save_path)
     return JSONResponse(content={"qna": qna_data})
-
-# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
-import whisperx, json
-
-async def process_audio_and_extract_qna(audio_path):
-    device = "cpu"
-    language = "ko"
-    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
-    asr_result = model.transcribe(audio_path)
-
-    transcript = " ".join([
-        seg["text"].strip()
-        for seg in asr_result["segments"]
-        if seg.get("language", "ko") == "ko"
-    ])
-
-@router.post("/transcribe_audio_chunked")
-async def transcribe_audio_chunked(file: UploadFile = File(...)):
-    # 1. 임시 파일 저장
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(await file.read())
-        audio_path = tmp.name
-
-    # 2. 모델 로드
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    language = "ko"
-    try:
-        model = whisperx.load_model(
-            "large-v2",  # 더 큰 모델로 변경
-            device=device,
-            language=language,
-            compute_type="float16",  # 정확도 높임
-            vad_method="silero"
-        )
-    except Exception as e:
-        print(f"모델 로드 실패: {e}")
-        model = whisperx.load_model(
-            "medium",
-            device=device,
-            language=language,
-            compute_type="int8",
-            vad_method="silero"
-        )
-
-    # 3. 오디오 분할
-    chunks = split_audio(audio_path, chunk_length_ms=30000)
-    full_transcript = ""
-    chunk_transcripts = []
-
-    # 4. 각 chunk 전사
-    for idx, chunk in enumerate(chunks):
-        chunk_tmp_path = None
-        try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as chunk_tmp:
-                chunk.export(chunk_tmp.name, format="wav")
-                chunk_tmp_path = chunk_tmp.name
-            chunk_text = await transcribe_chunk(chunk_tmp_path, model)
-            chunk_transcripts.append(chunk_text)
-            full_transcript += chunk_text + " "
-        except Exception as e:
-            print(f"Chunk {idx} 전사 실패: {e}")
-            chunk_transcripts.append("[전사 실패]")
-            full_transcript += "[전사 실패] "
-        finally:
-            if chunk_tmp_path and os.path.exists(chunk_tmp_path):
-                os.remove(chunk_tmp_path)
-
-    # 5. 임시 파일 삭제
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
-
-    # 6. 후처리 (예: ollama로 정제)
-    try:
-        prompt = prompt_extraction.make_light_cleaning_prompt(full_transcript)
-        response = ollama.generate(model="qwen2.5", prompt=prompt)
-        lightly_cleaned = response["response"]
-    except Exception as e:
-        print(f"후처리 실패: {e}")
-        lightly_cleaned = full_transcript
-
-    return {
-        "transcription": lightly_cleaned,
-        "chunk_transcripts": chunk_transcripts
-    }
-
-@router.post("/transcribe_audio")
-async def transcribe_audio(file: UploadFile = File(...)):
-    import whisperx
-    import tempfile
-    import os
-    import ollama
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(await file.read())
-        audio_path = tmp.name
-
-    device = "cpu"
-    language = "ko"
-    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
-
-    asr_result = model.transcribe(audio_path)
-    os.remove(audio_path)
-
-    raw_transcript = " ".join([
-        seg["text"].strip()
-        for seg in asr_result["segments"]
-        if seg.get("language", "ko") == "ko"
-    ])
-
-    prompt = prompt_extraction.make_light_cleaning_prompt(raw_transcript)
-    response = ollama.generate(model="qwen2.5", prompt=prompt)
-    lightly_cleaned = response["response"]
-
-    return {"transcription": lightly_cleaned}
-
-
-
-
-@router.post("/summarize_text")
-async def summarize_text(request: TextRequest):
-    import ollama
-
-    prompt = prompt_extraction.make_prompt(request.text)
-    response = ollama.generate(model='qwen2.5', prompt=prompt)
-
-    summary_raw = response["response"]
-    summary_clean = clean_korean_only(summary_raw)
-
-    return {"summary": summary_clean}
-
-@router.post("/upload_audio")
-async def upload_audio(file: UploadFile = File(...)):
-    # 1. 파일 저장
-    save_path = f"./call_data/{file.filename}"
-    with open(save_path, "wb") as buffer:
-        buffer.write(await file.read())
-
-    # 2. WhisperX + LLM Q&A 추출
-    qna_data = await process_audio_and_extract_qna(save_path)
-    return JSONResponse(content={"qna": qna_data})
-
-# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
-import whisperx, json
-
-
-@router.post("/summarize_text")
-async def summarize_text(request: TextRequest):
-    import ollama
-
-    prompt = prompt_extraction.make_prompt(request.text)
-    response = ollama.generate(model='qwen2.5', prompt=prompt)
-
-    summary_raw = response["response"]
-    summary_clean = clean_korean_only(summary_raw)
-
-    return {"summary": summary_clean}
-
-
-@router.post("/upload_audio")
-async def upload_audio(file: UploadFile = File(...)):
-    # 1. 파일 저장
-    save_path = f"./call_data/{file.filename}"
-    with open(save_path, "wb") as buffer:
-        buffer.write(await file.read())
-
-    # 2. WhisperX + LLM Q&A 추출
-    # (아래 함수는 기존 distinct_speaker_audio 코드 활용)
-    qna_data = await process_audio_and_extract_qna(save_path)
-    return JSONResponse(content={"qna": qna_data})
-
 
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):

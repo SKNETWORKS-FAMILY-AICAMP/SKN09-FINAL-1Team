@@ -136,8 +136,8 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 
   const handleRemoveFile = async (index) => {
     try {
-      // Qdrant 고정 컬렉션 삭제 요청
-      await fetch("http://localhost:8002/api/delete_temp_vectors", {
+      // Qdrant 컬렉션 삭제 요청
+      fetch("http://localhost:8002/api/delete_temp_vectors", {
         method: 'DELETE',
       });
       console.log("=> qdrant_temp 컬렉션 삭제 완료");
