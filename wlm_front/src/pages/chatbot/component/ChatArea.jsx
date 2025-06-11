@@ -3,7 +3,7 @@ import styles from '../css/ChatArea.module.css';
 import ReactMarkdown from 'react-markdown';
 import { FaFilePdf, FaTimes } from 'react-icons/fa';
 import upArrowIcon from '../../images/up_arrow.png'
-const ChatArea = () => {
+const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -11,12 +11,27 @@ const ChatArea = () => {
   const fileInputRef = useRef(null);
   const chatContentRef = useRef(null); 
 
-
   useEffect(() => {
     if (chatContentRef.current) {
       chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (chatNo) {
+      fetch(`http://localhost:8001/api/chat_log?chat_no=${chatNo}`)
+        .then(res => res.json())
+        .then(data => {
+          const formatted = data.map(msg => ({
+            text: msg.text,
+            isUser: msg.sender === "user"
+          }));
+          setMessages(formatted);
+        });
+    } else {
+      setMessages([]);
+    }
+  }, [chatNo]);
 
   const handleSend = async () => {
     if (sending) return;
@@ -31,11 +46,21 @@ const ChatArea = () => {
 
     const userMessage = { text: currentInput, isUser: true };
     setMessages(prev => [...prev, userMessage]);
+    if (onFirstMessageSent) onFirstMessageSent();
     setInput('');
 
     try {
       const formData = new FormData();
       formData.append('question', currentInput);
+      formData.append("new_chat", newChat.toString());
+
+      if (chatNo !== null && chatNo !== undefined) {
+        formData.append("chat_no", chatNo.toString());
+        console.log("chat_no:", chatNo);
+      } else {
+        console.log("chat_no 없음 - 새 채팅");
+      }
+
       files.forEach((f) => {
         formData.append('files', f);
       });
@@ -51,6 +76,10 @@ const ChatArea = () => {
       });
 
       const data = await res.json();
+      if (data.chat_no) {
+        console.log("chat_no:", data.chat_no);
+        setChatNo(data.chat_no);
+      }
 
       const aiResponse = {
         text: data.answer || data.error || '응답이 없습니다.',
@@ -65,11 +94,11 @@ const ChatArea = () => {
       setMessages(prev => [...prev, errorMsg]);
     }
 
-    setFiles([]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-
+    // 파일 보낸 후 파일 리스트 초기화 비활성화
+    // setFiles([]);
+    // if (fileInputRef.current) {
+    //   fileInputRef.current.value = '';
+    // }
     setSending(false);
   };
 
@@ -105,10 +134,22 @@ const ChatArea = () => {
   };
 
 
-  const handleRemoveFile = (index) => {
+  const handleRemoveFile = async (index) => {
+    try {
+      // Qdrant 고정 컬렉션 삭제 요청
+      await fetch("http://localhost:8002/api/delete_temp_vectors", {
+        method: 'DELETE',
+      });
+      console.log("=> qdrant_temp 컬렉션 삭제 완료");
+    } catch (err) {
+      console.error("=> Qdrant 컬렉션 삭제 실패:", err);
+    }
+
+    // 프론트 파일 리스트에서도 제거
     const updated = files.filter((_, i) => i !== index);
     setFiles(updated);
   };
+
 
   return (
     <div className={styles.chatArea}>

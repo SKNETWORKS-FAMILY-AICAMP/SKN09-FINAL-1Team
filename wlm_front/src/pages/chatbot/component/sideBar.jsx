@@ -1,30 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../css/SideBar.module.css';
 import FilterPanel from './FilterPanel';
 
-const mockData = [
-  { date: '2025.05.09', keyword: '로그인 문제' },
-  { date: '2025.05.09', keyword: 'API 오류' },
-  { date: '2025.05.08', keyword: '세션 종료' },
-  { date: '2025.05.08', keyword: '디자인 피드백' },
-  { date: '2025.05.08', keyword: '빌드 실패' },
-];
 
-const groupByDate = (data) => {
-  return data.reduce((acc, item) => {
-    if (!acc[item.date]) acc[item.date] = [];
-    acc[item.date].push(item.keyword);
-    return acc;
-  }, {});
-};
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen, setIsOpen, onSelectChat, refreshSidebar }) => {
   const [filterByDate, setFilterByDate] = useState(false);
   const [filterByKeyword, setFilterByKeyword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const groupedData = groupByDate(mockData);
+  const [groupedData, setGroupedData] = useState({});
+  const [allChats, setAllChats] = useState([]);
+
+
+  console.log(document.cookie)
+
+  useEffect(() => {
+    // const isLoggedIn = Boolean(document.cookie.includes("session="));
+    // if (!isLoggedIn) return;
+
+    fetch("http://localhost:8001/api/chat_list", {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        setAllChats(data);
+        setGroupedData(groupByDate(data));
+      });
+  }, [refreshSidebar]);
+
+
+  const groupByDate = (items) => {
+    return items.reduce((acc, item) => {
+      const date = item.chat_create_dt;
+      acc[date] = acc[date] || [];
+      acc[date].push(item);
+      return acc;
+    }, {});
+  };
+
+  const normalizeDate = (dateStr) => dateStr.replace(/\./g, '-');
+
+  useEffect(() => {
+    let filtered = [...allChats];
+
+    if (filterByDate) {
+      filtered = filtered.filter(chat => {
+        const chatDate = normalizeDate(chat.chat_create_dt);
+        let ok = true;
+        if (startDate) ok = ok && chatDate >= startDate;
+        if (endDate) ok = ok && chatDate <= endDate;
+        return ok;
+      });
+    }
+
+    if (filterByKeyword && searchTerm.trim()) {
+      const lower = searchTerm.toLowerCase();
+      filtered = filtered.filter(chat =>
+        chat.chat_title.toLowerCase().includes(lower)
+      );
+    }
+
+    setGroupedData(groupByDate(filtered));
+  }, [filterByDate, filterByKeyword, startDate, endDate, searchTerm, allChats]);
+
+  const handleDeleteChat = async (chat_no) => {
+    const confirmed = window.confirm("정말 이 채팅방을 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`http://localhost:8001/api/delete_chat_room?chat_no=${chat_no}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert("삭제 실패: " + (data?.detail || res.status));
+        return;
+      }
+
+      // 삭제 성공 시 채팅 리스트 새로고침
+      const updated = allChats.filter(chat => chat.chat_no !== chat_no);
+      setAllChats(updated);
+      setGroupedData(groupByDate(updated));
+    } catch (err) {
+      alert("오류 발생: " + err.message);
+    }
+  };
+
 
   return (
     <div className={styles.wrapper}>
@@ -50,11 +115,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className={styles.divider} />
 
         <div className={styles.resultSection}>
-          {Object.entries(groupedData).map(([date, keywords], index) => (
+          {Object.entries(groupedData).map(([date, chats], index) => (
             <details key={index} className={styles.details} open>
-              <summary className={styles.date}> {date}</summary>
-              {keywords.map((keyword, i) => (
-                <div key={i} className={styles.item}> {keyword}</div>
+              <summary className={styles.date}>
+                {date}
+              </summary>
+              {chats.map((chat) => (
+                <div key={chat.chat_no} className={styles.itemContainer}>
+                  <div className={styles.item} title={chat.chat_title} onClick={() => onSelectChat(chat.chat_no)}>
+                    {chat.chat_title}
+                  <button className={styles.deleteButton} onClick={(e) => {e.stopPropagation(); handleDeleteChat(chat.chat_no);}}>
+                    X
+                  </button>
+                  </div>
+                </div>
               ))}
             </details>
           ))}

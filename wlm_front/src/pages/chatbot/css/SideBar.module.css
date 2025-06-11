@@ -90,17 +90,49 @@
 .item {
   font-size: 0.88rem;
   padding: 6px 12px;
+  padding-right: 2rem;
   background-color: #ebebeb;     /* 밝은 무채색 배경 */
   color: #333333;
   border-radius: 8px;
   margin-top: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .item:hover {
   background-color: #dddddd;     /* 살짝 어두운 무채색 */
 }
+
+.itemContainer {
+  position: relative;
+}
+
+.deleteButton {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 2;
+  display: none;
+}
+
+.deleteButton:hover {
+  color: #ff4444;
+}
+
+.itemContainer:hover .deleteButton {
+  display: inline;
+}
+
+
 
 /* ────────────────────────────────────────────────────────── */
 
