@@ -1,3 +1,4 @@
+# python docker install
 sudo apt update
 
 sudo apt install -y python3-venv
@@ -16,7 +17,11 @@ sudo apt update
 
 sudo apt install -y docker-ce
 
-cd SKN09-FINAL-1Team/db_connection_mvc
+rm -rf model_hosting
+rm -rf wlm_front
+
+# docker build & run
+cd ~/SKN09-FINAL-1Team/db_connection_mvc
 
 sudo docker build -t db_connection_mvc .
 

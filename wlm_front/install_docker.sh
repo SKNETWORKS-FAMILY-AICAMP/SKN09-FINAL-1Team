@@ -1,5 +1,8 @@
 #!/bin/bash
 
+rm -rf model_hosting
+rm -rf db_connection_mvc
+
 sudo apt update
 
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
@@ -13,6 +16,8 @@ sudo apt update
 sudo apt install -y docker-ce
 
 sudo docker --version
+
+cd ~/SKN09-FINAL-1Team/wlm_front
 
 sudo docker build -t wlm_front .
 

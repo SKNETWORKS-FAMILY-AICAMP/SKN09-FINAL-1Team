@@ -25,7 +25,9 @@ echo '#!/bin/bash
 nohup ollama serve > ollama.log 2>&1 &
 sleep 10
 ollama pull qwen2.5
-cd ./SKN09-FINAL-1Team/model_hosting && uvicorn main:app --host 0.0.0.0 --port 8000 --reload' > start.sh
+rm -rf db_connection_mvc
+rm -rf wlm_front
+cd ~/SKN09-FINAL-1Team/model_hosting && uvicorn main:app --host 0.0.0.0 --port 8000 --reload' > start.sh
 
 # 시작 스크립트에 실행 권한 부여
 chmod +x start.sh
