@@ -4,7 +4,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, APIRouter
 from pydantic import BaseModel
 from typing import List
-from qdrant_loader import load_qdrant_db, store_temp_embedding
+from qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
 
 qdrant_router = APIRouter()
 
@@ -25,3 +25,12 @@ class SearchRequest(BaseModel):
 def search_vectors(request: SearchRequest):
     result = load_qdrant_db(request.question, request.collection_name)
     return {"result": result}
+
+@qdrant_router.delete("/api/delete_temp_vectors")
+def delete_temp_vectors():
+    collection_name = "qdrant_temp"
+    deleted = delete_collection(collection_name)
+    if deleted:
+        return {"message": f"Collection '{collection_name}' has been deleted."}
+    else:
+        return {"message": f"Collection '{collection_name}' does not exist."}
