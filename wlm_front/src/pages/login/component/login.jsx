@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import '../css/login.css';
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx'; // AuthContext 경로 확인 필수
 import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
