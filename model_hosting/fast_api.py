@@ -8,12 +8,13 @@ import pymysql
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
 from extraction.file_base_extraction import get_extractor_by_extension
+from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 import requests
 import httpx
 from dotenv import load_dotenv
-
+import torch
 import whisperx
 import ollama
 import json
@@ -31,15 +32,15 @@ from langchain_core.tools import tool, StructuredTool
 import uuid
 from datetime import datetime
 from types import SimpleNamespace
+from pydub import AudioSegment
 
 load_dotenv()
 secret = os.getenv("SESSION_SECRET")
 
-# 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "root")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "7276")  # 실제 비밀번호로 교체
+DB_USER = os.environ.get("MY_DB_USER", "wlb_mate")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "wlb_mate")  # 실제 비밀번호로 교체
 DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
@@ -82,7 +83,6 @@ class MemoryTools:
             description="Search memories by semantic similarity."
         )
 
-        # 둘 중 하나만 tools로 사용하세요 (아래는 docstring 방식)
         self.tools = [self.save_recall_memory_tool, self.search_recall_memories_tool]
         # self.tools = [self.save_recall_memory_tool2, self.search_recall_memories_tool2]
 
@@ -132,7 +132,6 @@ class MemoryTools:
         )
         return [document.page_content for document in documents]
 
-    # 2. description 방식 (docstring 없이)
     def _save_recall_memory_no_doc(self, memory: str, config: RunnableConfig) -> str:
         user_id = self.get_user_id(config)
         document = Document(
@@ -650,6 +649,81 @@ async def ask(
         }
 
 
+def split_audio(file_path, chunk_length_ms=30000):
+    audio = AudioSegment.from_file(file_path)
+    chunks = []
+    for i in range(0, len(audio), chunk_length_ms):
+        end = i + chunk_length_ms
+        if end > len(audio):
+            end = len(audio)  
+        chunk = audio[i:end]
+        chunks.append(chunk)
+    return chunks
+async def transcribe_chunk(chunk_file, model):
+    try:
+        asr_result = model.transcribe(chunk_file)
+        chunk_text = " ".join([
+            seg["text"].strip()
+            for seg in asr_result["segments"]
+            if seg.get("language", "ko") == "ko"
+        ])
+        return chunk_text
+    except Exception as e:
+        print(f"Chunk transcribe error: {e}")
+        return "[전사 실패]"
+    
+@router.post("/transcribe_audio_chunked")
+async def transcribe_audio_chunked(file: UploadFile = File(...)):
+    # 1. 임시 파일 저장
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    # 2. 모델 로드 (medium 모델)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    language = "ko"
+    model = whisperx.load_model(
+        "medium",
+        device=device,
+        language=language,
+        compute_type="float32",  # 정확도 높임
+        vad_method="silero"
+    )
+
+    # 3. 오디오 분할 (끝까지 정확히)
+    chunks = split_audio(audio_path, chunk_length_ms=30000)
+    full_transcript = ""
+    chunk_transcripts = []
+
+    # 4. 각 chunk 전사 (에러 처리 강화)
+    for idx, chunk in enumerate(chunks):
+        chunk_tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as chunk_tmp:
+                chunk.export(chunk_tmp.name, format="wav")
+                chunk_tmp_path = chunk_tmp.name
+            chunk_text = await transcribe_chunk(chunk_tmp_path, model)
+            chunk_transcripts.append(chunk_text)
+            full_transcript += chunk_text + " "
+        except Exception as e:
+            print(f"Chunk {idx} 처리 실패: {e}")
+            chunk_transcripts.append("[전사 실패]")
+            full_transcript += "[전사 실패] "
+        finally:
+            if chunk_tmp_path and os.path.exists(chunk_tmp_path):
+                os.remove(chunk_tmp_path)
+
+    # 5. 임시 파일 삭제
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+
+    # 6. 후처리 (ollama 등은 그대로 유지)
+    return {
+        "transcription": full_transcript.strip(),
+        "chunk_transcripts": chunk_transcripts
+    }
+
+
 @router.post("/transcribe_audio")
 async def transcribe_audio(file: UploadFile = File(...)):
     import whisperx
@@ -657,7 +731,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     import os
     import ollama
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(await file.read())
         audio_path = tmp.name
 
@@ -679,6 +753,244 @@ async def transcribe_audio(file: UploadFile = File(...)):
     lightly_cleaned = response["response"]
 
     return {"transcription": lightly_cleaned}
+
+from pydantic import BaseModel
+
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/summarize_text")
+async def summarize_text(request: TextRequest):
+    import ollama
+
+    prompt = prompt_extraction.make_prompt(request.text)
+    response = ollama.generate(model='qwen2.5', prompt=prompt)
+
+    summary_raw = response["response"]
+    summary_clean = clean_korean_only(summary_raw)
+
+    return {"summary": summary_clean}
+
+@router.post("/upload_audio")
+async def upload_audio(file: UploadFile = File(...)):
+    # 1. 파일 저장
+    save_path = f"./call_data/{file.filename}"
+    with open(save_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # 2. WhisperX + LLM Q&A 추출
+    qna_data = await process_audio_and_extract_qna(save_path)
+    return JSONResponse(content={"qna": qna_data})
+
+# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
+import whisperx, json
+
+async def process_audio_and_extract_qna(audio_path):
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+@router.post("/transcribe_audio_chunked")
+async def transcribe_audio_chunked(file: UploadFile = File(...)):
+    # 1. 임시 파일 저장
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    # 2. 모델 로드
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    language = "ko"
+    try:
+        model = whisperx.load_model(
+            "large-v2",  # 더 큰 모델로 변경
+            device=device,
+            language=language,
+            compute_type="float16",  # 정확도 높임
+            vad_method="silero"
+        )
+    except Exception as e:
+        print(f"모델 로드 실패: {e}")
+        model = whisperx.load_model(
+            "medium",
+            device=device,
+            language=language,
+            compute_type="int8",
+            vad_method="silero"
+        )
+
+    # 3. 오디오 분할
+    chunks = split_audio(audio_path, chunk_length_ms=30000)
+    full_transcript = ""
+    chunk_transcripts = []
+
+    # 4. 각 chunk 전사
+    for idx, chunk in enumerate(chunks):
+        chunk_tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as chunk_tmp:
+                chunk.export(chunk_tmp.name, format="wav")
+                chunk_tmp_path = chunk_tmp.name
+            chunk_text = await transcribe_chunk(chunk_tmp_path, model)
+            chunk_transcripts.append(chunk_text)
+            full_transcript += chunk_text + " "
+        except Exception as e:
+            print(f"Chunk {idx} 전사 실패: {e}")
+            chunk_transcripts.append("[전사 실패]")
+            full_transcript += "[전사 실패] "
+        finally:
+            if chunk_tmp_path and os.path.exists(chunk_tmp_path):
+                os.remove(chunk_tmp_path)
+
+    # 5. 임시 파일 삭제
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+
+    # 6. 후처리 (예: ollama로 정제)
+    try:
+        prompt = prompt_extraction.make_light_cleaning_prompt(full_transcript)
+        response = ollama.generate(model="qwen2.5", prompt=prompt)
+        lightly_cleaned = response["response"]
+    except Exception as e:
+        print(f"후처리 실패: {e}")
+        lightly_cleaned = full_transcript
+
+    return {
+        "transcription": lightly_cleaned,
+        "chunk_transcripts": chunk_transcripts
+    }
+
+@router.post("/transcribe_audio")
+async def transcribe_audio(file: UploadFile = File(...)):
+    import whisperx
+    import tempfile
+    import os
+    import ollama
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+
+    asr_result = model.transcribe(audio_path)
+    os.remove(audio_path)
+
+    raw_transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    prompt = prompt_extraction.make_light_cleaning_prompt(raw_transcript)
+    response = ollama.generate(model="qwen2.5", prompt=prompt)
+    lightly_cleaned = response["response"]
+
+    return {"transcription": lightly_cleaned}
+
+from pydantic import BaseModel
+
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/summarize_text")
+async def summarize_text(request: TextRequest):
+    import ollama
+
+    prompt = prompt_extraction.make_prompt(request.text)
+    response = ollama.generate(model='qwen2.5', prompt=prompt)
+
+    summary_raw = response["response"]
+    summary_clean = clean_korean_only(summary_raw)
+
+    return {"summary": summary_clean}
+
+@router.post("/upload_audio")
+async def upload_audio(file: UploadFile = File(...)):
+    # 1. 파일 저장
+    save_path = f"./call_data/{file.filename}"
+    with open(save_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # 2. WhisperX + LLM Q&A 추출
+    qna_data = await process_audio_and_extract_qna(save_path)
+    return JSONResponse(content={"qna": qna_data})
+
+# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
+import whisperx, json
+
+async def process_audio_and_extract_qna(audio_path):
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    # 4. LLM 프롬프트 구성
+    prompt = prompt_extraction.make_audio_transcription_prompt(transcript)
+
+    # Ollama Qwen2.5 모델로 Q&A 분리 요청
+    import ollama
+    try:
+        response = ollama.generate(
+            model="qwen2.5",
+            prompt=prompt
+        )
+        result_text = response['response'].strip()
+        try:
+            qna_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            qna_data = []
+            lines = result_text.splitlines()
+            for i in range(0, len(lines), 2):
+                if i+1 < len(lines):
+                    question = lines[i].replace("질문:", "").strip()
+                    answer = lines[i+1].replace("답변:", "").strip()
+                    qna_data.append({"question": question, "answer": answer})
+        return qna_data
+    except Exception as e:
+        return [{"question": "Error", "answer": str(e)}]
+# @router.post("/transcribe_audio")
+# async def transcribe_audio(file: UploadFile = File(...)):
+#     import whisperx
+#     import tempfile
+#     import os
+#     import ollama
+
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+#         tmp.write(await file.read())
+#         audio_path = tmp.name
+
+#     device = "cpu"
+#     language = "ko"
+#     model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+
+#     asr_result = model.transcribe(audio_path)
+#     os.remove(audio_path)
+
+#     raw_transcript = " ".join([
+#         seg["text"].strip()
+#         for seg in asr_result["segments"]
+#         if seg.get("language", "ko") == "ko"
+#     ])
+
+#     prompt = prompt_extraction.make_light_cleaning_prompt(raw_transcript)
+#     response = ollama.generate(model="qwen2.5", prompt=prompt)
+#     lightly_cleaned = response["response"]
+
+#     return {"transcription": lightly_cleaned}
 
 from pydantic import BaseModel
 

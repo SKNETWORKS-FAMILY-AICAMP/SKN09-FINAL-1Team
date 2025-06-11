@@ -7,4 +7,6 @@ const InfoButton = ({ onClick }) => (
   </button>
 );
 
+
+
 export default InfoButton; 

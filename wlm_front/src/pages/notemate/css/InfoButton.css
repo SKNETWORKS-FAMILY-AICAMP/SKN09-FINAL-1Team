@@ -13,6 +13,26 @@
     cursor: pointer;
     margin-left: 8px;
     transition: background 0.2s, border-color 0.2s;
+    /* margin-top: 10px;  */
+
+}
+.info-btn2 {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #000000;
+    background: #fff;
+    color: #000000;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.2s, border-color 0.2s;
+    margin-top: 30px; 
+
 }
 
 .info-btn:hover {
