@@ -141,6 +141,13 @@ def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
     client.upsert(collection_name=collection_name, points=points)
     return collection_name
 
+def delete_collection(collection_name="qdrant_temp"):
+    if client.collection_exists(collection_name=collection_name):
+        client.delete_collection(collection_name=collection_name)
+        return True
+    return False
+
+
 
 if __name__ == "__main__":
     init_qdrant_from_folder()

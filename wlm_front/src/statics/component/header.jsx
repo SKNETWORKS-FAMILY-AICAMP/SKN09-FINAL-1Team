@@ -28,6 +28,15 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      try {
+        await fetch("http://localhost:8002/api/delete_temp_vectors", {
+          method: 'DELETE',
+        });
+        console.log("=> Qdrant 컬렉션 삭제 완료");
+      } catch (err) {
+        console.warn("=> Qdrant 컬렉션 삭제 실패:", err);
+      }
+      // 서버 세션 삭제를 위한 API 호출
       await axios.post('http://localhost:8000/api/logout', {}, {
         withCredentials: true,
       });

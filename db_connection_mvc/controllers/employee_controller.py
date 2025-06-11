@@ -6,8 +6,8 @@ from datetime import date
 
 # 로그인 요청 모델
 class LoginRequest(BaseModel):
-    emp_code: str
-    emp_pwd: str
+    username: str
+    password: str
     
 # 비밀번호 확인 요청 모델
 class PasswordRequest(BaseModel):
@@ -44,7 +44,7 @@ async def get_all_employees():
 # 유저 로그인
 @router.post("/login")
 async def login(request: Request, login_data: LoginRequest):
-    employee = await employee_service.login(login_data.emp_code, login_data.emp_pwd)
+    employee = await employee_service.login(login_data.username, login_data.password)
     if not employee:
         raise HTTPException(status_code=401, detail="잘못된 사원번호나 비밀번호입니다.")
     
@@ -59,7 +59,8 @@ async def login(request: Request, login_data: LoginRequest):
         "emp_role": employee["emp_role"]
     }
 
-    return {'message': '로그인 성공'}
+    # 로그인시 세션 정보 반환
+    return {"message": "로그인 성공", "employee": employee}
 
 @router.post("/logout")
 async def logout(request: Request):
@@ -69,6 +70,7 @@ async def logout(request: Request):
 
 @router.get("/check-session")
 async def check_session(request: Request):
+    print(request.session)
     if "employee" not in request.session:
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     

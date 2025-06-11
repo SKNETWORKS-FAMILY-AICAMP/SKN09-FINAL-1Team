@@ -8,14 +8,13 @@ import pymysql
 from duckduckgo_search import DDGS  
 from pydantic import BaseModel
 from extraction.file_base_extraction import get_extractor_by_extension
-# from extraction.pdf_extraction import PDFExtraction
+from extraction.pdf_extraction import PDFExtraction
 from extraction.prompt_extraciont import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
 import requests
 import httpx
 from dotenv import load_dotenv
-
-
+import torch
 import whisperx
 import ollama
 import json
@@ -31,16 +30,17 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
 import uuid
-
+from datetime import datetime
+from types import SimpleNamespace
+from pydub import AudioSegment
 
 load_dotenv()
 secret = os.getenv("SESSION_SECRET")
 
-# 환경변수에서 DB 접속 정보 불러오기 (없으면 하드코딩)
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "root")  # 실제 사용자로 교체
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "1234")  # 실제 비밀번호로 교체
+DB_USER = os.environ.get("MY_DB_USER", "wlb_mate")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "wlb_mate")  # 실제 비밀번호로 교체
 DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
@@ -83,7 +83,6 @@ class MemoryTools:
             description="Search memories by semantic similarity."
         )
 
-        # 둘 중 하나만 tools로 사용하세요 (아래는 docstring 방식)
         self.tools = [self.save_recall_memory_tool, self.search_recall_memories_tool]
         # self.tools = [self.save_recall_memory_tool2, self.search_recall_memories_tool2]
 
@@ -133,7 +132,6 @@ class MemoryTools:
         )
         return [document.page_content for document in documents]
 
-    # 2. description 방식 (docstring 없이)
     def _save_recall_memory_no_doc(self, memory: str, config: RunnableConfig) -> str:
         user_id = self.get_user_id(config)
         document = Document(
@@ -174,82 +172,159 @@ class MySQLCheckpoint:
     def _get_connection(self):
         return pymysql.connect(**self.db_config)
 
+    def is_chat_owner(self, chat_no: int, emp_code: str) -> bool:
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 1
+                    FROM chat_mate m
+                    JOIN employee e ON m.emp_no = e.emp_no
+                    WHERE m.chat_no = %s AND e.emp_code = %s
+                """, (chat_no, emp_code))
+                return cursor.fetchone() is not None
+        finally:
+            conn.close()
+
+
     def get_tuple(self, config):
+        if config["configurable"].get("new_chat"):
+            return {"messages": [], "recall_memories": []}
+
         emp_code = config["configurable"]["user_id"]
+        chat_no = config["configurable"].get("chat_no")
+
+        conn = self._get_connection()
+
+        if not chat_no:
+            return {"messages": [], "recall_memories": []}
+        
+        try:
+            with conn.cursor() as cursor:
+                # chat_no 유효성 확인
+                if not self.is_chat_owner(chat_no, emp_code):
+                    raise ValueError("권한이 없는 채팅방입니다.")
+
+                # 메시지 조회
+                cursor.execute("""
+                    SELECT log_text, log_speaker_sn
+                    FROM chat_log
+                    WHERE chat_no = %s
+                    ORDER BY log_create_dt
+                """, (chat_no,))
+                rows = cursor.fetchall()
+
+                messages = [
+                    HumanMessage(content=log) if speaker == 1 else AIMessage(content=log)
+                    for log, speaker in rows
+                ]
+                return {"messages": messages, "recall_memories": []}
+        finally:
+            conn.close()
+
+
+    def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
+        emp_code = config["configurable"]["user_id"]
+        force_new_chat = config["configurable"].get("new_chat", False)
+        chat_no = config["configurable"].get("chat_no")
+
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                # chat_no 유효성 검증
+                if chat_no and not self.is_chat_owner(chat_no, emp_code):
+                    raise ValueError("권한이 없는 채팅방입니다.")
+
+                # chat_no가 없으면 가장 최근 것을 찾거나 새로 생성
+                if not chat_no:
+                    first_two = messages[:2]
+                    user_msg = first_two[0].content if len(first_two) > 0 and isinstance(first_two[0], HumanMessage) else ""
+                    bot_msg = first_two[1].content if len(first_two) > 1 and isinstance(first_two[1], AIMessage) else ""
+                    title_prompt = prompt_extraction.make_chat_title_prompt(user_msg, bot_msg)
+                    try:
+                        title = OllamaHosting("qwen2.5", title_prompt).get_model_response().strip()
+                        print("=> 생성된 제목:", title)
+                    except Exception as e:
+                        print("=> 제목 생성 실패:", e)
+                        title = f"대화 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    cursor.execute("""
+                    INSERT INTO chat_mate (emp_no, chat_title)
+                    SELECT emp_no, %s FROM employee WHERE emp_code = %s
+                    """, (title, emp_code))
+                    chat_no = cursor.lastrowid
+
+                # 저장된 메시지 이후만 저장
+                cursor.execute("SELECT COUNT(*) FROM chat_log WHERE chat_no = %s", (chat_no,))
+                saved_count = cursor.fetchone()[0]
+                new_messages = messages[saved_count:]
+
+                for msg in new_messages:
+                    if isinstance(msg, HumanMessage):
+                        speaker_sn = 1
+                    elif isinstance(msg, AIMessage):
+                        speaker_sn = 2
+                    elif isinstance(msg, dict):
+                        if msg.get("sender") == "user":
+                            speaker_sn = 1
+                        elif msg.get("sender") == "bot":
+                            speaker_sn = 2
+                        else:
+                            continue
+                        msg = SimpleNamespace(content=msg.get("text", ""))
+                    else:
+                        continue
+
+                    cursor.execute("""
+                        INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
+                        VALUES (%s, %s, %s, NOW())
+                    """, (chat_no, msg.content, speaker_sn))
+            conn.commit()
+            return chat_no
+        finally:
+            conn.close()
+
+
+
+    def get_chat_list(self, emp_code):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT chat_no, chat_title, DATE_FORMAT(chat_create_dt, '%%Y.%%m.%%d') as chat_create_dt
+                    FROM chat_mate
+                    WHERE emp_no = (SELECT emp_no FROM employee WHERE emp_code = %s)
+                    ORDER BY chat_create_dt DESC
+                """, (emp_code,))
+                rows = cursor.fetchall()
+                return [
+                    {
+                        "chat_no": row[0],
+                        "chat_title": row[1],
+                        "chat_create_dt": row[2]
+                    } for row in rows
+                ]
+        finally:
+            conn.close()
+
+    def get_chat_log(self, chat_no):
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
                 cursor.execute("""
                     SELECT log_text, log_speaker_sn
                     FROM chat_log
-                    WHERE chat_no IN (
-                        SELECT chat_no FROM chat_mate WHERE emp_no = (
-                            SELECT emp_no FROM employee WHERE emp_code = %s
-                        )
-                    )
+                    WHERE chat_no = %s
                     ORDER BY log_create_dt
-                """, (emp_code,))
+                """, (chat_no,))
                 rows = cursor.fetchall()
 
-                messages = []
-                for log_text, speaker_sn in rows:
-                    if speaker_sn == 1:
-                        messages.append(HumanMessage(content=log_text))
-                    elif speaker_sn == 2:
-                        messages.append(AIMessage(content=log_text))
-
-                return {"messages": messages, "recall_memories": []}
+                return [
+                    {"text": row[0], "sender": "user" if row[1] == 1 else "bot"}
+                    for row in rows
+                ]
         finally:
             conn.close()
-
-    def save_tuple(self, config, messages: List[Any], recall_memories: List[str]):
-        emp_code = config["configurable"]["user_id"]
-        conn = self._get_connection()
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT chat_no FROM chat_mate WHERE emp_no = (
-                        SELECT emp_no FROM employee WHERE emp_code = %s
-                    ) ORDER BY chat_create_dt DESC LIMIT 1
-                """, (emp_code,))
-                row = cursor.fetchone()
-                chat_no = row[0] if row else None
-                if not chat_no:
-                    print("❗ chat_no 없음 - 새 chat_mate 생성")
-                
-                    # 현재 해당 emp_code의 대화 개수 세기
-                    cursor.execute("""
-                        SELECT COUNT(*) FROM chat_mate 
-                        WHERE emp_no = (SELECT emp_no FROM employee WHERE emp_code = %s)
-                    """, (emp_code,))
-                    count = cursor.fetchone()[0]
-                
-                    # 제목 만들기: 대화 1, 대화 2, ...
-                    title = f"대화 {count + 1}"
-                
-                    # chat_mate에 새 row 삽입
-                    cursor.execute("""
-                        INSERT INTO chat_mate (emp_no, chat_title)
-                        VALUES (
-                            (SELECT emp_no FROM employee WHERE emp_code = %s),
-                            %s
-                        )
-                    """, (emp_code, title))
-                    conn.commit()
-                
-                    # 방금 생성한 chat_no 가져오기
-                    cursor.execute("SELECT LAST_INSERT_ID()")
-                    chat_no = cursor.fetchone()[0]
-
-                for msg in messages:
-                    speaker_sn = 1 if isinstance(msg, HumanMessage) else 2
-                    cursor.execute("""
-                        INSERT INTO chat_log (chat_no, log_text, log_speaker_sn, log_create_dt)
-                        VALUES (%s, %s, %s, NOW())
-                    """, (chat_no, msg.content, speaker_sn))
-            conn.commit()
-        finally:
-            conn.close()
+   
 
 
 class MemoryAgent:
@@ -305,6 +380,11 @@ class MemoryAgent:
                 " 도구가 성공적으로 완료되었는지 확인합니다.\n\n",
             ),
             ("placeholder", "{messages}"),
+        ])
+    def set_prompt(self, system_template: str):
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", system_template),
+            ("placeholder", "{messages}")
         ])
     def setup_model_with_tools(self, tools):
         self.tools = tools
@@ -385,6 +465,11 @@ async def ask(
     print("🔍 session.get('employee') =", request.session.get("employee"))
     print("🔍 request.cookies =", request.cookies)
 
+    form = await request.form()
+    new_chat_flag = form.get("new_chat", "false").lower() == "true"
+
+    print("=>new_chat =", form.get("new_chat"))
+    print("=>chat_no =", form.get("chat_no"))
 
     employee = request.session.get("employee")
     if not employee or "emp_code" not in employee:
@@ -393,9 +478,11 @@ async def ask(
 
     user_id = employee["emp_code"]
 
+    chat_no_str = form.get("chat_no", "").strip()
+    chat_no = int(chat_no_str) if chat_no_str.isdigit() else None
 
     mode = classify_question_mode(question)
-    config = {"configurable": {"user_id": user_id, "thread_id": user_id}}
+    config = {"configurable": {"user_id": user_id, "thread_id": user_id, "new_chat": new_chat_flag, "chat_no": chat_no}}
 
     # MySQLCheckpoint 인스턴스를 요청마다 생성하여 연결을 명시적으로 관리
     checkpoint = MySQLCheckpoint(
@@ -471,10 +558,11 @@ async def ask(
                 ]
             )
             # 웹 검색 결과는 DB에 저장하지 않는 것으로 판단하여, 이전 메시지만 저장
-            checkpoint.save_tuple(config, current_messages, current_recall_memories)
+            chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
             return {
                 "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
-                "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+                "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
+                "chat_no": chat_no
             }
 
         # 일반 문서 질의 응답 모드
@@ -493,17 +581,26 @@ async def ask(
                 criteria_list = criteria_data.get("result", "")
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
-            qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question)
-            qa_ollama = OllamaHosting("qwen2.5", qa_prompt)
-            answer = qa_ollama.get_model_response().strip()
+            agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
+            agent_state = memory_agent.load_memories(agent_state, config)
+            recall_memories_text = "\n".join(agent_state.recall_memories)
 
-            answers.append(f" **{filename}** 에서의 응답:\n{answer}")
+            qa_prompt = prompt_extraction.make_prompt_to_query_document(context, question, recall_memories_text)
+            memory_agent.set_prompt(qa_prompt)
+
+            agent_response = memory_agent.agent(agent_state)
+            answer = get_from_state(agent_response, "messages", [])[-1].content.strip()
+
+            answers.append(f"{answer}\n\n**출처: {filename}**")
 
         agent_response_content = "\n\n---\n\n".join(answers)
-        checkpoint.save_tuple(config, current_messages, current_recall_memories)
+        ai_message = AIMessage(content=agent_response_content)
+        all_messages = current_messages + [ai_message]
+        chat_no = checkpoint.save_tuple(config, all_messages, current_recall_memories)
         return {
             "answer": agent_response_content,
-            "evaluation_criteria": evaluation_criteria
+            "evaluation_criteria": evaluation_criteria,
+            "chat_no": chat_no
         }
 
     # 문서 없음 + 웹 검색
@@ -518,25 +615,26 @@ async def ask(
                 for res in results
             ]
         )
-        checkpoint.save_tuple(config, current_messages, current_recall_memories)
+        chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
         return {
             "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
-            "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다."
+            "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
+            "chat_no": chat_no
         }
 
     # 문서 없음 + 일반 질문
     else:
         # 일반 대화 모드
-        # agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
-        agent_state = State(messages=current_messages, recall_memories=[])
+        agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
         agent_state = memory_agent.load_memories(agent_state, config)
+        recall_text = "\n".join(agent_state.recall_memories)
+        system_prompt = prompt_extraction.make_general_question_prompt(question, recall_text)
+        memory_agent.set_prompt(system_prompt)
         agent_response = memory_agent.agent(agent_state)
-        
-        # agent_response에서 AIMessage 객체만 추출하여 저장
-        messages_to_save = [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
-        
-        checkpoint.save_tuple(config, messages_to_save, agent_response.recall_memories)
-        
+
+        all_messages = current_messages + [msg for msg in agent_response.messages if isinstance(msg, (AIMessage, HumanMessage))]
+        chat_no = checkpoint.save_tuple(config, all_messages, agent_response.recall_memories)
+
         messages = get_from_state(agent_response, "messages", [])
         if not messages:
             raise RuntimeError("No messages found in final_state")
@@ -546,8 +644,84 @@ async def ask(
 
         return {
             "answer": agent_response_content,
-            "evaluation_criteria": "기억 기반 응답 모드입니다. 평가 기준은 제공되지 않습니다."
+            "evaluation_criteria": "",
+            "chat_no": chat_no
         }
+
+
+def split_audio(file_path, chunk_length_ms=30000):
+    audio = AudioSegment.from_file(file_path)
+    chunks = []
+    for i in range(0, len(audio), chunk_length_ms):
+        end = i + chunk_length_ms
+        if end > len(audio):
+            end = len(audio)  
+        chunk = audio[i:end]
+        chunks.append(chunk)
+    return chunks
+async def transcribe_chunk(chunk_file, model):
+    try:
+        asr_result = model.transcribe(chunk_file)
+        chunk_text = " ".join([
+            seg["text"].strip()
+            for seg in asr_result["segments"]
+            if seg.get("language", "ko") == "ko"
+        ])
+        return chunk_text
+    except Exception as e:
+        print(f"Chunk transcribe error: {e}")
+        return "[전사 실패]"
+    
+@router.post("/transcribe_audio_chunked")
+async def transcribe_audio_chunked(file: UploadFile = File(...)):
+    # 1. 임시 파일 저장
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    # 2. 모델 로드 (medium 모델)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    language = "ko"
+    model = whisperx.load_model(
+        "medium",
+        device=device,
+        language=language,
+        compute_type="float32",  # 정확도 높임
+        vad_method="silero"
+    )
+
+    # 3. 오디오 분할 (끝까지 정확히)
+    chunks = split_audio(audio_path, chunk_length_ms=30000)
+    full_transcript = ""
+    chunk_transcripts = []
+
+    # 4. 각 chunk 전사 (에러 처리 강화)
+    for idx, chunk in enumerate(chunks):
+        chunk_tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as chunk_tmp:
+                chunk.export(chunk_tmp.name, format="wav")
+                chunk_tmp_path = chunk_tmp.name
+            chunk_text = await transcribe_chunk(chunk_tmp_path, model)
+            chunk_transcripts.append(chunk_text)
+            full_transcript += chunk_text + " "
+        except Exception as e:
+            print(f"Chunk {idx} 처리 실패: {e}")
+            chunk_transcripts.append("[전사 실패]")
+            full_transcript += "[전사 실패] "
+        finally:
+            if chunk_tmp_path and os.path.exists(chunk_tmp_path):
+                os.remove(chunk_tmp_path)
+
+    # 5. 임시 파일 삭제
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+
+    # 6. 후처리 (ollama 등은 그대로 유지)
+    return {
+        "transcription": full_transcript.strip(),
+        "chunk_transcripts": chunk_transcripts
+    }
 
 
 @router.post("/transcribe_audio")
@@ -557,7 +731,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     import os
     import ollama
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(await file.read())
         audio_path = tmp.name
 
@@ -579,6 +753,244 @@ async def transcribe_audio(file: UploadFile = File(...)):
     lightly_cleaned = response["response"]
 
     return {"transcription": lightly_cleaned}
+
+from pydantic import BaseModel
+
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/summarize_text")
+async def summarize_text(request: TextRequest):
+    import ollama
+
+    prompt = prompt_extraction.make_prompt(request.text)
+    response = ollama.generate(model='qwen2.5', prompt=prompt)
+
+    summary_raw = response["response"]
+    summary_clean = clean_korean_only(summary_raw)
+
+    return {"summary": summary_clean}
+
+@router.post("/upload_audio")
+async def upload_audio(file: UploadFile = File(...)):
+    # 1. 파일 저장
+    save_path = f"./call_data/{file.filename}"
+    with open(save_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # 2. WhisperX + LLM Q&A 추출
+    qna_data = await process_audio_and_extract_qna(save_path)
+    return JSONResponse(content={"qna": qna_data})
+
+# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
+import whisperx, json
+
+async def process_audio_and_extract_qna(audio_path):
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+@router.post("/transcribe_audio_chunked")
+async def transcribe_audio_chunked(file: UploadFile = File(...)):
+    # 1. 임시 파일 저장
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    # 2. 모델 로드
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    language = "ko"
+    try:
+        model = whisperx.load_model(
+            "large-v2",  # 더 큰 모델로 변경
+            device=device,
+            language=language,
+            compute_type="float16",  # 정확도 높임
+            vad_method="silero"
+        )
+    except Exception as e:
+        print(f"모델 로드 실패: {e}")
+        model = whisperx.load_model(
+            "medium",
+            device=device,
+            language=language,
+            compute_type="int8",
+            vad_method="silero"
+        )
+
+    # 3. 오디오 분할
+    chunks = split_audio(audio_path, chunk_length_ms=30000)
+    full_transcript = ""
+    chunk_transcripts = []
+
+    # 4. 각 chunk 전사
+    for idx, chunk in enumerate(chunks):
+        chunk_tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as chunk_tmp:
+                chunk.export(chunk_tmp.name, format="wav")
+                chunk_tmp_path = chunk_tmp.name
+            chunk_text = await transcribe_chunk(chunk_tmp_path, model)
+            chunk_transcripts.append(chunk_text)
+            full_transcript += chunk_text + " "
+        except Exception as e:
+            print(f"Chunk {idx} 전사 실패: {e}")
+            chunk_transcripts.append("[전사 실패]")
+            full_transcript += "[전사 실패] "
+        finally:
+            if chunk_tmp_path and os.path.exists(chunk_tmp_path):
+                os.remove(chunk_tmp_path)
+
+    # 5. 임시 파일 삭제
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+
+    # 6. 후처리 (예: ollama로 정제)
+    try:
+        prompt = prompt_extraction.make_light_cleaning_prompt(full_transcript)
+        response = ollama.generate(model="qwen2.5", prompt=prompt)
+        lightly_cleaned = response["response"]
+    except Exception as e:
+        print(f"후처리 실패: {e}")
+        lightly_cleaned = full_transcript
+
+    return {
+        "transcription": lightly_cleaned,
+        "chunk_transcripts": chunk_transcripts
+    }
+
+@router.post("/transcribe_audio")
+async def transcribe_audio(file: UploadFile = File(...)):
+    import whisperx
+    import tempfile
+    import os
+    import ollama
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(await file.read())
+        audio_path = tmp.name
+
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+
+    asr_result = model.transcribe(audio_path)
+    os.remove(audio_path)
+
+    raw_transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    prompt = prompt_extraction.make_light_cleaning_prompt(raw_transcript)
+    response = ollama.generate(model="qwen2.5", prompt=prompt)
+    lightly_cleaned = response["response"]
+
+    return {"transcription": lightly_cleaned}
+
+from pydantic import BaseModel
+
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/summarize_text")
+async def summarize_text(request: TextRequest):
+    import ollama
+
+    prompt = prompt_extraction.make_prompt(request.text)
+    response = ollama.generate(model='qwen2.5', prompt=prompt)
+
+    summary_raw = response["response"]
+    summary_clean = clean_korean_only(summary_raw)
+
+    return {"summary": summary_clean}
+
+@router.post("/upload_audio")
+async def upload_audio(file: UploadFile = File(...)):
+    # 1. 파일 저장
+    save_path = f"./call_data/{file.filename}"
+    with open(save_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # 2. WhisperX + LLM Q&A 추출
+    qna_data = await process_audio_and_extract_qna(save_path)
+    return JSONResponse(content={"qna": qna_data})
+
+# 기존 distinct_speaker_audio 코드에서 실제 Q&A 추출 부분만 함수로 분리
+import whisperx, json
+
+async def process_audio_and_extract_qna(audio_path):
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    # 4. LLM 프롬프트 구성
+    prompt = prompt_extraction.make_audio_transcription_prompt(transcript)
+
+    # Ollama Qwen2.5 모델로 Q&A 분리 요청
+    import ollama
+    try:
+        response = ollama.generate(
+            model="qwen2.5",
+            prompt=prompt
+        )
+        result_text = response['response'].strip()
+        try:
+            qna_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            qna_data = []
+            lines = result_text.splitlines()
+            for i in range(0, len(lines), 2):
+                if i+1 < len(lines):
+                    question = lines[i].replace("질문:", "").strip()
+                    answer = lines[i+1].replace("답변:", "").strip()
+                    qna_data.append({"question": question, "answer": answer})
+        return qna_data
+    except Exception as e:
+        return [{"question": "Error", "answer": str(e)}]
+# @router.post("/transcribe_audio")
+# async def transcribe_audio(file: UploadFile = File(...)):
+#     import whisperx
+#     import tempfile
+#     import os
+#     import ollama
+
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+#         tmp.write(await file.read())
+#         audio_path = tmp.name
+
+#     device = "cpu"
+#     language = "ko"
+#     model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+
+#     asr_result = model.transcribe(audio_path)
+#     os.remove(audio_path)
+
+#     raw_transcript = " ".join([
+#         seg["text"].strip()
+#         for seg in asr_result["segments"]
+#         if seg.get("language", "ko") == "ko"
+#     ])
+
+#     prompt = prompt_extraction.make_light_cleaning_prompt(raw_transcript)
+#     response = ollama.generate(model="qwen2.5", prompt=prompt)
+#     lightly_cleaned = response["response"]
+
+#     return {"transcription": lightly_cleaned}
 
 from pydantic import BaseModel
 
@@ -737,6 +1149,63 @@ async def ask_query(input: QuestionInput):
     final_answer = ollama.get_model_response().strip()
 
     return {"answer": final_answer}
+
+
+
+@router.get("/api/chat_list")
+async def chat_list(request: Request):
+    employee = request.session.get("employee")
+    emp_code = employee["emp_code"]
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    return checkpoint.get_chat_list(emp_code)
+
+@router.get("/api/chat_log")
+async def chat_log(chat_no: int):
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    return checkpoint.get_chat_log(chat_no)
+
+@router.delete("/api/delete_chat_room")
+async def delete_chat_room(chat_no: int, request: Request):
+    employee = request.session.get("employee")
+    emp_code = employee["emp_code"]
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+
+    if not checkpoint.is_chat_owner(chat_no, emp_code):
+        raise HTTPException(status_code=403, detail="해당 채팅방에 대한 삭제 권한이 없습니다.")
+
+    conn = checkpoint._get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM chat_log WHERE chat_no = %s", (chat_no,))
+            cursor.execute("DELETE FROM chat_mate WHERE chat_no = %s", (chat_no,))
+        conn.commit()
+        return {"success": True}
+    finally:
+        conn.close()
+
 
 @router.get("/check-session")
 async def check_session(request: Request):

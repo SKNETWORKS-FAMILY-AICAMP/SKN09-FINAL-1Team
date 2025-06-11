@@ -108,7 +108,7 @@ class PromptExtraction:
 # 출력 (평가 기준 항목 목록):
 """
 
-    def make_prompt_to_query_document(self, document_text, question):
+    def make_prompt_to_query_document(self, document_text, question, memory):
         return f"""
 당신은 사업 제안서 문서 내용을 기반으로 질문에 정확하고 정직하게 답변하는 지능형 비서입니다.
 
@@ -124,10 +124,14 @@ class PromptExtraction:
 # 제약 조건
 - 질문이 명확하지 않아도 문서에서 최대한 근거 있는 부분을 찾아 응답하세요.
 - 문서에 있는 내용 외에는 어떠한 추측이나 배경 지식을 사용하지 마세요.
+- 과거 대화 내용을 기반하여 사용자의 질문의 의도에 맞는 응답을 하세요.
 - 반드시 한국어로 응답하세요.
 
 # 입력 문서
 {document_text}
+
+#과거 대화 내용
+{memory}
 
 # 질문
 {question}
@@ -177,7 +181,6 @@ class PromptExtraction:
 [회의 개요]
 - 일자:
 - 주최자:
-- 참석자:
 - 회의 주제:
 
 [주요 논의 사항]
@@ -217,11 +220,14 @@ class PromptExtraction:
     {text}
     """
 
-    def make_general_question_prompt(self, question: str) -> str:
+    def make_general_question_prompt(self, question: str, recall: str = "") -> str:
         return f"""
-    반드시 한국어로 대답하세요.       
+    반드시 한국어만을 이용하여 대답하세요.       
     다음은 사용자의 질문입니다. 아래 질문에 대해 가능한 사실에 기반해 간결하고 정확한 답변을 제공해 주세요.
-
+    이전 대화내역의 기억이 있다면 맥락을 파악하여, 사용자의 상황에 알맞은 답변을 제공하세요. 
+    <이전 대화>
+    {recall}
+    </이전 대화>
     질문: {question}
     """
 
@@ -267,3 +273,33 @@ class PromptExtraction:
     (반드시 한국어로만 답변하세요. 중국어, 영어, 일본어 등은 절대 사용하지 마세요. 한국어 이외의 언어가 한 글자라도 포함되면 안 됩니다.)
     """
 
+    def make_chat_title_prompt(self, question: str, answer: str) -> str:
+        return f"""
+    다음 대화는 질문과 답변으로 이루어져 있습니다.
+    이 대화를 핵심 키워드로 요약하여 간결한 제목을 만드세요.    
+    제목은 반드시 특수문자 없이 **한국어**만을 이용하여 작성하세요.
+    예시: 공모전 평가기준
+
+    질문:
+    {question}
+
+    답변:
+    {answer}
+    """
+
+    def make_prompt_for_civil_complaint(question, context_docs):
+        context = "\n\n".join([f"- {doc}" for doc in context_docs])
+
+        return f"""
+            당신은 민원 응답을 담당하는 공공기관 AI입니다.
+            
+            다음은 국민이 제기한 민원 질문입니다.
+            질문: "{question}"
+            
+            아래는 관련 법령, 과거 Q&A에서 검색된 내용입니다:
+            {context}
+            
+            위 정보를 바탕으로 민원인의 질문에 대해 정확하고 간결하게 답변하십시오.
+            - 법령 조항이 있다면 출처도 함께 제공하십시오.
+            - 친절하고 공손한 말투를 유지하십시오.
+            """
