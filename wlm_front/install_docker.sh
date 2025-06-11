@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rm -rf model_hosting
-rm -rf db_connection_mvc
+rm -rf ~/SKN09-FINAL-1Team/model_hosting
+rm -rf ~/SKN09-FINAL-1Team/db_connection_mvc
 
 sudo apt update
 

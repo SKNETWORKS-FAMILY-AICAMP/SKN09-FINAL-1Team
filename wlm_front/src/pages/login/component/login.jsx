@@ -3,6 +3,7 @@ import '../css/login.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx'; // AuthContext 경로 확인 필수
 import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
+import axios from 'axios';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -16,15 +17,13 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-session', {
+        const response = await axios.get('http://15.164.36.159:8000/api/check-session', {
           withCredentials: true
         });
-        if (response.data.employee) {
+        if (response) {
           navigate('/main');
         }
       } catch (error) {
-        // 세션이 없는 경우 로그인 페이지 유지
-        console.log('세션 없음');
       }
     };
     checkSession();
@@ -35,7 +34,7 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/login', { 
+      const response = await fetch('http://15.164.36.159:8000/api/login', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
