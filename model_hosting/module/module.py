@@ -10,11 +10,14 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
 from ollama_load.ollama_hosting import OllamaHosting
-from duckduckgo_search import DDGS  
+from duckduckgo_search import DDGS 
+from pydub import AudioSegment 
 from datetime import datetime
 from types import SimpleNamespace
 from pydantic import BaseModel
 from extraction.prompt_extraction import PromptExtraction
+import whisperx
+import json
 import uuid
 import pymysql
 import re
@@ -419,6 +422,67 @@ def classify_question_mode(question: str) -> str:
         return "web_search"
     return "document"
 
+def split_audio(file_path, chunk_length_ms=30000):
+    audio = AudioSegment.from_file(file_path)
+    chunks = []
+    for i in range(0, len(audio), chunk_length_ms):
+        end = i + chunk_length_ms
+        if end > len(audio):
+            end = len(audio)  
+        chunk = audio[i:end]
+        chunks.append(chunk)
+    return chunks
+
+async def transcribe_chunk(chunk_file, model):
+    try:
+        asr_result = model.transcribe(chunk_file)
+        chunk_text = " ".join([
+            seg["text"].strip()
+            for seg in asr_result["segments"]
+            if seg.get("language", "ko") == "ko"
+        ])
+        return chunk_text
+    except Exception as e:
+        print(f"Chunk transcribe error: {e}")
+        return "[전사 실패]"
+    
+
+async def process_audio_and_extract_qna(audio_path):
+    device = "cpu"
+    language = "ko"
+    model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
+    asr_result = model.transcribe(audio_path)
+
+    transcript = " ".join([
+        seg["text"].strip()
+        for seg in asr_result["segments"]
+        if seg.get("language", "ko") == "ko"
+    ])
+
+    # 4. LLM 프롬프트 구성
+    prompt = prompt_extraction.make_audio_transcription_prompt(transcript)
+
+    # Ollama Qwen2.5 모델로 Q&A 분리 요청
+    import ollama
+    try:
+        response = ollama.generate(
+            model="qwen2.5",
+            prompt=prompt
+        )
+        result_text = response['response'].strip()
+        try:
+            qna_data = json.loads(result_text)
+        except json.JSONDecodeError:
+            qna_data = []
+            lines = result_text.splitlines()
+            for i in range(0, len(lines), 2):
+                if i+1 < len(lines):
+                    question = lines[i].replace("질문:", "").strip()
+                    answer = lines[i+1].replace("답변:", "").strip()
+                    qna_data.append({"question": question, "answer": answer})
+        return qna_data
+    except Exception as e:
+        return [{"question": "Error", "answer": str(e)}]
 
 
 def get_from_state(state, key, default):
