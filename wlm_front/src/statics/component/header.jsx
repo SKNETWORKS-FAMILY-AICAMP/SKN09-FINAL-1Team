@@ -15,7 +15,7 @@ const Header = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-session', {
+        const response = await axios.get('/api/check-session', {
           withCredentials: true
         });
         setSessionInfo(response.data.employee);

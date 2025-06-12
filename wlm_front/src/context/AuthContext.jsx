@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkUserSession = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/check-session", {
+        const response = await fetch("/api/check-session", {
           credentials: 'include' // 🌟 인증 정보를 포함하도록 설정 (가장 중요!)
         });
 

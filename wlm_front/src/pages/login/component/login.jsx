@@ -17,7 +17,7 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await axios.get('http://15.164.36.159:8000/api/check-session', {
+        const response = await axios.get('/api/check-session', {
           withCredentials: true
         });
         if (response) {
@@ -34,7 +34,7 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://15.164.36.159:8000/api/login', { 
+      const response = await fetch('/api/login', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
