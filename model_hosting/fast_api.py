@@ -236,7 +236,7 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=300.0) as client:
         search_resp = await client.post(
             "http://localhost:8002/api/search_vectors",
             json={"question": question, "collection_name": "wlmmate_vectors"}

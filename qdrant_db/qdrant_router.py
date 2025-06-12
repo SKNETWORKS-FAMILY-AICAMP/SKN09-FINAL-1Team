@@ -24,6 +24,7 @@ class SearchRequest(BaseModel):
 @qdrant_router.post("/api/search_vectors")
 def search_vectors(request: SearchRequest):
     result = load_qdrant_db(request.question, request.collection_name)
+    print(f"=>벡터 검색결과: {result}")
     return {"result": result}
 
 @qdrant_router.delete("/api/delete_temp_vectors")
