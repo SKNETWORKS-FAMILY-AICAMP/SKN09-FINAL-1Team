@@ -7,6 +7,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",  # Vite dev server
     # "http://localhost:3000",  # 필요 시 다른 포트도 추가
+    "http://13.209.180.125:6333",  # Vite dev server
 ]
 app.add_middleware(
     CORSMiddleware,

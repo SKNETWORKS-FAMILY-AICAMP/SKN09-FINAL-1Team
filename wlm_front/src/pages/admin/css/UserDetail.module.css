@@ -39,13 +39,13 @@
 }
 
 .resetButton:hover {
-    background-color: #e0a800;
+    background-color: #af8402;
 }
 
 .closeButton {
     padding: 0.45rem 1rem;
-    background-color: #6c757d;
-    color: #6b6b6b;
+    background-color: #6b6b6b;
+    color: #000;
     border: none;
     border-radius: 6px;
     cursor: pointer;

@@ -328,10 +328,25 @@
 //     );
 // };
 
-// export default UserCreate;
+// export default UserCreate; 
+
+/********************** */
+/********************** */
+/********************** */
+
+// yj working tree
+// TO DO :
+
+
+/********************** */
+/********************** */
+/********************** */
+
+
+//기존
 import React, { useState } from 'react';
-import axios from 'axios';
 import styles from '../css/UserCreate.module.css';
+import axios from 'axios';
 
 const UserCreate = ({ onSubmit, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -339,8 +354,8 @@ const UserCreate = ({ onSubmit, onCancel }) => {
         emp_code: '',
         emp_email: '',
         emp_birth_date: '',
-        emp_role: '1',
-        emp_pwd: '1234'
+        emp_role: '1', 
+        emp_pwd: '1234' 
     });
 
     const handleChange = (e) => {

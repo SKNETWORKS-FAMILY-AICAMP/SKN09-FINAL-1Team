@@ -8,15 +8,20 @@ import os
 
 
 app = FastAPI()
+load_dotenv() 
 secret = os.getenv("SESSION_SECRET", "default_key")
 
 origins = [
     "http://localhost:5173",  # Vite dev server
     # "http://localhost:3000",  # 필요 시 다른 포트도 추가
+    "http://13.209.180.125:8000",
+    "http://13.209.180.125:5173"
 ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    # allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

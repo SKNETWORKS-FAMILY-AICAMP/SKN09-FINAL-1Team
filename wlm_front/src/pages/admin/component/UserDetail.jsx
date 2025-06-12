@@ -41,10 +41,10 @@ const UserDetail = ({ user, onClose, onResetPassword }) => {
                             <th>사원번호</th>
                             <td>{user.emp_code}</td>
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <th>아이디</th>
                             <td>{user.user_id}</td>
-                        </tr>
+                        </tr> */}
                         <tr>
                             <th>이메일</th>
                             <td>{user.emp_email}</td>
