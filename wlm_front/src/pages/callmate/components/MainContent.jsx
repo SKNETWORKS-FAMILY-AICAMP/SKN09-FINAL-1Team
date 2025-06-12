@@ -147,7 +147,7 @@ const MainContent = ({ searchParams }) => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:8001/upload_audio', {
+      const res = await fetch('/model/upload_audio', {
         method: 'POST',
         body: formData,
       });

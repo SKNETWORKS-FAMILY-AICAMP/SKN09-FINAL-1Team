@@ -136,7 +136,7 @@ const TranscriptBox = forwardRef((props, ref) => {
     formData.append('file', file);
     try {
       const response = await axios.post(
-        'http://localhost:8001/transcribe_audio_chunked',
+        '/model/transcribe_audio_chunked',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
@@ -158,7 +158,7 @@ const TranscriptBox = forwardRef((props, ref) => {
     if (!transcript) return;
     setIsSummarizing(true);
     try {
-      const response = await axios.post('http://localhost:8001/summarize_text', {
+      const response = await axios.post('/model/summarize_text', {
         text: transcript,
       });
       setSummary(response.data.summary);

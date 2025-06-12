@@ -34,7 +34,7 @@ const UserCreate = ({ onSubmit, onCancel }) => {
             };
 
             const response = await axios.post(
-                "http://localhost:8000/api/employees",
+                "/api/employees",
                 employeeDataToSend,
                 { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
             );
