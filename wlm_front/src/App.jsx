@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx';
 import Header from './statics/component/header.jsx';
 import NoteMate from './pages/notemate/component/notemate.jsx';
 import Base from './pages/chatbot/chatbot_con/Base.jsx';
@@ -43,11 +42,9 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 

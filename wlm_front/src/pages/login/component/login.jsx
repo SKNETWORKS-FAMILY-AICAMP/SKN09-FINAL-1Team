@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/login.css';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext.jsx'; // AuthContext 경로 확인 필수
 import ForgotPasswordModal from './forgotpasswordmodal'; // 모달 컴포넌트 추가
 import axios from 'axios';
 
@@ -9,7 +8,6 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth(); // AuthContext의 login 함수 가져오기
   const [showReset, setShowReset] = useState(false); // 비밀번호 초기화 모달 상태z
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -49,7 +47,6 @@ const Login = () => {
         console.log("Login 성공 응답:", data);
 
         if (data.employee) {
-          // 백엔드에서 받은 employee 객체를 AuthContext의 user 객체 형식에 맞게 변환
           const userData = {
             emp_no: data.employee.emp_no,
             name: data.employee.emp_name,
@@ -59,7 +56,7 @@ const Login = () => {
             birth_date: data.employee.emp_birth_date,
             role: data.employee.emp_role
           };
-          login(userData); // AuthContext의 login 함수에 사용자 상세 정보 객체 전달
+          // login(userData); // AuthContext의 login 함수에 사용자 상세 정보 객체 전달
           navigate('/main'); // 로그인 성공 후 메인 페이지로 이동
         } else {
           alert('로그인 성공했으나 사용자 정보가 없습니다. 관리자에게 문의하세요.');
