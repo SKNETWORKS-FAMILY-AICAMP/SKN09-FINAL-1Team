@@ -39,7 +39,7 @@ const ForgotPasswordModal = ({ onClose }) => {
     setSuccess(false);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/reset-password', form);
+      const response = await axios.post('/api/reset-password', form);
       setMessage(response.data.message || '비밀번호가 1234로 초기화되었습니다.');
       setSuccess(true);
     } catch (error) {
