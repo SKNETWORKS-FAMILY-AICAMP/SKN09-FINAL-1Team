@@ -22,6 +22,7 @@ import uuid
 import pymysql
 import re
 import torch
+import ollama
 
 prompt_extraction = PromptExtraction()
 

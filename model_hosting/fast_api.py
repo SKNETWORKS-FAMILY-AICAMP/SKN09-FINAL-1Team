@@ -12,7 +12,7 @@ import ollama
 from extraction.file_base_extraction import get_extractor_by_extension
 from extraction.prompt_extraction import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
-from module.module import State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
 
 
 
