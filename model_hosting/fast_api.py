@@ -450,6 +450,12 @@ async def delete_chat_room(chat_no: int, request: Request):
         conn.close()
 
 
+@router.get("/check-session")
+async def check_session(request: Request):
+    if "employee" not in request.session:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    return {"employee": request.session["employee"]}
 
 ### uvicorn main:app --reload
  
