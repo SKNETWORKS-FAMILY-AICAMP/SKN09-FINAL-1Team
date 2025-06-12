@@ -1,18 +1,27 @@
+
+
 import React, { useState, useEffect } from 'react';
 import styles from '../css/UserList.module.css';
 
-const UserList = ({ users, onSelectUser, onDeleteUser }) => {
+const UserList = ({ users = [], onSelectUser, onDeleteUser }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedUsers, setPaginatedUsers] = useState([]);
     const usersPerPage = 5;
 
+    // users가 바뀌면 currentPage를 1로 초기화
     useEffect(() => {
-        const startIndex = (currentPage - 1) * usersPerPage;
-        const endIndex = startIndex + usersPerPage;
-        setPaginatedUsers(users.slice(startIndex, endIndex));
+        setCurrentPage(1);
+    }, [users]);
+
+    useEffect(() => {
+        if (Array.isArray(users)) {
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            setPaginatedUsers(users.slice(startIndex, endIndex));
+        }
     }, [users, currentPage]);
 
-    const totalPages = Math.ceil(users.length / usersPerPage);
+    const totalPages = Math.ceil((users?.length || 0) / usersPerPage);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -46,6 +55,7 @@ const UserList = ({ users, onSelectUser, onDeleteUser }) => {
                     </div>
                 ))}
             </div>
+
             {totalPages > 1 && (
                 <div className={styles.pagination}>
                     <button
@@ -55,15 +65,31 @@ const UserList = ({ users, onSelectUser, onDeleteUser }) => {
                     >
                         이전
                     </button>
-                    {[...Array(totalPages)].map((_, index) => (
-                        <button
-                            key={index + 1}
-                            className={`${styles.pageButton} ${currentPage === index + 1 ? styles.active : ''}`}
-                            onClick={() => handlePageChange(index + 1)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
+
+                    {(() => {
+                        const maxVisible = 5;
+                        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                        let endPage = startPage + maxVisible - 1;
+
+                        if (endPage > totalPages) {
+                            endPage = totalPages;
+                            startPage = Math.max(1, endPage - maxVisible + 1);
+                        }
+
+                        return Array.from({ length: endPage - startPage + 1 }, (_, i) => {
+                            const page = startPage + i;
+                            return (
+                                <button
+                                    key={page}
+                                    className={`${styles.pageButton} ${currentPage === page ? styles.active : ''}`}
+                                    onClick={() => handlePageChange(page)}
+                                >
+                                    {page}
+                                </button>
+                            );
+                        });
+                    })()}
+
                     <button
                         className={styles.pageButton}
                         onClick={() => handlePageChange(currentPage + 1)}
@@ -77,4 +103,4 @@ const UserList = ({ users, onSelectUser, onDeleteUser }) => {
     );
 };
 
-export default UserList; 
+export default UserList;

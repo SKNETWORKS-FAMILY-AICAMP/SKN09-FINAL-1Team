@@ -11,11 +11,9 @@ secret = os.getenv("SESSION_SECRET", "default_key")
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173",  # Vite dev server
-    "http://localhost:3306",  # 필요 시 다른 포트도 추가
+    "http://localhost:5173",
 ]
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,9 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 세션
 app.add_middleware(
-    SessionMiddleware, 
+    SessionMiddleware,
     secret_key=secret,
     session_cookie="session",
     max_age=None,
@@ -34,13 +31,8 @@ app.add_middleware(
     https_only=False
 )
 
-
 app.include_router(employee_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-### uvicorn main:app --reload

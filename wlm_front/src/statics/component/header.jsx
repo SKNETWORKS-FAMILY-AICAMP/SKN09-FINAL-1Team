@@ -39,10 +39,7 @@ const Header = () => {
       await axios.post('/api/logout', {}, {
         withCredentials: true
       });
-
       setSessionInfo(null);
-
-      // 로그인 페이지로 이동
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 중 오류 발생:', error);
@@ -89,25 +86,34 @@ const Header = () => {
       )}
 
       <div className="header-buttons">
-        {sessionInfo ? (
-          <>
-            <div className="header-btn-wrap">
-              <Link to="/mypage">
-                <button className="header-btn">내정보</button>
-              </Link>
-            </div>
-            <div className="header-btn-wrap">
-              <button className="header-btn" onClick={handleLogout}>로그아웃</button>
-            </div>
-          </>
-        ) : (
-          <div className="header-btn-wrap">
-            <Link to="/login">
-              <button className="header-btn">로그인</button>
-            </Link>
-          </div>
-        )}
+  {sessionInfo ? (
+    <>
+      {sessionInfo.emp_code?.startsWith('ADMIN') ? (
+        <div className="header-btn-wrap">
+          <Link to="/admin">
+            <button className="header-btn">관리자 페이지</button>
+          </Link>
+        </div>
+      ) : (
+        <div className="header-btn-wrap">
+          <Link to="/mypage">
+            <button className="header-btn">내 정보</button>
+          </Link>
+        </div>
+      )}
+      <div className="header-btn-wrap">
+        <button className="header-btn" onClick={handleLogout}>로그아웃</button>
       </div>
+    </>
+  ) : (
+    <div className="header-btn-wrap">
+      <Link to="/login">
+        <button className="header-btn">로그인</button>
+      </Link>
+    </div>
+  )}
+</div>
+
     </div>
   );
 };

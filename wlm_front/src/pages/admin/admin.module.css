@@ -16,12 +16,12 @@
     margin: 0 auto;
     padding: 3rem 3rem;
     min-height: 100vh;
-    background: #f4faff;
+    background: #6b6b6b;
     font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
 }
 
 .title {
-    color: #007acc;
+    color: #fff;
     margin-bottom: 2rem;
     font-size: 2.3rem;
     font-weight: 800;
@@ -196,7 +196,7 @@
 
 .mainContent {
     flex-grow: 1;
-    background: #fff;
+    background: #3a3a3a;
     border-radius: 12px;
     padding: 2rem;
     box-shadow: 0 2px 12px rgba(0, 122, 204, 0.07);
