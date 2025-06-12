@@ -38,3 +38,7 @@ __pycache__/
 **/qdrant_data/
 */qdrant_data/
 qdrant_data/
+
+
+package-lock.json*
+package.json*

@@ -13,7 +13,9 @@ model = AutoModel.from_pretrained(embedding_model_name)
 
 qdrant_path = "./qdrant_data"
 json_docs_path = "../data/preprocess"
+civil_data_path = "../data/civil_data.json"
 client = QdrantClient(path=qdrant_path)
+
 
 # 임베딩 차원
 embedding_dim = 768
@@ -59,17 +61,17 @@ def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="wlmmate
                 )
                 file_idx += 1
 
-def init_qdrant_from_file(json_file_path, collection_name="wlmmate_vectors"):
+def init_qdrant_from_file(civil_data_path=civil_data_path, collection_name="wlmmate_vectors", id_offset=100000):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
         )
 
-    with open(json_file_path, 'r', encoding='utf-8') as file:
+    with open(civil_data_path, 'r', encoding='utf-8') as file:
         documents = json.load(file)
 
-    file_idx = 0
+    file_idx = id_offset
     for doc in documents:
         if not isinstance(doc, dict):
             continue
@@ -148,8 +150,3 @@ def delete_collection(collection_name="qdrant_temp"):
     return False
 
 
-
-if __name__ == "__main__":
-    init_qdrant_from_folder()
-    wlmmate_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/civil_data.json"))
-    init_qdrant_from_file(wlmmate_path)

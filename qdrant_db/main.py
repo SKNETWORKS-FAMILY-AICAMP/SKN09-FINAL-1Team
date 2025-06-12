@@ -1,8 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from qdrant_router import qdrant_router
+from qdrant_loader import init_qdrant_from_folder, init_qdrant_from_file
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 서버 시작 시 실행되는 코드
+    init_qdrant_from_folder()
+    init_qdrant_from_file()
+    yield
+    # 서버 종료 시 실행되는 코드
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",  # Vite dev server
@@ -18,7 +29,6 @@ app.add_middleware(
 )
 
 app.include_router(qdrant_router)
-
 
 
 ### uvicorn main:app --reload
