@@ -23,7 +23,7 @@ const PasswordChangeModal = ({ onClose, onSubmit }) => {
         
         setIsVerifying(true);
         try {
-            const response = await fetch('api/verify-password', {
+            const response = await fetch('/api/verify-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const PasswordChangeModal = ({ onClose, onSubmit }) => {
 
     const handleChangePassword = async (newPassword, newCheckPassword) => {
         try {
-            const response = await fetch('api/change-password', {
+            const response = await fetch('/api/change-password', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

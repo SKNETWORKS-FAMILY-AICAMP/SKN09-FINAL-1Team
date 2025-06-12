@@ -12,7 +12,7 @@ const MyPage = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get('api/mypage', {
+                const response = await axios.get('/api/mypage', {
                     withCredentials: true
                 });
                 setUserData(response.data);
