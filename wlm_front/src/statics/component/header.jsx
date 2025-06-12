@@ -5,7 +5,6 @@ import logoImage from '../../pages/mainpage/css/wlbmate_logo.png';
 import axios from 'axios';
 
 const Header = () => {
-  const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sessionInfo, setSessionInfo] = useState(null);
@@ -27,21 +26,20 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      try {
-        await fetch("http://localhost:8002/api/delete_temp_vectors", {
-          method: 'DELETE',
-        });
-        console.log("=> Qdrant 컬렉션 삭제 완료");
-      } catch (err) {
-        console.warn("=> Qdrant 컬렉션 삭제 실패:", err);
-      }
+      // 현재 이 친구는 작동하면 안됨 일단 주석처리
+      // try {
+      //   await fetch("http://localhost:8002/api/delete_temp_vectors", {
+      //     method: 'DELETE',
+      //   });
+      //   console.log("=> Qdrant 컬렉션 삭제 완료");
+      // } catch (err) {
+      //   console.warn("=> Qdrant 컬렉션 삭제 실패:", err);
+      // }
       // 서버 세션 삭제를 위한 API 호출
-      await axios.post('http://localhost:8000/api/logout', {}, {
+      await axios.post('/api/logout', {}, {
         withCredentials: true
       });
 
-      // 로컬 상태 초기화
-      logout();
       setSessionInfo(null);
 
       // 로그인 페이지로 이동
