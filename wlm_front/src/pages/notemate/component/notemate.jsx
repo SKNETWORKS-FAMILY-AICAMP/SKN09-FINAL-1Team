@@ -272,7 +272,7 @@ import ConfirmModal from './ConfirmModal.jsx';
 import InfoButton from './InfoButton.jsx';
 import InfoModal from './InfoModal.jsx';
 import '../css/notemate.css';
-import { useAuth } from '../../../context/AuthContext.jsx'; // AuthContext 경로 확인 필수
+import { useAuth } from '../../../context/AuthContext.jsx'; //
 
 const NoteMate = () => {
   const { user, loading } = useAuth(); // useAuth 훅을 통해 user와 loading 상태 가져오기
