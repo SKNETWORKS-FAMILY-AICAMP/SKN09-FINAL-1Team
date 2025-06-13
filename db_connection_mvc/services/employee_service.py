@@ -29,7 +29,7 @@ class EmployeeService:
 
             db_hashed = row["emp_pwd"]
 
-            # 2) 평문 vs 해시 비교  🔄 변경됨
+            # 2) 평문 vs 해시 비교  
             if not verify_password(emp_pwd, db_hashed):
                 print(f"[login] 비밀번호 불일치: 입력={emp_pwd}, DB 해시={db_hashed}")
                 return None
@@ -52,7 +52,7 @@ class EmployeeService:
 
     async def change_password(self, emp_code: str, new_password: str) -> Dict[str, Any]:
         try:
-            new_hash = hash_password(new_password)  # 🔄 변경됨
+            new_hash = hash_password(new_password)   
             self.db.change_password(emp_code, new_hash)
             return self._format_success("비밀번호 변경 성공")
         except Exception as e:
@@ -62,7 +62,7 @@ class EmployeeService:
     async def create_employee(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             data["emp_birth_date"] = date.fromisoformat(data["emp_birth_date"])
-            data["emp_pwd"] = hash_password(data["emp_pwd"])  # 🔄 변경됨
+            data["emp_pwd"] = hash_password(data["emp_pwd"])   
             emp_no = await self.db.create_employee(data)
             return self._format_success("직원 등록 성공", {"emp_no": emp_no}, 1)
         except Exception as e:
@@ -78,7 +78,7 @@ class EmployeeService:
 
     async def change_password_by_emp_no(self, emp_no: int, new_password: str) -> Dict[str, Any]:
         try:
-            new_hash = hash_password(new_password)  # 🔄 변경됨
+            new_hash = hash_password(new_password)   
             await self.db.change_password_by_emp_no(emp_no, new_hash)
             return self._format_success("비밀번호 초기화 성공")
         except Exception as e:

@@ -80,7 +80,7 @@ from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime
-import bcrypt
+from services.utils.hash import verify_password
 
 load_dotenv()
 
@@ -130,14 +130,17 @@ class Database:
                 if not employee:
                     return None
 
-                db_pwd = employee["emp_pwd"]
+                # 1) DB에서 읽어온 SHA-256 해시(hex)
+                db_hashed = employee["emp_pwd"].strip()  # 앞뒤 공백 제거
 
-                # 올바른 해시 비교
-                is_valid = bcrypt.checkpw(emp_pwd.encode("utf-8"), db_pwd.encode("utf-8"))
+                # 2) 입력 평문 vs 해시 검증
+                is_valid = verify_password(emp_pwd, db_hashed)  
 
+                # 3) 검증 성공 시 employee 정보, 아니면 None
                 return employee if is_valid else None
+
         except Exception as e:
-            print(f"로그인 검증 오류: {e}")
+            print(f"[verify_employee_login] 예외 발생: {e}")
             return None
         finally:
             conn.close()
