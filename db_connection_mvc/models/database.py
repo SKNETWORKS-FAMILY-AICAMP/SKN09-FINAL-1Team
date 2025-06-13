@@ -127,18 +127,29 @@ class Database:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT * FROM employee WHERE emp_code = %s", (emp_code,))
                 employee = cursor.fetchone()
-                print("사용자 입력 비밀번호:", emp_pwd)
-                print("DB 해시 비밀번호:", employee["emp_pwd"])
-                print("checkpw 결과:", bcrypt.checkpw(emp_pwd.encode(), employee["emp_pwd"].encode()))
-                if employee and bcrypt.checkpw(emp_pwd.encode(), employee["emp_pwd"].encode()):
-                    return employee
-                else:
+                if not employee:
                     return None
+    
+                db_pwd = employee["emp_pwd"]
+    
+                # 해시 여부 확인
+                if db_pwd.startswith("$2b$"):  # bcrypt 해시라면
+                    is_valid = bcrypt.checkpw(emp_pwd.encode(), db_pwd.encode())
+                else:  # 아직 평문이라면 단순 비교
+                    is_valid = emp_pwd == db_pwd
+    
+                print("입력:", emp_pwd)
+                print("DB:", db_pwd)
+                print("비교 결과:", is_valid)
+    
+                return employee if is_valid else None
+    
         except Exception as e:
             print(f"로그인 검증 오류: {e}")
             return None
         finally:
             conn.close()
+    
 
 
     def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
