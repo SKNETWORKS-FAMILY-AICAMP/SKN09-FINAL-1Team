@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 from models.database import Database
 from datetime import date
+from services.utils.hash import hash_password
 
 class EmployeeService:
     def __init__(self):
@@ -21,6 +22,13 @@ class EmployeeService:
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         try:
+            emp_pwd_data = self.db.get_emp_pwd(emp_code)
+            if not emp_pwd_data:
+                return None
+
+            hashed_pw = emp_pwd_data["emp_pwd"]
+            if not verify_password(emp_pwd, hashed_pw):
+                return None
             employee = self.db.verify_employee_login(emp_code, emp_pwd)
             return employee
         except Exception as e:
@@ -36,7 +44,8 @@ class EmployeeService:
 
     async def change_password(self, emp_code: str, new_password: str) -> Dict[str, Any]:
         try:
-            self.db.change_password(emp_code, new_password)
+            hashed_pw = hash_password(new_password)
+            self.db.change_password(emp_code, hashed_pw)
             return self._format_success("비밀번호 변경 성공")
         except Exception as e:
             return self._format_error(f"비밀번호 변경 오류: {str(e)}")
@@ -45,6 +54,8 @@ class EmployeeService:
         try:
             employee_data["emp_birth_date"] = date.fromisoformat(employee_data["emp_birth_date"])
             
+            employee_data["emp_pwd"] = hash_password(employee_data["emp_pwd"])
+
             emp_no = await self.db.create_employee(employee_data)
             
             return self._format_success("등록 성공", {"emp_no": emp_no}, count=1)
@@ -60,7 +71,8 @@ class EmployeeService:
 
     async def change_password_by_emp_no(self, emp_no: int, new_password: str) -> Dict[str, Any]:
         try:
-            await self.db.change_password_by_emp_no(emp_no, new_password)
+            hashed_pw = hash_password(new_password)
+            await self.db.change_password_by_emp_no(emp_no, hashed_pw)
             return self._format_success(f"직원 번호 {emp_no} 비밀번호 초기화 성공")
         except Exception as e:
             return self._format_error(f"비밀번호 초기화 서비스 오류: {str(e)}")

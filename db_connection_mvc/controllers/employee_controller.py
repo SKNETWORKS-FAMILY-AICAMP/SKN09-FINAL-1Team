@@ -52,6 +52,7 @@ from services.employee_service import EmployeeService
 from pydantic import BaseModel, ValidationError
 from datetime import date
 import traceback
+from services.utils.hash import verify_password
 
 router = APIRouter()
 employee_service = EmployeeService()
