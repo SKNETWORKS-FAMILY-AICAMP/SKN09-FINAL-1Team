@@ -127,6 +127,9 @@ class Database:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT * FROM employee WHERE emp_code = %s", (emp_code,))
                 employee = cursor.fetchone()
+                print("사용자 입력 비밀번호:", emp_pwd)
+                print("DB 해시 비밀번호:", employee["emp_pwd"])
+                print("checkpw 결과:", bcrypt.checkpw(emp_pwd.encode(), employee["emp_pwd"].encode()))
                 if employee and bcrypt.checkpw(emp_pwd.encode(), employee["emp_pwd"].encode()):
                     return employee
                 else:
