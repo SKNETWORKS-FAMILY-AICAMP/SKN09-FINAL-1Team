@@ -21,13 +21,21 @@ class EmployeeService:
             return self._format_error(f"직원 목록 조회 오류: {str(e)}")
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
-        employee = self.db.get_employee_by_code(emp_code)
-        if not employee:
+        try:
+            emp_pwd_data = self.db.get_emp_pwd(emp_code)
+            if not emp_pwd_data:
+                return None
+    
+            stored_pw = emp_pwd_data["emp_pwd"]
+            if emp_pwd != stored_pw:  # 해시 대신 평문 비교
+                return None
+    
+            employee = self.db.verify_employee_login(emp_code, emp_pwd)
+            return employee
+        except Exception as e:
+            print(f"로그인 서비스 오류: {e}")
             return None
-        if not verify_password(emp_pwd, employee["emp_pwd"]):
-            return None
-        employee.pop("emp_pwd", None)
-        return employee
+
 
 
     async def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
