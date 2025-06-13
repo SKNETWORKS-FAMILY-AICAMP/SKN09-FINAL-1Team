@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional
 from models.database import Database
 from datetime import date
 from services.utils.hash import hash_password
-
+from services.utils.hash import verify_password
 class EmployeeService:
     def __init__(self):
         self.db = Database()

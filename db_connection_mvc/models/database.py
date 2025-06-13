@@ -80,6 +80,7 @@ from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime
+import bcrypt
 
 load_dotenv()
 
@@ -124,26 +125,18 @@ class Database:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                query = """
-                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role,
-                           emp_birth_date, emp_create_dt
-                    FROM employee
-                    WHERE emp_code = %s AND emp_pwd = %s
-                """
-                cursor.execute(query, (emp_code, emp_pwd))
-                result = cursor.fetchone()
-                
-                if result:
-                    if 'emp_birth_date' in result and isinstance(result['emp_birth_date'], date):
-                        result['emp_birth_date'] = result['emp_birth_date'].isoformat()
-                    if 'emp_create_dt' in result and isinstance(result['emp_create_dt'], (date, datetime)):
-                        result['emp_create_dt'] = result['emp_create_dt'].isoformat().split('T')[0]
-                return result
+                cursor.execute("SELECT * FROM employee WHERE emp_code = %s", (emp_code,))
+                employee = cursor.fetchone()
+                if employee and bcrypt.checkpw(emp_pwd.encode(), employee["emp_pwd"].encode()):
+                    return employee
+                else:
+                    return None
         except Exception as e:
             print(f"로그인 검증 오류: {e}")
-            raise
+            return None
         finally:
             conn.close()
+
 
     def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
         conn = self._get_connection()

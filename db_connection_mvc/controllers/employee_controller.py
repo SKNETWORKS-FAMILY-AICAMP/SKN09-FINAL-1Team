@@ -126,16 +126,18 @@ async def get_mypage_info(request: Request):
     }
     
 @router.post("/verify-password")
-async def verify_password(request: Request, password_request: PasswordRequest):
+async def verify_password_route(request: Request, password_request: PasswordRequest):
     employee = request.session.get("employee")
     if not employee:
         raise HTTPException(status_code=401, detail="로그인된 사용자가 없습니다.")
         
     emp_code = employee["emp_code"]
-    
     emp_pwd_info = await employee_service.get_emp_pwd(emp_code)
-    if not emp_pwd_info or emp_pwd_info.get("emp_pwd") != password_request.password:
+
+    stored_hash = emp_pwd_info.get("emp_pwd")
+    if not stored_hash or not verify_password(password_request.password, stored_hash):
         raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+    
     return {"message": "비밀번호 확인 성공"}
 
 @router.put("/change-password")
