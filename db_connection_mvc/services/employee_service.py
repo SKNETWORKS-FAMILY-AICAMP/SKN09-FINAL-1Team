@@ -22,18 +22,21 @@ class EmployeeService:
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         try:
+            # 1) DB에서 사원번호로 비밀번호만 먼저 가져옴
             emp_pwd_data = self.db.get_emp_pwd(emp_code)
             if not emp_pwd_data:
                 return None
-    
-            stored_pw = emp_pwd_data["emp_pwd"]
-            if emp_pwd != stored_pw:  # 해시 대신 평문 비교
+
+            db_hashed = emp_pwd_data["emp_pwd"]
+
+            # 2) 입력된 평문 비밀번호와 DB 해시 비교
+            if not verify_password(emp_pwd, db_hashed):
                 return None
-    
-            employee = self.db.verify_employee_login(emp_code, emp_pwd)
-            return employee
+
+            # 3) 로그인 성공 → 전체 employee 정보 조회
+            return self.db.get_employee_by_code(emp_code)
         except Exception as e:
-            print(f"로그인 서비스 오류: {e}")
+            print(f"로그인 오류: {e}")
             return None
 
 
