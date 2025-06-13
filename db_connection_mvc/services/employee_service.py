@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 from models.database import Database
 from datetime import date
+from services.utils.hash import hash_password, verify_password
 
 class EmployeeService:
     def __init__(self):
@@ -20,12 +21,15 @@ class EmployeeService:
             return self._format_error(f"직원 목록 조회 오류: {str(e)}")
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
-        try:
-            employee = self.db.verify_employee_login(emp_code, emp_pwd)
-            return employee
-        except Exception as e:
-            print(f"로그인 서비스 오류: {e}")
+        """
+        1) DB에서 해시된 비밀번호 조회
+        2) SHA-256 해시 비교
+        3) 성공하면 사용자 정보 반환
+        """
+        db_hash = self.db.get_emp_pwd(emp_code)
+        if not db_hash or not verify_password(emp_pwd, db_hash):
             return None
+        return self.db.get_employee_by_code(emp_code)
 
     async def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
         try:

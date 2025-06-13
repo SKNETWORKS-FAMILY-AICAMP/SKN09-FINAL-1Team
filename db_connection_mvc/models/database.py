@@ -102,21 +102,17 @@ class Database:
         try:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role, 
+                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role,
                            emp_birth_date, emp_create_dt
                     FROM employee
                 """)
-                employees = cursor.fetchall()
-                
-                for employee in employees:
-                    if 'emp_birth_date' in employee and isinstance(employee['emp_birth_date'], date):
-                        employee['emp_birth_date'] = employee['emp_birth_date'].isoformat()
-                    if 'emp_create_dt' in employee and isinstance(employee['emp_create_dt'], (date, datetime)):
-                        employee['emp_create_dt'] = employee['emp_create_dt'].isoformat().split('T')[0]
-                return employees
-        except Exception as e:
-            print(f"데이터베이스 조회 오류: {e}")
-            raise 
+                rows = cursor.fetchall()
+                for r in rows:
+                    if isinstance(r.get("emp_birth_date"), date):
+                        r["emp_birth_date"] = r["emp_birth_date"].isoformat()
+                    if isinstance(r.get("emp_create_dt"), (date, datetime)):
+                        r["emp_create_dt"] = r["emp_create_dt"].isoformat().split("T")[0]
+                return rows
         finally:
             conn.close()
 
@@ -145,21 +141,17 @@ class Database:
         finally:
             conn.close()
 
-    def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
+    def get_emp_pwd(self, emp_code: str) -> Optional[str]:
+        """사원코드로 SHA256 해시된 비밀번호만 반환"""
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                query = """
-                    SELECT emp_pwd
-                    FROM employee
-                    WHERE emp_code = %s
-                """
-                cursor.execute(query, (emp_code,))
-                result = cursor.fetchone()
-                return result
-        except Exception as e:
-            print(f"비밀번호 조회 오류: {e}")
-            raise
+                cursor.execute(
+                    "SELECT emp_pwd FROM employee WHERE emp_code = %s",
+                    (emp_code,)
+                )
+                row = cursor.fetchone()
+                return row.get("emp_pwd") if row else None
         finally:
             conn.close()
 
@@ -180,6 +172,30 @@ class Database:
             raise
         finally:
             conn.close()
+
+    def get_employee_by_code(self, emp_code: str) -> Optional[Dict[str, Any]]:
+        """로그인 성공 후 세션에 저장할 사용자 정보 조회"""
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role,
+                           emp_birth_date, emp_create_dt
+                    FROM employee
+                    WHERE emp_code = %s
+                """, (emp_code,))
+                user = cursor.fetchone()
+                if user:
+                    bd = user.get("emp_birth_date")
+                    cd = user.get("emp_create_dt")
+                    if isinstance(bd, date):
+                        user["emp_birth_date"] = bd.isoformat()
+                    if isinstance(cd, (date, datetime)):
+                        user["emp_create_dt"] = cd.isoformat().split("T")[0]
+                return user
+        finally:
+            conn.close()
+
 
     async def create_employee(self, employee_data: Dict[str, Any]) -> int:
         conn = self._get_connection()
@@ -236,3 +252,5 @@ class Database:
             raise
         finally:
             conn.close()
+
+    
