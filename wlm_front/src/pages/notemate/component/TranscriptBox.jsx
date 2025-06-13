@@ -7,7 +7,7 @@ import { FaFileAudio } from 'react-icons/fa';
 import { useReactMediaRecorder } from 'react-media-recorder';
 
 const TranscriptBox = forwardRef((props, ref) => {
-  const { step, showTranscriptInfo, setShowTranscriptInfo, setStep } = props;
+  const { step, showTranscriptInfo, setShowTranscriptInfo, setStep, isRecording = false, onUploadStateChange } = props;
   const [transcript, setTranscript] = useState('');
   const [summary, setSummary] = useState('');
   const [uploadedFileName, setUploadedFileName] = useState('');
@@ -15,7 +15,6 @@ const TranscriptBox = forwardRef((props, ref) => {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [liveText, setLiveText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   // react-media-recorder 훅 사용
@@ -26,11 +25,6 @@ const TranscriptBox = forwardRef((props, ref) => {
     mediaBlobUrl,
     clearBlobUrl,
   } = useReactMediaRecorder({ audio: true, mimeType: 'audio/webm' });
-
-  // 녹음 상태 동기화
-  useEffect(() => {
-    setIsRecording(status === 'recording');
-  }, [status]);
 
   // 타이머
   useEffect(() => {
@@ -61,6 +55,7 @@ const TranscriptBox = forwardRef((props, ref) => {
       const timeStr = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
       const filename = `${hostname}_${dateStr}_${timeStr}.wav`;
 
+      // 파일 다운로드(기존)
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -71,6 +66,30 @@ const TranscriptBox = forwardRef((props, ref) => {
       setUploadedFileName(filename);
       setIsUploaded(true);
       clearBlobUrl();
+
+      // === 서버로 업로드 및 텍스트 변환 요청 ===
+      setIsUploading(true);
+      if (onUploadStateChange) onUploadStateChange(true);
+      const formData = new FormData();
+      formData.append('file', new File([blob], filename, { type: blob.type }));
+      try {
+        const res = await fetch('/model/transcribe_audio_chunked', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.chunk_transcripts && Array.isArray(data.chunk_transcripts)) {
+          await showChunksLive(data.chunk_transcripts);
+        } else {
+          setLiveText(data.transcription || '');
+          setTranscript(data.transcription || '');
+        }
+        setStep && setStep('transcripted');
+      } catch (err) {
+        console.error('녹음 파일 업로드/전사 실패:', err);
+      } finally {
+        setIsUploading(false);
+      }
     } catch (err) {
       console.error('녹음 파일 저장 실패:', err);
     }
@@ -131,6 +150,7 @@ const TranscriptBox = forwardRef((props, ref) => {
     setUploadedFileName(file.name);
     setIsUploading(true);
     setIsUploaded(true);
+    if (onUploadStateChange) onUploadStateChange(true);
     setLiveText('');
     const formData = new FormData();
     formData.append('file', file);
