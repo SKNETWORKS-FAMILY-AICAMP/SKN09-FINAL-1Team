@@ -22,15 +22,16 @@ class EmployeeService:
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         try:
-            emp_pwd_data = self.db.get_emp_pwd(emp_code)
-            if not emp_pwd_data:
+            employee = self.db.get_employee_by_code(emp_code)
+            if not employee:
                 return None
-
-            hashed_pw = emp_pwd_data["emp_pwd"]
-            if not verify_password(emp_pwd, hashed_pw):
+    
+            hashed_pw = employee.get("emp_pwd", "")
+            if verify_password(emp_pwd, hashed_pw):
+                employee.pop("emp_pwd", None)  # 민감 정보 제거
+                return employee
+            else:
                 return None
-            employee = self.db.verify_employee_login(emp_code, emp_pwd)
-            return employee
         except Exception as e:
             print(f"로그인 서비스 오류: {e}")
             return None
@@ -76,3 +77,5 @@ class EmployeeService:
             return self._format_success(f"직원 번호 {emp_no} 비밀번호 초기화 성공")
         except Exception as e:
             return self._format_error(f"비밀번호 초기화 서비스 오류: {str(e)}")
+        
+
