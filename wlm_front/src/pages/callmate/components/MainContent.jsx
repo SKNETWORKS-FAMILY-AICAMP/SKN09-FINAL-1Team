@@ -145,7 +145,8 @@ const MainContent = ({ searchParams }) => {
     // 서버로 파일 업로드
     const formData = new FormData();
     formData.append('file', file);
-
+    
+    // model 서버로 파일 업로드
     try {
       const res = await fetch('/model/upload_audio', {
         method: 'POST',
@@ -169,6 +170,8 @@ const MainContent = ({ searchParams }) => {
     } catch (e) {
       alert('업로드 실패: ' + e.message);
     }
+
+
     setLoading(false);
   };
 

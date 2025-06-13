@@ -12,7 +12,7 @@ import ollama
 from extraction.file_base_extraction import get_extractor_by_extension
 from extraction.prompt_extraction import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
-from module.module import State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
 
 
 
@@ -364,8 +364,14 @@ async def upload_audio(file: UploadFile = File(...)):
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    # 2. WhisperX + LLM Q&A 추출
+    # 2. WhisperX + LLM Q&A 추출 (리스트 형태로 반환)
     qna_data = await process_audio_and_extract_qna(save_path)
+    
+    # 3. 피드백 모델 호출 및 각 QnA에 피드백 추가
+    feedbacks = feedback_model(qna_data)
+    for i, qna in enumerate(qna_data):
+        qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
+    
     return JSONResponse(content={"qna": qna_data})
 
 @router.post("/ask_query")
