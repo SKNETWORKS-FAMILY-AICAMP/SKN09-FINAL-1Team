@@ -21,6 +21,8 @@ import json
 import uuid
 import pymysql
 import re
+import torch
+import ollama
 
 prompt_extraction = PromptExtraction()
 
@@ -447,8 +449,9 @@ async def transcribe_chunk(chunk_file, model):
         return "[전사 실패]"
     
 
+# 받아온 음성 파일을 바탕으로 Q&A 추출
 async def process_audio_and_extract_qna(audio_path):
-    device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     language = "ko"
     model = whisperx.load_model("medium", device=device, language=language, compute_type="int8", vad_method="silero")
     asr_result = model.transcribe(audio_path)
@@ -483,6 +486,15 @@ async def process_audio_and_extract_qna(audio_path):
         return qna_data
     except Exception as e:
         return [{"question": "Error", "answer": str(e)}]
+
+# 위 작성한 Q&A를 바탕으로 피드백해주는 모델 작성 (이거 만든 사람이 나중에 lanchin_ollama 패키지로 바꿔주세용 :) 그건 해주세요 :) )
+def feedback_model(qna_data):
+    prompt = prompt_extraction.make_feedback_prompt(qna_data)
+    response = ollama.generate(
+        model="qwen2.5",
+        prompt=prompt
+    )
+    return response['response'].strip()
 
 
 def get_from_state(state, key, default):
