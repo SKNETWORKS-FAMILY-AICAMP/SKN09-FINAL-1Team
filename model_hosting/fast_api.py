@@ -453,7 +453,7 @@ async def generate_unanswered():
 async def chat_list(request: Request):
     async with httpx.AsyncClient(timeout=300.0) as client:
         response = await client.get(
-            "http://15.164.36.159:8000/api/check-session")
+            "http://192.168.0.38:8000/api/check-session")
     
 
     employee = response.json()
