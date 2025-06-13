@@ -452,9 +452,11 @@ async def generate_unanswered():
 @router.get("/chat_list")
 async def chat_list(request: Request):
     async with httpx.AsyncClient(timeout=300.0) as client:
-        employee = await client.get(
+        response = await client.get(
             "http://15.164.36.159:8000/api/check-session")
     
+
+    employee = response.json()
     emp_code = employee["emp_code"]
 
     checkpoint = MySQLCheckpoint(
