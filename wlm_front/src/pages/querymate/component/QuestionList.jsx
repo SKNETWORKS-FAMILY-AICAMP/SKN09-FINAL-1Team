@@ -78,13 +78,13 @@ const QuestionList = ({ searchParams }) => {
       console.log("응답 생성 결과:", data);
 
       if (data.success) {
-        alert(`${data.count}개의 미응답 질문에 대해 답변이 자동 생성되었습니다.`);
+        console.log(`${data.count}개의 미응답 질문에 대해 답변이 자동 생성되었습니다.`);
       } else {
-        alert("답변 생성에 실패했습니다.");
+        console.log("답변 생성에 실패했습니다.");
       }
     } catch (err) {
       console.error("답변 생성 중 오류:", err);
-      alert("답변 생성 중 오류가 발생했습니다.");
+      console.log("답변 생성 중 오류가 발생했습니다.");
     }
   };
 
