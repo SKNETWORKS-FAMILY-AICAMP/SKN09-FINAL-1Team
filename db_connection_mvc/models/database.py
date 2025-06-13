@@ -133,11 +133,7 @@ class Database:
                 db_pwd = employee["emp_pwd"]
 
                 # 올바른 해시 비교
-                is_valid = bcrypt.checkpw(emp_pwd.encode(), db_pwd.encode())
-
-                print("입력 비밀번호:", emp_pwd)
-                print("DB 해시값:", db_pwd)
-                print("일치 여부:", is_valid)
+                is_valid = bcrypt.checkpw(emp_pwd.encode("utf-8"), db_pwd.encode("utf-8"))
 
                 return employee if is_valid else None
         except Exception as e:
