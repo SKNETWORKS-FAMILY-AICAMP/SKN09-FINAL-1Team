@@ -404,6 +404,7 @@ async def ask_query(input: QuestionInput):
 @router.get("/chat_list")
 async def chat_list(request: Request):
     employee = request.session.get("employee")
+    print(employee)
     emp_code = employee["emp_code"]
 
     checkpoint = MySQLCheckpoint(

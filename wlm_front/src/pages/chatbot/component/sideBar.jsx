@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, setIsOpen, onSelectChat, refreshSidebar }) => {
     // const isLoggedIn = Boolean(document.cookie.includes("session="));
     // if (!isLoggedIn) return;
 
-    fetch("http://localhost:8001/api/chat_list", {
+    fetch("/model/chat_list", {
       credentials: 'include'
     })
       .then(res => res.json())
@@ -70,7 +70,7 @@ const Sidebar = ({ isOpen, setIsOpen, onSelectChat, refreshSidebar }) => {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:8001/api/delete_chat_room?chat_no=${chat_no}`, {
+      const res = await fetch(`/model/delete_chat_room?chat_no=${chat_no}`, {
         method: 'DELETE',
         credentials: 'include'
       });
