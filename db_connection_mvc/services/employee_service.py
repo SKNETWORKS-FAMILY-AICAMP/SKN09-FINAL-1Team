@@ -1,8 +1,7 @@
 from typing import List, Dict, Any, Optional
 from models.database import Database
 from datetime import date
-from services.utils.hash import hash_password
-from services.utils.hash import verify_password
+
 class EmployeeService:
     def __init__(self):
         self.db = Database()
@@ -22,26 +21,11 @@ class EmployeeService:
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         try:
-            # 1) SHA-256 해시(hex) 가져오기
-            row = self.db.get_emp_pwd(emp_code)
-            if not row:
-                return None
-
-            db_hashed = row["emp_pwd"]
-
-            # 2) 평문 vs 해시 비교  
-            if not verify_password(emp_pwd, db_hashed):
-                print(f"[login] 비밀번호 불일치: 입력={emp_pwd}, DB 해시={db_hashed}")
-                return None
-
-            # 3) 성공 시 전체 정보 반환
-            user = self.db.get_employee_by_code(emp_code)
-            return user
-
+            employee = self.db.verify_employee_login(emp_code, emp_pwd)
+            return employee
         except Exception as e:
-            print(f"[EmployeeService.login] 예외 발생: {e}")
+            print(f"로그인 서비스 오류: {e}")
             return None
-
 
     async def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
         try:
@@ -52,22 +36,20 @@ class EmployeeService:
 
     async def change_password(self, emp_code: str, new_password: str) -> Dict[str, Any]:
         try:
-            new_hash = hash_password(new_password)   
-            self.db.change_password(emp_code, new_hash)
+            self.db.change_password(emp_code, new_password)
             return self._format_success("비밀번호 변경 성공")
         except Exception as e:
-            print(f"[EmployeeService.change_password] 예외 발생: {e}")
-            return self._format_error(f"비밀번호 변경 실패: {e}")
+            return self._format_error(f"비밀번호 변경 오류: {str(e)}")
 
-    async def create_employee(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def create_employee(self, employee_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            data["emp_birth_date"] = date.fromisoformat(data["emp_birth_date"])
-            data["emp_pwd"] = hash_password(data["emp_pwd"])   
-            emp_no = await self.db.create_employee(data)
-            return self._format_success("직원 등록 성공", {"emp_no": emp_no}, 1)
+            employee_data["emp_birth_date"] = date.fromisoformat(employee_data["emp_birth_date"])
+            
+            emp_no = await self.db.create_employee(employee_data)
+            
+            return self._format_success("등록 성공", {"emp_no": emp_no}, count=1)
         except Exception as e:
-            print(f"[EmployeeService.create_employee] 예외 발생: {e}")
-            return self._format_error(f"등록 실패: {e}")
+            return self._format_error(f"직원 생성 서비스 오류: {str(e)}")
 
     async def delete_employee(self, emp_no: int) -> Dict[str, Any]:
         try:
@@ -78,11 +60,7 @@ class EmployeeService:
 
     async def change_password_by_emp_no(self, emp_no: int, new_password: str) -> Dict[str, Any]:
         try:
-            new_hash = hash_password(new_password)   
-            await self.db.change_password_by_emp_no(emp_no, new_hash)
-            return self._format_success("비밀번호 초기화 성공")
+            await self.db.change_password_by_emp_no(emp_no, new_password)
+            return self._format_success(f"직원 번호 {emp_no} 비밀번호 초기화 성공")
         except Exception as e:
-            print(f"[EmployeeService.change_password_by_emp_no] 예외 발생: {e}")
-            return self._format_error(f"초기화 실패: {e}")
-        
-
+            return self._format_error(f"비밀번호 초기화 서비스 오류: {str(e)}")

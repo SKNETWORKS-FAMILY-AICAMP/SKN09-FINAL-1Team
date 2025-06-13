@@ -80,7 +80,6 @@ from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime
-from services.utils.hash import verify_password
 
 load_dotenv()
 
@@ -125,121 +124,90 @@ class Database:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM employee WHERE emp_code = %s", (emp_code,))
-                employee = cursor.fetchone()
-                if not employee:
-                    return None
-
-                # 1) DB에서 읽어온 SHA-256 해시(hex)
-                db_hashed = employee["emp_pwd"].strip()  # 앞뒤 공백 제거
-
-                # 2) 입력 평문 vs 해시 검증
-                is_valid = verify_password(emp_pwd, db_hashed)  
-
-                # 3) 검증 성공 시 employee 정보, 아니면 None
-                return employee if is_valid else None
-
+                query = """
+                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role,
+                           emp_birth_date, emp_create_dt
+                    FROM employee
+                    WHERE emp_code = %s AND emp_pwd = %s
+                """
+                cursor.execute(query, (emp_code, emp_pwd))
+                result = cursor.fetchone()
+                
+                if result:
+                    if 'emp_birth_date' in result and isinstance(result['emp_birth_date'], date):
+                        result['emp_birth_date'] = result['emp_birth_date'].isoformat()
+                    if 'emp_create_dt' in result and isinstance(result['emp_create_dt'], (date, datetime)):
+                        result['emp_create_dt'] = result['emp_create_dt'].isoformat().split('T')[0]
+                return result
         except Exception as e:
-            print(f"[verify_employee_login] 예외 발생: {e}")
-            return None
-        finally:
-            conn.close()
-
-    def create_employee(self, data: Dict[str, Any]) -> int:
-        """
-        신규 직원 생성 (emp_pwd는 이미 해시된 상태여야 함).
-        """
-        conn = self._get_connection()
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO employee
-                        (emp_name, emp_code, emp_pwd, emp_email, emp_birth_date, emp_role, emp_create_dt)
-                    VALUES
-                        (%s, %s, %s, %s, %s, %s, NOW())
-                """, (
-                    data["emp_name"],
-                    data["emp_code"],
-                    data["emp_pwd"],
-                    data["emp_email"],
-                    data["emp_birth_date"],
-                    data["emp_role"],
-                ))
-                conn.commit()
-                return cursor.lastrowid
-        except Exception as e:
-            print(f"[Database.create_employee] 예외 발생: {e}")
-            conn.rollback()
+            print(f"로그인 검증 오류: {e}")
             raise
         finally:
             conn.close()
 
     def get_emp_pwd(self, emp_code: str) -> Optional[Dict[str, Any]]:
-        """
-        사용자 emp_code로 SHA-256 해시된 비밀번호(emp_pwd)만 조회.
-        """
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT emp_pwd FROM employee WHERE emp_code = %s",
-                    (emp_code,)
-                )
-                return cursor.fetchone()
+                query = """
+                    SELECT emp_pwd
+                    FROM employee
+                    WHERE emp_code = %s
+                """
+                cursor.execute(query, (emp_code,))
+                result = cursor.fetchone()
+                return result
         except Exception as e:
-            print(f"[Database.get_emp_pwd] 예외 발생: {e}")
+            print(f"비밀번호 조회 오류: {e}")
             raise
         finally:
             conn.close()
-    def change_password(self, emp_code: str, new_hashed: str) -> None:
-        """
-        emp_code로 비밀번호(new_hashed)를 업데이트.
-        """
+
+    def change_password(self, emp_code: str, new_password: str) -> None:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("""
+                query = """
                     UPDATE employee
                     SET emp_pwd = %s
                     WHERE emp_code = %s
-                """, (new_hashed, emp_code))
+                """
+                cursor.execute(query, (new_password, emp_code))
                 conn.commit()
         except Exception as e:
-            print(f"[Database.change_password] 예외 발생: {e}")
-            conn.rollback()
+            print(f"비밀번호 변경 오류: {e}")
+            conn.rollback() 
             raise
         finally:
             conn.close()
 
-    def get_employee_by_code(self, emp_code: str) -> Optional[Dict[str, Any]]:
-        """
-        로그인 성공 시 전체 사용자 정보를 조회.
-        """
+    async def create_employee(self, employee_data: Dict[str, Any]) -> int:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role,
-                           emp_birth_date, emp_create_dt
-                    FROM employee
-                    WHERE emp_code = %s
-                """, (emp_code,))
-                user = cursor.fetchone()
-                # 날짜 타입을 ISO 문자열로 변환
-                if user:
-                    bd = user.get("emp_birth_date")
-                    cd = user.get("emp_create_dt")
-                    if isinstance(bd, date):
-                        user["emp_birth_date"] = bd.isoformat()
-                    if isinstance(cd, (date, datetime)):
-                        user["emp_create_dt"] = cd.isoformat().split("T")[0]
-                return user
+                sql = """
+                INSERT INTO employee (emp_name, emp_code, emp_pwd, emp_email, emp_birth_date, emp_role, emp_create_dt)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW())
+                """
+                cursor.execute(
+                    sql,
+                    (
+                        employee_data["emp_name"],
+                        employee_data["emp_code"],
+                        employee_data["emp_pwd"],
+                        employee_data["emp_email"],
+                        employee_data["emp_birth_date"], 
+                        employee_data["emp_role"],
+                    ),
+                )
+            conn.commit()
+            return cursor.lastrowid
         except Exception as e:
-            print(f"[Database.get_employee_by_code] 예외 발생: {e}")
-            raise
+            print(f"데이터베이스 직원 생성 오류: {e}")
+            conn.rollback() 
+            raise 
         finally:
             conn.close()
-
 
     async def delete_employee(self, emp_no: int):
         conn = self._get_connection()
