@@ -24,10 +24,11 @@ memory_agent = MemoryAgent()
 memory_agent.setup_model_with_tools(memory_tools.get_tools())
 prompt_extraction = PromptExtraction()
 
-DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
+DB_HOST = os.environ.get("MY_DB_HOST", "database-1.cbesaym4o1mp.ap-northeast-2.rds.amazonaws.com"),
+# DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
 DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
 DB_USER = os.environ.get("MY_DB_USER", "wlb_mate")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "wlb_mate")  # 실제 비밀번호로 교체
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "28592859")  # 실제 비밀번호로 교체
 DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
@@ -392,8 +393,6 @@ async def ask_query(input: QuestionInput):
     final_answer = ollama.get_model_response().strip()
 
     return {"answer": final_answer}
-
-
 
 @router.get("/api/chat_list")
 async def chat_list(request: Request):

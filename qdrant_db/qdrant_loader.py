@@ -4,6 +4,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
+from langchain_core.tools import tool
 
 # 모델 로드
 embedding_model_name = "BM-K/KoSimCSE-roberta"
@@ -150,3 +151,72 @@ def delete_collection(collection_name="qdrant_temp"):
     return False
 
 
+###########
+
+# yj
+#  querymate  참조  try
+
+
+
+############
+
+from langchain.vectorstores import Qdrant
+from langchain.schema import Document
+from typing import List, Tuple
+
+# 여러 컬렉션 이름
+COLLECTIONS = ["qdrant_temp", "wlmmate_vectors", ]
+
+# LangChain Qdrant 래퍼 초기화 함수
+def get_qdrant_vectorstore(collection_name: str) -> Qdrant:
+    return Qdrant(
+        client=client,
+        collection_name=collection_name,
+        embedding_function=get_embedding  # LangChain에서 사용할 embedding 함수 연결
+    )
+
+# 여러 컬렉션에서 유사 문서를 검색
+def search_similar_docs(query: str, top_k=3) -> List[Tuple[str, List[Document], float]]:
+    """
+    질문(query)을 임베딩하여 3개 컬렉션에서 검색 후,
+    컬렉션명, 유사 문서 리스트, 최고 점수를 반환
+    """
+    query_embedding = get_embedding(query)
+    results = []
+
+    for col in COLLECTIONS:
+        vectorstore = get_qdrant_vectorstore(col)
+        docs_and_scores = vectorstore.similarity_search_by_vector(
+            query_embedding, k=top_k, with_score=True
+        )
+        if docs_and_scores:
+            docs, scores = zip(*docs_and_scores)
+            max_score = max(scores)
+            results.append((col, list(docs), max_score))
+
+    return results
+
+@tool
+def search_collections_tool(query: str) -> list:
+    """
+    사용자의 질문(query)을 기반으로 Qdrant의 여러 컬렉션에서 벡터 검색을 수행합니다.
+    가장 관련 있는 결과를 최대 3개까지 반환합니다.
+    """
+    results = []
+
+    # 예: 컬렉션 이름 목록
+    collection_names = ["civil_law_vectors", "insurance_vectors", "future_addition_vectors"]
+
+    for collection in collection_names:
+        try:
+            hits = client.search(
+                collection_name=collection,
+                query_vector=get_embedding(query),
+                limit=3,
+            )
+            for hit in hits:
+                results.append(f"[{collection}] {hit.payload.get('content', '')}")
+        except Exception as e:
+            results.append(f"[{collection}] 검색 실패: {str(e)}")
+
+    return results

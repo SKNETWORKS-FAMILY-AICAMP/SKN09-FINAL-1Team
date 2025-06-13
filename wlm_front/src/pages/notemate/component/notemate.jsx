@@ -320,7 +320,7 @@ const NoteMate = () => {
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/employees"); // 🚨 백엔드 API 실제 엔드포인트로 수정
+        const res = await fetch("/api/employees"); // 🚨 백엔드 API 실제 엔드포인트로 수정
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }

@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List, Literal, Tuple
 from langchain_core.messages import get_buffer_string
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
@@ -6,6 +6,8 @@ from langchain_ollama import ChatOllama
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 from transformers import AutoTokenizer
+import torch
+from qdrant_client import search_collections_tool
 
 class State(MessagesState):
     recall_memories: List[str]
@@ -22,8 +24,14 @@ class MemoryAgent:
         self.model = ChatOllama(model=model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
         self.prompt = self._create_prompt()
-        self.tools = None
-        
+        # self.tools = None
+        self.tools = [
+            self.search_tool_wrapper  # 아래 래퍼 함수 연결
+            # , 다른 도구들 ...
+        ]
+        self.model_with_tools = self.model.bind_tools(self.tools)
+
+
     def _create_prompt(self) -> ChatPromptTemplate:
         """프롬프트 템플릿 생성"""
         return ChatPromptTemplate.from_messages([
@@ -133,3 +141,24 @@ class MemoryAgent:
         builder.add_edge("tools", "agent")
         
         return builder 
+    
+
+#######################
+
+#yj
+# qdrant_db에서 가져온 코드로, 메모리 에이전트의 기능을 구현합니다.
+
+
+########################
+
+    def search_tool_wrapper(self, query: str) -> str:
+        # query를 임베딩 함수로 임베딩 후 검색 도구 함수 호출
+        embedding = self._get_embedding(query)
+        return search_collections_tool(embedding)
+
+    def _get_embedding(self, text: str):
+        # 임베딩 함수 (예: tokenizer+model or 외부 임베딩 API)
+        inputs = self.tokenizer(text, return_tensors='pt', truncation=True, padding=True)
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+        return outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()

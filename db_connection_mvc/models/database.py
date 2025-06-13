@@ -13,7 +13,7 @@
 #             port=int(os.environ.get("MY_DB_PORT", 3306)),
 #             user=os.environ.get("MY_DB_USER", "root"),
 #             password=os.environ.get("MY_DB_PASSWORD", ""),
-#             database=os.environ.get("MY_DB_NAME", "wlb_mate"),
+#             =os.environ.get("MY_DB_NAME", "wlb_mate"),
 #             charset=os.environ.get("MY_DB_CHARSET", "utf8mb4")
 #         )
 #         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
@@ -86,10 +86,12 @@ load_dotenv()
 class Database:
     def __init__(self):
         self.db_config = {
-            "host": os.environ.get("MY_DB_HOST", "localhost"),
+            "host": os.environ.get("MY_DB_HOST", "database-1.cbesaym4o1mp.ap-northeast-2.rds.amazonaws.com"),
+            # "host": os.environ.get("MY_DB_HOST", "localhost"),
             "port": int(os.environ.get("MY_DB_PORT", 3306)),
-            "user": os.environ.get("MY_DB_USER", "root"),
-            "password": os.environ.get("MY_DB_PASSWORD", ""),
+            "user": os.environ.get("MY_DB_USER", "wlb_mate"),
+            "password": os.environ.get("MY_DB_PASSWORD", "28592859"),
+            # "password": os.environ.get("MY_DB_PASSWORD", "1234"),
             "database": os.environ.get("MY_DB_NAME", "wlb_mate"),
             "charset": os.environ.get("MY_DB_CHARSET", "utf8mb4")
         }
