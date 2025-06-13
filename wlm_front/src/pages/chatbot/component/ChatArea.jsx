@@ -19,7 +19,7 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 
   useEffect(() => {
     if (chatNo) {
-      fetch(`/model/api/chat_log?chat_no=${chatNo}`)
+      fetch(`/model/chat_log?chat_no=${chatNo}`)
         .then(res => res.json())
         .then(data => {
           const formatted = data.map(msg => ({

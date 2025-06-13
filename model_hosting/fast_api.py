@@ -449,7 +449,7 @@ async def generate_unanswered():
 
 
 
-@router.get("/api/chat_list")
+@router.get("/chat_list")
 async def chat_list(request: Request):
     async with httpx.AsyncClient(timeout=300.0) as client:
         employee = await client.get(
@@ -467,7 +467,7 @@ async def chat_list(request: Request):
     )
     return checkpoint.get_chat_list(emp_code)
 
-@router.get("/api/chat_log")
+@router.get("/chat_log")
 async def chat_log(chat_no: int):
     checkpoint = MySQLCheckpoint(
         host=DB_HOST,

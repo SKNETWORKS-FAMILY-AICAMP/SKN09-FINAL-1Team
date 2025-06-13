@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, setIsOpen, onSelectChat, refreshSidebar }) => {
     // const isLoggedIn = Boolean(document.cookie.includes("session="));
     // if (!isLoggedIn) return;
 
-    fetch("/model/api/chat_list", {
+    fetch("/model/chat_list", {
       credentials: 'include'
     })
       .then(res => res.json())
