@@ -19,7 +19,7 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 
   useEffect(() => {
     if (chatNo) {
-      fetch(`http://localhost:8001/api/chat_log?chat_no=${chatNo}`)
+      fetch(`/model/chat_log?chat_no=${chatNo}`)
         .then(res => res.json())
         .then(data => {
           const formatted = data.map(msg => ({
@@ -69,7 +69,7 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
       }
 
 
-      const res = await fetch('http://localhost:8001/ask', {
+      const res = await fetch('/model/ask', {
         method: 'POST',
         body: formData,
         credentials: 'include',

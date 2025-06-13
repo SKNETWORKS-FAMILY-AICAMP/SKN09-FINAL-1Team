@@ -143,7 +143,7 @@ const NoteMate = () => {
     formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
 
     try {
-      const res = await fetch('/model/send-email', {
+      const res = await fetch('/api/send-email', { 
         method: 'POST',
         body: formData,
       });

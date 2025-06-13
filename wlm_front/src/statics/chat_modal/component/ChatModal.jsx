@@ -25,7 +25,7 @@ const ChatModal = ({ onClose }) => {
 
     try {
       // API 호출
-      const response = await fetch('http://localhost:8001/miniask', {
+      const response = await fetch('/model/miniask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
