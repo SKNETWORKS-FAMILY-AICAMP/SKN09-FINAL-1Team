@@ -479,7 +479,7 @@ async def chat_log(chat_no: int):
     )
     return checkpoint.get_chat_log(chat_no)
 
-@router.delete("/api/delete_chat_room")
+@router.delete("/delete_chat_room")
 async def delete_chat_room(chat_no: int, request: Request):
     employee = request.session.get("employee")
     emp_code = employee["emp_code"]
