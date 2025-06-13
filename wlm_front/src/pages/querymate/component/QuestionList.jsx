@@ -35,12 +35,21 @@ const QuestionList = ({ searchParams }) => {
       }
 
       const data = await res.json();
+      console.log("서버 응답 데이터:", data);
 
       if (!Array.isArray(data)) {
         throw new Error("응답 데이터가 배열이 아님");
       }
 
-      setQuestions(data);
+      const mapped = data.map((item) => ({
+        id: item.query_no,
+        question: item.query_title,
+        answer: item.res_text,
+        date: item.query_create_dt,
+        status: mapStatus(item.res_state),
+      }));
+
+      setQuestions(mapped);
     } catch (err) {
       console.error("민원 목록 가져오기 실패:", err);
       setQuestions([]); // 빈 배열로 초기화해서 .filter 에러 방지
@@ -51,6 +60,34 @@ const QuestionList = ({ searchParams }) => {
   useEffect(() => {
     fetchQueryListFromServer();
   }, []);
+
+  const generateUnansweredResponses = async () => {
+    try {
+      const res = await fetch("/model/generate-unanswered", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`응답 실패: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("응답 생성 결과:", data);
+
+      if (data.success) {
+        alert(`${data.count}개의 미응답 질문에 대해 답변이 자동 생성되었습니다.`);
+      } else {
+        alert("답변 생성에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("답변 생성 중 오류:", err);
+      alert("답변 생성 중 오류가 발생했습니다.");
+    }
+  };
+
 
 
   const handleDelete = (id) => {
@@ -67,35 +104,43 @@ const QuestionList = ({ searchParams }) => {
 
   // 날짜 문자열을 Date 객체로 변환하는 함수
   const parseDate = (dateStr) => {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+
     const [year, month, day] = dateStr.split('.').map(Number);
     return new Date(year, month - 1, day);
   };
 
+
   const filtered = questions
-    .filter((q) => q.question.toLowerCase().includes((searchParams.keyword || "").toLowerCase()))
+    .filter((q) =>
+      q.question && q.question.toLowerCase().includes((searchParams.keyword || "").toLowerCase())
+    )
     .filter((q) => {
-      if (!searchParams.startDate && !searchParams.endDate) return true;
-      
+      // ✅ dateRange가 null이면 통과
+      if (!searchParams.dateRange) return true;
+
       const questionDate = parseDate(q.date);
-      
-      if (searchParams.startDate) {
-        const start = new Date(searchParams.startDate);
+      const { startDate, endDate } = searchParams.dateRange;
+
+      if (startDate) {
+        const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
         if (questionDate < start) return false;
       }
-      
-      if (searchParams.endDate) {
-        const end = new Date(searchParams.endDate);
+
+      if (endDate) {
+        const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
         if (questionDate > end) return false;
       }
-      
+
       return true;
     })
     .filter((q) => {
       if (!searchParams.status || searchParams.status === '전체') return true;
       return q.status === searchParams.status;
     });
+
 
   const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -106,9 +151,9 @@ const QuestionList = ({ searchParams }) => {
         <h2 className={styles.title}>📋 민원 질문 목록</h2>
         <button
           className={styles.generateButton}
-          onClick={fetchQueryListFromServer}
+          onClick={() => {generateUnansweredResponses(); fetchQueryListFromServer();}}
         >
-          질문 생성
+          답변 생성
         </button>
       </div>
 

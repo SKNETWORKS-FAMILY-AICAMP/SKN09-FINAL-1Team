@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from models.database import Database
 from pydantic import BaseModel
+from pymysql.cursors import DictCursor
 
 query_router = APIRouter()
 db = Database()
@@ -9,13 +10,13 @@ db = Database()
 def get_query_list():
     conn = db._get_connection()
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(DictCursor) as cursor:  # ✅ 여기에 DictCursor 지정
             cursor.execute("""
                 SELECT 
                     query_mate.query_no,
                     query_mate.query_title,
                     query_mate.query_text,
-                    DATE_FORMAT(query_mate.query_create_dt, '%%Y.%%m.%%d') AS query_create_dt,
+                    DATE_FORMAT(query_mate.query_create_dt, '%Y.%m.%d') AS query_create_dt,
                     query_response.res_text,
                     query_response.res_state
                 FROM query_mate
@@ -23,12 +24,14 @@ def get_query_list():
                 ORDER BY query_mate.query_create_dt DESC
             """)
             results = cursor.fetchall()
+            print("쿼리 결과:", results[:3])
         return results
     except Exception as e:
         print(f"민원 조회 실패: {e}")
         return []
     finally:
         conn.close()
+
 
 class SaveAnswerInput(BaseModel):
     query_no: int
