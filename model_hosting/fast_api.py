@@ -401,7 +401,7 @@ async def ask_query(input: QuestionInput):
 
 
 
-@router.get("/api/chat_list")
+@router.get("/chat_list")
 async def chat_list(request: Request):
     employee = request.session.get("employee")
     emp_code = employee["emp_code"]
@@ -416,7 +416,7 @@ async def chat_list(request: Request):
     )
     return checkpoint.get_chat_list(emp_code)
 
-@router.get("/api/chat_log")
+@router.get("/chat_log")
 async def chat_log(chat_no: int):
     checkpoint = MySQLCheckpoint(
         host=DB_HOST,
