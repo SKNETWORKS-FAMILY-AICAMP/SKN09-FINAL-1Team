@@ -107,14 +107,14 @@ async def ask(
             page_texts = [p['text'] for p in pages]
             async with httpx.AsyncClient(timeout=300.0) as client:
                 await client.post(
-                    "/vectors/api/upload_vectors",
+                    "http://194.68.245.148:22144/api/upload_vectors",
                     json={"chunks": page_texts, "collection_name": "qdrant_temp"}
                 )
 
 
         async with httpx.AsyncClient(timeout=300.0) as client:
             search_resp = await client.post(
-                "/vectors/api/search_vectors",
+                "http://194.68.245.148:22144/api/search_vectors",
                 json={"question": question, "collection_name": "qdrant_temp"}
             )
 
@@ -156,7 +156,7 @@ async def ask(
             if evaluation_criteria is None:
                 async with httpx.AsyncClient(timeout=300.0) as client:
                     criteria_resp = await client.post(
-                        "/vectors/api/search_vectors",
+                        "http://194.68.245.148:22144/api/search_vectors",
                         json={"question": "평가 기준", "collection_name": "qdrant_temp"}
                     )
                 criteria_data = criteria_resp.json()
@@ -238,7 +238,7 @@ async def miniask(input: QuestionInput):
     # 벡터 검색
     async with httpx.AsyncClient(timeout=300.0) as client:
         search_resp = await client.post(
-            "/vectors/api/search_vectors",
+            "http://194.68.245.148:22144/api/search_vectors",
             json={"question": question, "collection_name": "wlmmate_vectors"}
         )
 
@@ -373,7 +373,7 @@ async def ask_query(input: QuestionInput):
     query = input.question
     async with httpx.AsyncClient(timeout=300.0) as client:
         search_resp = await client.post(
-            "/vectors/api/search_vectors",
+            "http://194.68.245.148:22144/api/search_vectors",
             json={"question": query, "collection_name": "wlmmate_vectors"}
         )
 

@@ -29,13 +29,24 @@ const QuestionList = ({ searchParams }) => {
   const fetchQueryListFromServer = async () => {
     try {
       const res = await fetch("/api/get-query-list");
+
+      if (!res.ok) {
+        throw new Error(`API 응답 실패: ${res.status}`);
+      }
+
       const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("응답 데이터가 배열이 아님");
+      }
+
       setQuestions(data);
     } catch (err) {
       console.error("민원 목록 가져오기 실패:", err);
-      setQuestions([]);
+      setQuestions([]); // 빈 배열로 초기화해서 .filter 에러 방지
     }
   };
+
 
   useEffect(() => {
     fetchQueryListFromServer();
