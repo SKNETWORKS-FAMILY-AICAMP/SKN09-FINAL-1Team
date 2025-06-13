@@ -294,23 +294,12 @@ const ParticipantList = ({
         <li>
           <span>이름</span>
           <span>이메일</span>
-          <span>선택</span> {/* 이메일 전송을 위한 체크박스 헤더 */}
           <span>삭제</span>
         </li>
         {users.map((user, idx) => (
           <li key={idx}>
             <span>{user.name}</span>
             <span>{user.email}</span>
-            {/* 주최자는 체크박스를 비활성화할 수 있습니다. (필요시 추가) */}
-            <span>
-              <input
-                type="checkbox"
-                checked={user.selected}
-                onChange={() => handleCheck(idx)}
-                // 주최자(hostName, hostEmail과 일치하는 경우)는 체크박스를 비활성화 (선택 사항)
-                // disabled={user.name === hostName && user.email === hostEmail}
-              />
-            </span>
             {/* 주최자는 삭제 버튼을 비활성화하거나 숨길 수 있습니다. (필요시 추가) */}
             <span>
               <button

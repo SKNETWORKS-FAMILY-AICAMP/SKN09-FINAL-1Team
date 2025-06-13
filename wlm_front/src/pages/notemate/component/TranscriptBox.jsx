@@ -135,16 +135,19 @@ const TranscriptBox = forwardRef((props, ref) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post(
-        'http://localhost:8001/transcribe_audio_chunked',
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+      const response = await fetch(
+        '/model/transcribe_audio_chunked',
+        {
+          method: 'POST',
+          body: formData
+        }
       );
-      if (response.data.chunk_transcripts && Array.isArray(response.data.chunk_transcripts)) {
-        await showChunksLive(response.data.chunk_transcripts);
+      const data = await response.json();
+      if (data.chunk_transcripts && Array.isArray(data.chunk_transcripts)) {
+        await showChunksLive(data.chunk_transcripts);
       } else {
-        setLiveText(response.data.transcription || '');
-        setTranscript(response.data.transcription || '');
+        setLiveText(data.transcription || '');
+        setTranscript(data.transcription || '');
       }
       setStep && setStep('transcripted');
     } catch (err) {
@@ -158,7 +161,7 @@ const TranscriptBox = forwardRef((props, ref) => {
     if (!transcript) return;
     setIsSummarizing(true);
     try {
-      const response = await axios.post('http://localhost:8001/summarize_text', {
+      const response = await axios.post('/model/summarize_text', {
         text: transcript,
       });
       setSummary(response.data.summary);

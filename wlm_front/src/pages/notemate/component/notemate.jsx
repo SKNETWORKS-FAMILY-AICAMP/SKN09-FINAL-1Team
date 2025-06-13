@@ -272,25 +272,20 @@ import ConfirmModal from './ConfirmModal.jsx';
 import InfoButton from './InfoButton.jsx';
 import InfoModal from './InfoModal.jsx';
 import '../css/notemate.css';
-import { useAuth } from '../../../context/AuthContext.jsx'; //
+import axios from 'axios';
 
 const NoteMate = () => {
-  const { user, loading } = useAuth(); // useAuth 훅을 통해 user와 loading 상태 가져오기
-
   const [isRecording, setIsRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [modalStep, setModalStep] = useState(null);
   const [timerInterval, setTimerInterval] = useState(null);
   const [meetingDate, setMeetingDate] = useState('');
-  // hostName과 hostEmail을 user 객체에서 가져오거나 초기값으로 설정
-  const [hostName, setHostName] = useState(''); 
-  const [hostEmail, setHostEmail] = useState(''); 
-
+  const [hostName, setHostName] = useState('');
+  const [hostEmail, setHostEmail] = useState('');
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [sendMessage, setSendMessage] = useState("");
-  const [users, setUsers] = useState([]); // 참가자 목록
-  const [allUsers, setAllUsers] = useState([]); // DB에서 불러온 전체 유저 목록
-
+  const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [step, setStep] = useState('init');
   const exampleTranscript = '예시 변환 텍스트입니다. 이곳에 음성 인식 결과가 표시됩니다.';
   const exampleSummary = '예시 요약 결과입니다. 이곳에 요약 결과가 표시됩니다.';
@@ -300,11 +295,18 @@ const NoteMate = () => {
 
   // user 객체가 로드되면 hostName과 hostEmail을 설정
   useEffect(() => {
-    if (user && !loading) {
-      setHostName(user.name); // user.name에서 이름 가져오기
-      setHostEmail(user.email); // user.email에서 이메일 가져오기
-    }
-  }, [user, loading]); 
+    const fetchSessionUser = async () => {
+      try {
+        const response = await axios.get('/api/check-session', { withCredentials: true });
+        setHostName(response.data.employee['emp_name']);
+        setHostEmail(response.data.employee['emp_email']);
+      } catch (error) {
+        console.error('세션 유저 정보 로드 실패:', error);
+      }
+    };
+    fetchSessionUser();
+  }, []);
+
 
   // 현재 시간으로 meetingDate 설정 (컴포넌트 마운트 시 한 번만)
   useEffect(() => {
@@ -320,7 +322,7 @@ const NoteMate = () => {
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/employees"); // 🚨 백엔드 API 실제 엔드포인트로 수정
+        const res = await fetch("/api/employees");
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -408,7 +410,7 @@ const NoteMate = () => {
     formData.append("summary_file", new File([summary], `${meetingDate}_회의록_요약.txt`, { type: "text/plain" }));
 
     try {
-      const res = await fetch('http://localhost:8001/send-email', { // 🚨 백엔드 이메일 전송 API 실제 엔드포인트로 수정
+      const res = await fetch('/model/send-email', {
         method: 'POST',
         body: formData,
       });
@@ -437,8 +439,7 @@ const NoteMate = () => {
     return emailSteps.includes(modalStep);
   };
 
-  // 로딩 중이거나 user 객체가 없을 때 로딩 UI 표시
-  if (loading || !user) {
+  if (!hostName || !hostEmail) {
     return (
       <div className="record-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <p>사용자 정보를 불러오는 중입니다...</p>
