@@ -558,10 +558,17 @@ async def process_audio_and_extract_qna(audio_path):
 
 def feedback_model(qna_data):
     model = ChatOllama(model="qwen2.5")
-
     prompt = prompt_extraction.make_feedback_prompt(qna_data)
     response = model.invoke(prompt)
-    feedbacks = response.content.strip().split("\n")
+
+    # 응답을 개별 피드백으로 분리하고 빈 문자열 제거
+    feedbacks = [f.strip() for f in response.content.strip().split("\n") if f.strip()]
+
+    # 따옴표 제거 및 정리
+    feedbacks = [f.strip("\"'") for f in feedbacks]
+
+    # 빈 문자열이 아닌 피드백만 필터링
+    feedbacks = [f for f in feedbacks if f]
     print(feedbacks)
 
     return feedbacks
