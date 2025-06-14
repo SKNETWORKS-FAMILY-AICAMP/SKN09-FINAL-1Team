@@ -49,7 +49,7 @@ class PromptExtraction:
             - 전반적인 분석과 평가에 객관적이고 공정하게 접근합니다.
             """
         return prompt
-    
+
     def test_make_prompt_to_extract_criteria(self):
         return """
         당신은 사업 제안서 문서를 분석하여, 심사자가 사업을 평가할 때 참고하는 '평가 기준(또는 평가 요소)'을 정확히 추출하는 전문가입니다.
@@ -77,7 +77,7 @@ class PromptExtraction:
 
 # 출력 (평가 기준 항목 목록):
 """
-    
+
     def make_prompt_to_extract_criteria(self, document_text):
         return f"""
 당신은 사업 제안서 문서를 분석하여, 심사자가 사업을 평가할 때 참고하는 '평가 기준(또는 평가 요소)'을 정확히 추출하는 전문가입니다.
@@ -138,7 +138,7 @@ class PromptExtraction:
 
 # 답변
 """
-    
+
     def make_light_cleaning_prompt(self, text: str) -> str:
         return f"""
 반드시 한국어로 대답하세요.        
@@ -160,7 +160,7 @@ class PromptExtraction:
 
 {text}
 """
-    
+
     def make_prompt(self, transcribed_text):
         return f"""
 반드시 한국어로 대답하세요.        
@@ -246,7 +246,7 @@ class PromptExtraction:
 텍스트:
 \"\"\"{transcript}\"\"\"
 """
-    
+
     def make_fallback_prompt(self, question: str) -> str:
         return f"""아래 질문에 대해 반드시 한국어로만 답변하세요. 
     중국어, 영어, 일본어 등 다른 언어는 절대 사용하지 마세요. 
@@ -314,7 +314,7 @@ class PromptExtraction:
 답변: {qna['answer']}
 
 """
-        
+
         return f"""
 질문에 대한 답변의 적절성을 평가하고, 법적 원칙, 회사 규정 및 대인 관계 행동을 바탕으로 피드백을 제공합니다.
 피드백이 건설적인지 확인하고 이러한 원칙에 따라 응답의 정렬을 개선하는 방법에 대한 지침을 제공합니다.
