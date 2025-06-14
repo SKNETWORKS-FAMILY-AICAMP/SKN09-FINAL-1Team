@@ -161,6 +161,7 @@ const MainContent = ({ searchParams }) => {
             answer: qna.answer,
             date: new Date().toISOString().slice(0, 10),
             tags: [], // 필요시 태그 추가
+            feedback: qna.feedback,
           }))
         );
         setCurrentPage(1);
