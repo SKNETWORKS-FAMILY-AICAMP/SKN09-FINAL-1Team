@@ -487,14 +487,17 @@ async def process_audio_and_extract_qna(audio_path):
     except Exception as e:
         return [{"question": "Error", "answer": str(e)}]
 
-# 위 작성한 Q&A를 바탕으로 피드백해주는 모델 작성 (이거 만든 사람이 나중에 lanchin_ollama 패키지로 바꿔주세용 :) 그건 해주세요 :) )
 def feedback_model(qna_data):
-    prompt = prompt_extraction.make_feedback_prompt(qna_data)
-    response = ollama.generate(
-        model="qwen2.5",
-        prompt=prompt
-    )
-    return response['response'].strip()
+    model = ChatOllama(model="qwen2.5")
+    feedbacks = []
+    
+    for qna in qna_data:
+        # 각 QnA 쌍에 대해 개별적으로 피드백 생성
+        prompt = prompt_extraction.make_feedback_prompt([qna])
+        response = model.invoke(prompt)
+        feedbacks.append(response.content.strip())
+    
+    return feedbacks
 
 
 def get_from_state(state, key, default):
