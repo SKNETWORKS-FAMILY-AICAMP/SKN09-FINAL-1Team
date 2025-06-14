@@ -358,29 +358,21 @@ async def summarize_text(request: TextRequest):
     return {"summary": summary_clean}
 
 @router.post("/upload_audio")
-async def upload_audio(file: UploadFile = File(...)):
-    try:
+async def upload_audio(file: UploadFile = File(...)):        
         # 1. 파일 저장
-        save_path = f"./call_data/{file.filename}"
-        with open(save_path, "wb") as buffer:
-            buffer.write(await file.read())
+    save_path = f"./call_data/{file.filename}"
+    with open(save_path, "wb") as buffer:
+        buffer.write(await file.read())
 
-        # 2. WhisperX + LLM Q&A 추출 (리스트 형태로 반환)
-        qna_data = await process_audio_and_extract_qna(save_path)
-        
-        # 3. 피드백 모델 호출 및 각 QnA에 피드백 추가
-        feedbacks = feedback_model(qna_data)
-        
-        # 피드백을 QnA 데이터에 추가
-        for qna, feedback in zip(qna_data, feedbacks):
-            qna['feedback'] = feedback
-        
-        return JSONResponse(content={"qna": qna_data})
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"오디오 처리 중 오류가 발생했습니다: {str(e)}"}
-        )
+    # 2. WhisperX + LLM Q&A 추출 (리스트 형태로 반환)
+    qna_data = await process_audio_and_extract_qna(save_path)
+    
+    # 3. 피드백 모델 호출 및 각 QnA에 피드백 추가
+    feedbacks = feedback_model(qna_data)
+    for i, qna in enumerate(qna_data):
+        qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
+    
+    return JSONResponse(content={"qna": qna_data})
 
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
