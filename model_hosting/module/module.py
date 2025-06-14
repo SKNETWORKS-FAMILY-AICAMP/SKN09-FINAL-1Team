@@ -563,7 +563,6 @@ def feedback_model(qna_data):
     response = model.invoke(prompt)
     feedbacks = response.content.strip().split("\n")
     print(feedbacks)
-    feedbacks = [f.strip() for f in feedbacks if f.strip()]
 
     return feedbacks
 
