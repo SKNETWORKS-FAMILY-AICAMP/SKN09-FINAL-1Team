@@ -98,7 +98,7 @@ const MainContent = ({ searchParams }) => {
         } else {
           // 전체 검색
           return qa.question.toLowerCase().includes(searchParams.keyword.toLowerCase()) ||
-                 qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
+            qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
         }
       });
     }
@@ -145,7 +145,10 @@ const MainContent = ({ searchParams }) => {
     // 서버로 파일 업로드
     const formData = new FormData();
     formData.append('file', file);
-    
+
+    // 파일 이름에서 확장자 제거
+    const fileName = file.name.replace('.mp3', '');
+
     // model 서버로 파일 업로드
     try {
       const res = await fetch('/model/upload_audio', {
@@ -162,6 +165,7 @@ const MainContent = ({ searchParams }) => {
             date: new Date().toISOString().slice(0, 10),
             tags: [], // 필요시 태그 추가
             feedback: qna.feedback,
+            fileName: fileName, // 파일 이름 추가
           }))
         );
         setCurrentPage(1);
@@ -171,7 +175,6 @@ const MainContent = ({ searchParams }) => {
     } catch (e) {
       alert('업로드 실패: ' + e.message);
     }
-
 
     setLoading(false);
   };
@@ -221,7 +224,7 @@ const MainContent = ({ searchParams }) => {
               ref={fileInputRef}
               style={{ display: 'none' }}
             />
-            <button 
+            <button
               className={styles.uploadButton}
               onClick={() => fileInputRef.current.click()}
               disabled={loading}
@@ -247,7 +250,7 @@ const MainContent = ({ searchParams }) => {
                     <span key={index} className={styles.tag}>#{tag}</span>
                   ))}
                 </div>
-                <div 
+                <div
                   className={`${styles.answerSection} ${selectedAnswer === qa.answer ? styles.expanded : ''}`}
                   onClick={() => handleAnswerClick(qa.answer)}
                 >
@@ -265,8 +268,8 @@ const MainContent = ({ searchParams }) => {
                         <div className={styles.fileInfoItem}>
                           <div className={styles.fileInfoRow}>
                             <strong>음성 파일:</strong>
-                            <a 
-                              href={`/api/download/${qa.audioFileName}`} 
+                            <a
+                              href={`/api/download/${qa.audioFileName}`}
                               download={qa.audioFileName}
                               className={styles.downloadLink}
                             >
@@ -275,8 +278,8 @@ const MainContent = ({ searchParams }) => {
                           </div>
                           <div className={styles.fileInfoRow}>
                             <strong>원본 텍스트:</strong>
-                            <a 
-                              href={`/api/download/${qa.textFileName}`} 
+                            <a
+                              href={`/api/download/${qa.textFileName}`}
                               download={qa.textFileName}
                               className={styles.downloadLink}
                             >
@@ -292,7 +295,7 @@ const MainContent = ({ searchParams }) => {
                   </div>
                 )}
                 <div className={styles.qaActions}>
-                  <button 
+                  <button
                     className={`${styles.actionButton} ${styles.deleteButton}`}
                     onClick={() => handleDelete(qa.id)}
                   >
@@ -309,8 +312,8 @@ const MainContent = ({ searchParams }) => {
         </div>
         {filteredQAList.length > 0 && (
           <div className={styles.pagination}>
-            <button 
-              className={styles.pageButton} 
+            <button
+              className={styles.pageButton}
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -325,8 +328,8 @@ const MainContent = ({ searchParams }) => {
                 {number}
               </button>
             ))}
-            <button 
-              className={styles.pageButton} 
+            <button
+              className={styles.pageButton}
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
