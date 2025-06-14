@@ -557,6 +557,7 @@ async def process_audio_and_extract_qna(audio_path):
 
 
 def feedback_model(qna_data):
+    print(qna_data)
     model = ChatOllama(model="qwen2.5")
     prompt = prompt_extraction.make_feedback_prompt(qna_data)
     response = model.invoke(prompt)
