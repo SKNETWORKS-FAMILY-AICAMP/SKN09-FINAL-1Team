@@ -565,14 +565,19 @@ def feedback_model(qna_data):
     # 응답을 개별 피드백으로 분리하고 빈 문자열 제거
     feedbacks = [f.strip() for f in response.content.strip().split("\n") if f.strip()]
 
-    # 따옴표 제거 및 정리
-    feedbacks = [f.strip("\"'") for f in feedbacks]
+    # 피드백 정규화
+    normalized_feedbacks = []
+    for feedback in feedbacks:
+        # "- "feedbackN": " 패턴 제거
+        feedback = re.sub(r'^-\s*"feedback\d+":\s*', "", feedback)
+        # 따옴표 제거
+        feedback = feedback.strip("\"'")
+        # 빈 문자열이 아닌 경우만 추가
+        if feedback:
+            normalized_feedbacks.append(feedback)
 
-    # 빈 문자열이 아닌 피드백만 필터링
-    feedbacks = [f for f in feedbacks if f]
-    print(feedbacks)
-
-    return feedbacks
+    print(normalized_feedbacks)
+    return normalized_feedbacks
 
 
 def get_from_state(state, key, default):
