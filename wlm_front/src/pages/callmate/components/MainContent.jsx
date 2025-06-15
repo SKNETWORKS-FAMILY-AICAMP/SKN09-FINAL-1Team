@@ -257,8 +257,18 @@ const MainContent = ({ searchParams }) => {
         const res = await fetch('/api/call_datas');
         if (!res.ok) throw new Error('DB 데이터 불러오기 실패');
         const dbData = await res.json();
-        // dbData가 배열 형태라고 가정
-        setQaList(dbData);
+        // dbData를 qaListData 형식으로 변환
+        const formatted = dbData.map((item, idx) => ({
+          id: item.id || item.coun_no || idx + 1,
+          question: item.question || item.coun_question,
+          answer: item.answer || item.coun_answer,
+          date: item.date || item.call_create_dt || new Date().toISOString().slice(0, 10),
+          tags: item.tags || [],
+          feedback: item.feedback || item.coun_feedback,
+          audioFileName: item.audioFileName || item.call_path?.split('/')?.pop() || '',
+          audioBlobUrl: null,
+        }));
+        setQaList(formatted);
       } catch (err) {
         console.error('DB 데이터 불러오기 오류:', err);
       }
