@@ -1,3 +1,4 @@
+# qdrant_db/qdrant_loader.py
 import json
 import os
 import torch
@@ -11,8 +12,11 @@ tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 model = AutoModel.from_pretrained(embedding_model_name)
 
 # Qdrant 설정 (서버 주소, 포트)
-QDRANT_HOST = "213.173.111.202"
-QDRANT_PORT = 47370
+
+QDRANT_HOST = os.getenv("QDRANT_HOST", "213.173.111.202")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", "47370")) # Qdrant 기본 API 포트
+
+print(f"Connecting to Qdrant at {QDRANT_HOST}:{QDRANT_PORT}")
 client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 # 임베딩 차원
@@ -30,6 +34,7 @@ def get_embedding(text: str):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
     with torch.no_grad():
         outputs = model(**inputs)
+    # Convert to list for Qdrant PointStruct if necessary, otherwise .numpy() is fine
     return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
 
 def clean_doc(doc):
@@ -40,72 +45,126 @@ def clean_doc(doc):
     답변 = "\n".join(cleaned_lines).strip()
     return f"질문: {질문}\n답변: {답변}"
 
-def init_qdrant_from_folder(folder_path="../data/preprocess"):
-    # 폴더 내 하위 폴더(법령, 사업, 훈령) 순회
+# --- ★ 경로 수정 ★ ---
+def init_qdrant_from_folder(folder_path="/app/data/preprocess"):
+    print(f"Initializing Qdrant from folder: {folder_path}")
+    if not os.path.exists(folder_path):
+        print(f"Error: Data folder '{folder_path}' not found. Skipping folder initialization.")
+        return
+    
     for subfolder in os.listdir(folder_path):
         subfolder_path = os.path.join(folder_path, subfolder)
         if not os.path.isdir(subfolder_path):
             continue
-        # 컬렉션 이름: COLLECTIONS에서 가져오기
         collection_name = COLLECTIONS.get(subfolder)
         if not collection_name:
-            continue  # 매칭되는 컬렉션 이름이 없으면 건너뜀
+            print(f"Warning: No collection name mapped for subfolder '{subfolder}'. Skipping.")
+            continue
 
-        # 컬렉션 생성
+        print(f"Checking collection: {collection_name}")
+        try:
+            # collection_exists 전에 ping으로 연결 확인
+            if not client.is_consistent(): # 또는 client.get_collections() 시도
+                print(f"Warning: Qdrant client not connected or not consistent. Retrying...")
+                client.recreate_collection(
+                    collection_name=collection_name,
+                    vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+                ) # 재연결 시도
+                
+            if not client.collection_exists(collection_name=collection_name):
+                print(f"Collection '{collection_name}' does not exist. Creating...")
+                client.recreate_collection(
+                    collection_name=collection_name,
+                    vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+                )
+                print(f"Collection '{collection_name}' created.")
+            else:
+                print(f"Collection '{collection_name}' already exists.")
+
+            file_idx = 0
+            for root, _, files in os.walk(subfolder_path):
+                for filename in files:
+                    if not filename.endswith(".json"):
+                        continue
+                    file_path = os.path.join(root, filename)
+                    print(f"Processing file: {file_path}")
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as file:
+                            documents = json.load(file)
+                        for doc in documents:
+                            if not isinstance(doc, dict):
+                                print(f"Warning: Skipping non-dict document in {file_path}: {doc}")
+                                continue
+                            embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
+                            embedding = get_embedding(embedding_input)
+                            payload = {"content": embedding_input}
+                            client.upsert(
+                                collection_name=collection_name,
+                                points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                            )
+                            file_idx += 1
+                    except Exception as file_e:
+                        print(f"Error processing file '{file_path}': {file_e}")
+            print(f"Finished processing folder: {subfolder}")
+        except Exception as e:
+            print(f"Critical Error processing collection '{collection_name}' from folder '{subfolder}': {e}")
+
+
+# --- ★ 경로 수정 ★ ---
+def init_qdrant_from_file(civil_data_path="/app/data/civil_data.json", id_offset=100000):
+    print(f"Initializing Qdrant from file: {civil_data_path}")
+    if not os.path.exists(civil_data_path):
+        print(f"Error: Data file '{civil_data_path}' not found. Skipping file initialization.")
+        return
+
+    collection_name = COLLECTIONS["민원"]
+    print(f"Checking collection: {collection_name}")
+    try:
+        if not client.is_consistent(): # 또는 client.get_collections() 시도
+            print(f"Warning: Qdrant client not connected or not consistent. Retrying...")
+            client.recreate_collection(
+                collection_name=collection_name,
+                vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            ) # 재연결 시도
+            
         if not client.collection_exists(collection_name=collection_name):
+            print(f"Collection '{collection_name}' does not exist. Creating...")
             client.recreate_collection(
                 collection_name=collection_name,
                 vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
             )
+            print(f"Collection '{collection_name}' created.")
+        else:
+            print(f"Collection '{collection_name}' already exists.")
 
-        # 폴더 내 JSON 파일 처리
-        file_idx = 0
-        for root, _, files in os.walk(subfolder_path):
-            for filename in files:
-                if not filename.endswith(".json"):
-                    continue
-                with open(os.path.join(root, filename), 'r', encoding='utf-8') as file:
-                    documents = json.load(file)
-                for doc in documents:
-                    if not isinstance(doc, dict):
-                        continue
-                    embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
-                    embedding = get_embedding(embedding_input)
-                    payload = {"content": embedding_input}
-                    client.upsert(
-                        collection_name=collection_name,
-                        points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
-                    )
-                    file_idx += 1
+        with open(civil_data_path, 'r', encoding='utf-8') as file:
+            documents = json.load(file)
 
-def init_qdrant_from_file(civil_data_path="../data/civil_data.json", id_offset=100000):
-    collection_name = COLLECTIONS["민원"]
-    if not client.collection_exists(collection_name=collection_name):
-        client.recreate_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
-        )
+        file_idx = id_offset
+        for doc in documents:
+            if not isinstance(doc, dict):
+                print(f"Warning: Skipping non-dict document in {civil_data_path}: {doc}")
+                continue
+            embedding_input = clean_doc(doc)
+            embedding = get_embedding(embedding_input)
+            payload = {"content": embedding_input}
+            client.upsert(
+                collection_name=collection_name,
+                points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+            )
+            file_idx += 1
+        print(f"Finished processing file: {civil_data_path}")
+    except Exception as e:
+        print(f"Critical Error processing collection '{collection_name}' from file '{civil_data_path}': {e}")
 
-    with open(civil_data_path, 'r', encoding='utf-8') as file:
-        documents = json.load(file)
 
-    file_idx = id_offset
-    for doc in documents:
-        if not isinstance(doc, dict):
-            continue
-        embedding_input = clean_doc(doc)
-        embedding = get_embedding(embedding_input)
-        payload = {"content": embedding_input}
-        client.upsert(
-            collection_name=collection_name,
-            points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
-        )
-        file_idx += 1
-
+# --- 이하 내용은 변경 없음 (기존 코드와 동일) ---
+# load_qdrant_db, search_wlmmate_law, split_into_chunks, store_temp_embedding, delete_collection 함수들은 그대로 유지합니다.
 def load_qdrant_db(question, collection_name="wlmmate_vectors"):
+    # ... (기존 코드 유지) ...
     query_vector = get_embedding(question)
     search_results = client.search(
-        collection_name=collection_name,
+        collection_name=collection_name, # 여기서 어떤 컬렉션을 검색할지는 요청에 따라 달라집니다.
         query_vector=query_vector,
         limit=3
     )
@@ -118,10 +177,10 @@ def load_qdrant_db(question, collection_name="wlmmate_vectors"):
         response = f"{question}'에 관한 문서가 존재하지 않습니다."
     return response
 
-def search_wlmmate_law(question: str, collection_name="wlmmate_vectors"):
+def search_wlmmate_law(question: str, collection_name="wlmmate_vectors"): # 이 함수의 collection_name도 필요에 따라 바꾸어야 합니다.
     query_vector = get_embedding(question)
     results = client.search(
-        collection_name=collection_name,
+        collection_name=collection_name, # 기본값이 wlmmate_vectors인데, 사용되는 컬렉션으로 변경 필요
         query_vector=query_vector,
         limit=5
     )
