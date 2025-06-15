@@ -8,7 +8,8 @@ html, body {
   margin: 0;
   min-height: 100vh;
   font-family: 'Raleway', sans-serif;
-  color: #000000;           /* 기본 글씨 흰색 */
+  color: #000000;
+                  /* 기본 글씨 흰색 */
 }
 
 .container {
