@@ -13,7 +13,7 @@ router = APIRouter()
 call_service = CallService()
 
 # 파일 저장 디렉토리 생성
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "audios")
+UPLOAD_DIR = "/call_data/audios"  # 서버의 실제 경로
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
@@ -44,8 +44,13 @@ async def save_call_info(
 
         # 파일 저장
         file_path = os.path.join(UPLOAD_DIR, file.filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        try:
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"파일 저장 중 오류 발생: {str(e)}"
+            )
 
         # 서비스를 통해 데이터 저장
         result = await call_service.save_call_info(
