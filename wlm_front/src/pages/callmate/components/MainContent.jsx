@@ -334,7 +334,7 @@ const MainContent = ({ searchParams }) => {
                           <div className={styles.fileInfoRow}>
                             <strong>음성 파일:</strong>
                             <a
-                              href={qa.audioBlobUrl}
+                              href={qa.audioBlobUrl ? qa.audioBlobUrl : `/call_data/audios/${qa.audioFileName}`}
                               download={qa.audioFileName}
                               className={styles.downloadLink}
                             >
