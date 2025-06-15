@@ -76,8 +76,8 @@ const MainContent = ({ searchParams }) => {
   //   }
   // ];
 
-  const [qaList, setQaList] = useState();
-  const [filteredQAList, setFilteredQAList] = useState();
+  const [qaList, setQaList] = useState([]);
+  const [filteredQAList, setFilteredQAList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -104,13 +104,13 @@ const MainContent = ({ searchParams }) => {
     if (searchParams?.keyword) {
       filtered = filtered.filter(qa => {
         if (searchParams.type === 'tag') {
-          return qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
+          return qa.tags?.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
         } else if (searchParams.type === 'question') {
           return qa.question.toLowerCase().includes(searchParams.keyword.toLowerCase());
         } else {
           // 전체 검색
           return qa.question.toLowerCase().includes(searchParams.keyword.toLowerCase()) ||
-            qa.tags.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
+            qa.tags?.some(tag => tag.toLowerCase().includes(searchParams.keyword.toLowerCase()));
         }
       });
     }
@@ -220,10 +220,10 @@ const MainContent = ({ searchParams }) => {
   // 현재 페이지의 아이템들
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredQAList.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredQAList?.slice(indexOfFirstItem, indexOfLastItem) || [];
 
   // 전체 페이지 수 계산
-  const totalPages = Math.ceil(filteredQAList.length / itemsPerPage);
+  const totalPages = Math.ceil((filteredQAList?.length || 0) / itemsPerPage);
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber) => {
