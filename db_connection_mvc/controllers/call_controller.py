@@ -82,7 +82,11 @@ async def get_all_call_datas():
             "id": row.get("coun_no"),
             "question": row.get("coun_question"),
             "answer": row.get("coun_answer"),
-            "date": row.get("call_create_dt")[:10] if row.get("call_create_dt") else "",
+            "date": (
+                row.get("call_create_dt").strftime("%Y-%m-%d")
+                if row.get("call_create_dt")
+                else ""
+            ),
             "tags": [],
             "feedback": row.get("coun_feedback"),
             "audioFileName": (
