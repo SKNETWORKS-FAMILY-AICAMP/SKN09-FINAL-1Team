@@ -185,7 +185,7 @@ const MainContent = ({ searchParams }) => {
 
         // Q&A 데이터를 서버에 저장
         try {
-          const saveResponse = await fetch('/call/save_call_info', {
+          const saveResponse = await fetch('/api/call/save_call_info', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
