@@ -84,6 +84,18 @@ const MainContent = ({ searchParams }) => {
   const fileInputRef = useRef(null);
   const itemsPerPage = 5;
 
+  // Blob URL 정리를 위한 cleanup
+  useEffect(() => {
+    return () => {
+      // 컴포넌트가 언마운트될 때 모든 Blob URL 해제
+      qaList.forEach(qa => {
+        if (qa.audioBlobUrl) {
+          URL.revokeObjectURL(qa.audioBlobUrl);
+        }
+      });
+    };
+  }, [qaList]);
+
   // 검색 조건에 따른 필터링
   useEffect(() => {
     let filtered = [...qaList];
@@ -149,6 +161,9 @@ const MainContent = ({ searchParams }) => {
     // 파일 이름에서 확장자 제거
     const fileName = file.name.replace('.mp3', '');
 
+    // 파일을 Blob URL로 저장
+    const audioBlobUrl = URL.createObjectURL(file);
+
     // model 서버로 파일 업로드
     try {
       const res = await fetch('/model/upload_audio', {
@@ -157,18 +172,40 @@ const MainContent = ({ searchParams }) => {
       });
       const data = await res.json();
       if (data.qna && Array.isArray(data.qna)) {
-        setQaList(
-          data.qna.map((qna, idx) => ({
-            id: idx + 1,
-            question: qna.question,
-            answer: qna.answer,
-            date: new Date().toISOString().slice(0, 10),
-            tags: [], // 필요시 태그 추가
-            feedback: qna.feedback,
-            fileName: fileName, // 파일 이름 추가
-          }))
-        );
-        setCurrentPage(1);
+        const qaListData = data.qna.map((qna, idx) => ({
+          id: idx + 1,
+          question: qna.question,
+          answer: qna.answer,
+          date: new Date().toISOString().slice(0, 10),
+          tags: [], // 필요시 태그 추가
+          feedback: qna.feedback,
+          audioFileName: file.name, // 실제 업로드된 파일 이름 저장
+          audioBlobUrl: audioBlobUrl, // Blob URL 저장
+        }));
+
+        // Q&A 데이터를 서버에 저장
+        try {
+          const saveResponse = await fetch('/call/save_call_info', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              file_name: file.name,
+              qna_list: data.qna
+            }),
+          });
+
+          if (!saveResponse.ok) {
+            throw new Error('Q&A 데이터 저장 실패');
+          }
+
+          setQaList(qaListData);
+          setCurrentPage(1);
+        } catch (saveError) {
+          console.error('Q&A 데이터 저장 중 오류:', saveError);
+          alert('Q&A 데이터 저장 중 오류가 발생했습니다.');
+        }
       } else {
         alert('Q&A 추출 실패');
       }
@@ -269,7 +306,7 @@ const MainContent = ({ searchParams }) => {
                           <div className={styles.fileInfoRow}>
                             <strong>음성 파일:</strong>
                             <a
-                              href={`/api/download/${qa.audioFileName}`}
+                              href={qa.audioBlobUrl}
                               download={qa.audioFileName}
                               className={styles.downloadLink}
                             >

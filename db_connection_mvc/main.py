@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from controllers.employee_controller import router as employee_router
 from controllers.email_controller import email_router
 from controllers.query_controller import query_router
+from controllers.call_controller import call_router
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(employee_router, prefix="/api")
 app.include_router(email_router, prefix="/api")
 app.include_router(query_router, prefix="/api")
+app.include_router(call_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
