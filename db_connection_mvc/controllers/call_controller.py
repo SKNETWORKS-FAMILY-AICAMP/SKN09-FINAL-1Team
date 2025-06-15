@@ -1,4 +1,13 @@
-from fastapi import APIRouter, Request, Response, HTTPException, UploadFile, File, Form
+from fastapi import (
+    APIRouter,
+    Request,
+    Response,
+    HTTPException,
+    UploadFile,
+    File,
+    Form,
+    Path,
+)
 from pydantic import BaseModel, ValidationError
 from datetime import date
 from services.call_service import CallService
@@ -97,3 +106,11 @@ async def get_all_call_datas():
         for row in result["data"]
     ]
     return formatted
+
+
+@router.delete("/delete_call_data/{coun_no}")
+async def delete_call_data(coun_no: int = Path(...)):
+    result = await call_service.delete_call_data(coun_no)
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result

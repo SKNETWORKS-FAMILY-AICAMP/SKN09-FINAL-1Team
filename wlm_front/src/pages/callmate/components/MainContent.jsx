@@ -151,8 +151,8 @@ const MainContent = ({ searchParams }) => {
     }
 
     setLoading(true);
-    setQaList([]); // 업로드 시 기존 리스트 초기화
-    setFilteredQAList([]); // 필터링된 리스트도 초기화
+    // setQaList([]); // 업로드 시 기존 리스트 초기화하지 않음
+    // setFilteredQAList([]); // 필터링된 리스트도 초기화하지 않음
 
     // 서버로 파일 업로드
     const formData = new FormData();
@@ -202,7 +202,11 @@ const MainContent = ({ searchParams }) => {
             throw new Error(errorData.detail || 'Q&A 데이터 저장 실패');
           }
 
-          setQaList(qaListData);
+          // 기존 데이터에 새 데이터 추가
+          setQaList(prev => [
+            ...prev,
+            ...qaListData
+          ]);
           setCurrentPage(1);
         } catch (saveError) {
           console.error('Q&A 데이터 저장 중 오류:', saveError);
@@ -238,8 +242,16 @@ const MainContent = ({ searchParams }) => {
   };
 
   // 삭제 핸들러
-  const handleDelete = (id) => {
-    setQaList((prev) => prev.filter((qa) => qa.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/delete_call_data/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('삭제 실패');
+      setQaList((prev) => prev.filter((qa) => qa.id !== id));
+    } catch (err) {
+      alert('삭제 중 오류 발생');
+    }
   };
 
   // 마지막 페이지 체크 및 조정

@@ -243,3 +243,19 @@ class Database:
             raise
         finally:
             conn.close()
+
+    async def delete_call_data(self, coun_no: int):
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                # call_counsel에서 해당 Q&A 삭제
+                sql = "DELETE FROM call_counsel WHERE coun_no = %s"
+                cursor.execute(sql, (coun_no,))
+            conn.commit()
+            return {"status": "success", "message": "Q&A 삭제 성공"}
+        except Exception as e:
+            print(f"Q&A 삭제 오류: {e}")
+            conn.rollback()
+            raise
+        finally:
+            conn.close()

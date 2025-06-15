@@ -35,3 +35,10 @@ class CallService:
             return self._format_success("통화 Q&A 전체 조회 성공", data=result)
         except Exception as e:
             return self._format_error(f"통화 Q&A 전체 조회 오류: {str(e)}")
+
+    async def delete_call_data(self, coun_no: int):
+        try:
+            result = await self.db.delete_call_data(coun_no)
+            return self._format_success("Q&A 삭제 성공", data=result)
+        except Exception as e:
+            return self._format_error(f"Q&A 삭제 오류: {str(e)}")
