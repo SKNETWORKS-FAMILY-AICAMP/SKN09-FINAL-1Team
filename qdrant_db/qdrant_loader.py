@@ -10,15 +10,21 @@ embedding_model_name = "BM-K/KoSimCSE-roberta"
 tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 model = AutoModel.from_pretrained(embedding_model_name)
 
-
-qdrant_path = "./qdrant_data"
-json_docs_path = "../data/preprocess"
-civil_data_path = "../data/civil_data.json"
-client = QdrantClient(path=qdrant_path)
-
+# Qdrant 설정 (서버 주소, 포트)
+QDRANT_HOST = "213.173.111.202"
+QDRANT_PORT = 47370
+client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 # 임베딩 차원
 embedding_dim = 768
+
+# 컬렉션 이름 매핑
+COLLECTIONS = {
+    "법령": "wlmmate_law",
+    "사업": "wlmmate_project",
+    "훈령": "wlmmate_order",
+    "민원": "wlmmate_civil"
+}
 
 def get_embedding(text: str):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
@@ -34,34 +40,46 @@ def clean_doc(doc):
     답변 = "\n".join(cleaned_lines).strip()
     return f"질문: {질문}\n답변: {답변}"
 
-def init_qdrant_from_folder(folder_path=json_docs_path, collection_name="wlmmate_vectors"):
-    if not client.collection_exists(collection_name=collection_name):
-        client.recreate_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
-        )
+def init_qdrant_from_folder(folder_path="../data/preprocess"):
+    # 폴더 내 하위 폴더(법령, 사업, 훈령) 순회
+    for subfolder in os.listdir(folder_path):
+        subfolder_path = os.path.join(folder_path, subfolder)
+        if not os.path.isdir(subfolder_path):
+            continue
+        # 컬렉션 이름: COLLECTIONS에서 가져오기
+        collection_name = COLLECTIONS.get(subfolder)
+        if not collection_name:
+            continue  # 매칭되는 컬렉션 이름이 없으면 건너뜀
 
-    file_idx = 0
-    for root, _, files in os.walk(folder_path):
-        for filename in files:
-            if not filename.endswith(".json"):
-                continue
-            with open(os.path.join(root, filename), 'r', encoding='utf-8') as file:
-                documents = json.load(file)
+        # 컬렉션 생성
+        if not client.collection_exists(collection_name=collection_name):
+            client.recreate_collection(
+                collection_name=collection_name,
+                vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            )
 
-            for doc in documents:
-                if not isinstance(doc, dict):
+        # 폴더 내 JSON 파일 처리
+        file_idx = 0
+        for root, _, files in os.walk(subfolder_path):
+            for filename in files:
+                if not filename.endswith(".json"):
                     continue
-                embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
-                embedding = get_embedding(embedding_input)
-                payload = {"content": embedding_input}
-                client.upsert(
-                    collection_name=collection_name,
-                    points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
-                )
-                file_idx += 1
+                with open(os.path.join(root, filename), 'r', encoding='utf-8') as file:
+                    documents = json.load(file)
+                for doc in documents:
+                    if not isinstance(doc, dict):
+                        continue
+                    embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
+                    embedding = get_embedding(embedding_input)
+                    payload = {"content": embedding_input}
+                    client.upsert(
+                        collection_name=collection_name,
+                        points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                    )
+                    file_idx += 1
 
-def init_qdrant_from_file(civil_data_path=civil_data_path, collection_name="wlmmate_vectors", id_offset=100000):
+def init_qdrant_from_file(civil_data_path="../data/civil_data.json", id_offset=100000):
+    collection_name = COLLECTIONS["민원"]
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
@@ -149,4 +167,7 @@ def delete_collection(collection_name="qdrant_temp"):
         return True
     return False
 
-
+if __name__ == "__main__":
+    init_qdrant_from_folder()
+    init_qdrant_from_file()
+    print("Qdrant 데이터 로드 완료!")

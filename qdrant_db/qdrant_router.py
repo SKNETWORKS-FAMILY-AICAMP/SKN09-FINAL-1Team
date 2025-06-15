@@ -1,7 +1,4 @@
-# 임시 코드
-# 실제 적용시 수정 필요
-
-from fastapi import FastAPI, UploadFile, File, Form, APIRouter
+from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
 from qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
