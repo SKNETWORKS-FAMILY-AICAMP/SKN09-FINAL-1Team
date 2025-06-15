@@ -13,8 +13,7 @@ router = APIRouter()
 call_service = CallService()
 
 # 파일 저장 디렉토리 생성
-UPLOAD_DIR = "/call_data/audios"  # 서버의 실제 경로
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+UPLOAD_DIR = "../call_data/audios"  # 서버의 실제 경로
 
 
 class CallData(BaseModel):
@@ -47,7 +46,9 @@ async def save_call_info(
         try:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
+            print(f"파일이 저장된 경로: {file_path}")  # 디버깅을 위한 로그
         except Exception as e:
+            print(f"파일 저장 오류: {str(e)}")  # 디버깅을 위한 로그
             raise HTTPException(
                 status_code=500, detail=f"파일 저장 중 오류 발생: {str(e)}"
             )
@@ -66,4 +67,5 @@ async def save_call_info(
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:
+        print(f"전체 프로세스 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
