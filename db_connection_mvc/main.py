@@ -7,6 +7,7 @@ from controllers.call_controller import router as call_router
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
 load_dotenv()
 secret = os.getenv("SESSION_SECRET", "default_key")
@@ -31,7 +32,11 @@ app.add_middleware(
     session_cookie="session",
     max_age=None,
     same_site="lax",
-    https_only=False
+    https_only=False,
+)
+
+app.mount(
+    "/call_data/audios", StaticFiles(directory="/app/call_data/audios"), name="audios"
 )
 
 app.include_router(employee_router, prefix="/api")
@@ -41,4 +46,5 @@ app.include_router(call_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
