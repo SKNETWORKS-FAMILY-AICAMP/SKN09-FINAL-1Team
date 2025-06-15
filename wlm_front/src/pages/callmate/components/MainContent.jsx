@@ -198,14 +198,15 @@ const MainContent = ({ searchParams }) => {
           });
 
           if (!saveResponse.ok) {
-            throw new Error('Q&A 데이터 저장 실패');
+            const errorData = await saveResponse.json();
+            throw new Error(errorData.detail || 'Q&A 데이터 저장 실패');
           }
 
           setQaList(qaListData);
           setCurrentPage(1);
         } catch (saveError) {
           console.error('Q&A 데이터 저장 중 오류:', saveError);
-          alert('Q&A 데이터 저장 중 오류가 발생했습니다.');
+          alert(saveError.message || 'Q&A 데이터 저장 중 오류가 발생했습니다.');
         }
       } else {
         alert('Q&A 추출 실패');
