@@ -312,10 +312,13 @@ const MainContent = ({ searchParams }) => {
             >
               이전
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <button
                 key={number}
-                className={`${styles.pageButton} ${currentPage === number ? styles.activePage : ''}`}
+                className={`
+                  ${styles.pageButton} 
+                  ${currentPage === number ? styles.activePage : styles.inactivePage}
+                `}
                 onClick={() => handlePageChange(number)}
               >
                 {number}
