@@ -250,6 +250,22 @@ const MainContent = ({ searchParams }) => {
     }
   }, [filteredQAList.length, currentPage, itemsPerPage]);
 
+  useEffect(() => {
+    // 컴포넌트 마운트 시 DB에서 Q&A 데이터 불러오기
+    const fetchDBData = async () => {
+      try {
+        const res = await fetch('/api/call_datas');
+        if (!res.ok) throw new Error('DB 데이터 불러오기 실패');
+        const dbData = await res.json();
+        // dbData가 배열 형태라고 가정
+        setQaList(dbData);
+      } catch (err) {
+        console.error('DB 데이터 불러오기 오류:', err);
+      }
+    };
+    fetchDBData();
+  }, []);
+
   return (
     <div className={styles.mainContent}>
       <div className={styles.contentWrapper}>

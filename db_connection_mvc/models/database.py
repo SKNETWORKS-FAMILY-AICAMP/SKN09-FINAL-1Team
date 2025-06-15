@@ -217,3 +217,29 @@ class Database:
             raise
         finally:
             conn.close()
+
+    async def get_all_call_datas(self) -> list:
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                sql = """
+                SELECT
+                    c.call_no,
+                    c.call_path,
+                    c.call_create_dt,
+                    cs.coun_no,
+                    cs.coun_question,
+                    cs.coun_answer,
+                    cs.coun_feedback
+                FROM call_mate c
+                JOIN call_counsel cs ON c.call_no = cs.call_no
+                ORDER BY c.call_no DESC, cs.coun_no ASC
+                """
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                return result
+        except Exception as e:
+            print(f"통화 Q&A 전체 조회 오류: {e}")
+            raise
+        finally:
+            conn.close()

@@ -28,3 +28,10 @@ class CallService:
             )
         except Exception as e:
             return self._format_error(f"통화 데이터 저장 중 오류 발생: {str(e)}")
+
+    async def get_all_call_datas(self):
+        try:
+            result = await self.db.get_all_call_datas()
+            return self._format_success("통화 Q&A 전체 조회 성공", data=result)
+        except Exception as e:
+            return self._format_error(f"통화 Q&A 전체 조회 오류: {str(e)}")

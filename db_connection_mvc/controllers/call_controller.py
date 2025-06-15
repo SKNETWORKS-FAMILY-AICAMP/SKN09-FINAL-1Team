@@ -13,7 +13,7 @@ router = APIRouter()
 call_service = CallService()
 
 # 파일 저장 디렉토리 생성
-UPLOAD_DIR = "../call_data/audios"  # 서버의 실제 경로
+UPLOAD_DIR = "/app/call_data/audios"  # 서버의 실제 경로
 
 
 class CallData(BaseModel):
@@ -69,3 +69,27 @@ async def save_call_info(
     except Exception as e:
         print(f"전체 프로세스 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/call_datas")
+async def get_all_call_datas():
+    result = await call_service.get_all_call_datas()
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["message"])
+    # 프론트에서 원하는 형식으로 변환
+    formatted = [
+        {
+            "id": row.get("coun_no"),
+            "question": row.get("coun_question"),
+            "answer": row.get("coun_answer"),
+            "date": row.get("call_create_dt")[:10] if row.get("call_create_dt") else "",
+            "tags": [],
+            "feedback": row.get("coun_feedback"),
+            "audioFileName": (
+                row.get("call_path").split("/")[-1] if row.get("call_path") else ""
+            ),
+            "audioBlobUrl": None,
+        }
+        for row in result["data"]
+    ]
+    return formatted
