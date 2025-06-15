@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from controllers.employee_controller import router as employee_router
 from controllers.email_controller import email_router
 from controllers.query_controller import query_router
-from controllers.call_controller import call_router
+from controllers.call_controller import router as call_router
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
