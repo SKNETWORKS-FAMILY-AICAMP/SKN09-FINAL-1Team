@@ -18,6 +18,13 @@ class EmployeeService:
             return self._format_success("직원 목록을 성공적으로 조회했습니다.", employees, len(employees))
         except Exception as e:
             return self._format_error(f"직원 목록 조회 오류: {str(e)}")
+        
+    async def get_employees_general(self) -> Dict[str, Any]:
+        try:
+            employees = self.db.get_employees_general_account()
+            return self._format_success("직원 목록을 성공적으로 조회했습니다.", employees, len(employees))
+        except Exception as e:
+            return self._format_error(f"직원 목록 조회 오류: {str(e)}")
 
     async def login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         try:

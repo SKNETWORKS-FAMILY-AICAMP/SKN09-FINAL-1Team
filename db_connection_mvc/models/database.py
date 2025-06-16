@@ -56,9 +56,31 @@ class Database:
         finally:
             conn.close()
 
-    def verify_employee_login(
-        self, emp_code: str, emp_pwd: str
-    ) -> Optional[Dict[str, Any]]:
+    def get_employees_general_account(self) -> List[Dict[str, Any]]:
+        conn = self._get_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT emp_no, emp_name, emp_code, emp_email, emp_role, 
+                           emp_birth_date, emp_create_dt
+                    FROM employee
+                    WHERE emp_role != 0
+                """)
+                employees = cursor.fetchall()
+
+                for employee in employees:
+                    if 'emp_birth_date' in employee and isinstance(employee['emp_birth_date'], date):
+                        employee['emp_birth_date'] = employee['emp_birth_date'].isoformat()
+                    if 'emp_create_dt' in employee and isinstance(employee['emp_create_dt'], (date, datetime)):
+                        employee['emp_create_dt'] = employee['emp_create_dt'].isoformat().split('T')[0]
+                return employees
+        except Exception as e:
+            print(f"데이터베이스 조회 오류: {e}")
+            raise 
+        finally:
+            conn.close()
+
+    def verify_employee_login(self, emp_code: str, emp_pwd: str) -> Optional[Dict[str, Any]]:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:

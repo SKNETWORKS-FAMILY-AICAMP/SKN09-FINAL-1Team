@@ -313,7 +313,7 @@ import axios from 'axios';
 function AdminBase() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-     [showCreateForm, setShowCreateForm] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
     const [searchType, setSearchType] = useState('all');
     const [searchText, setSearchText] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -321,7 +321,7 @@ function AdminBase() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('/api/employees', {
+                const response = await axios.get('/api/employees_general', {
                     withCredentials: true,
                 });
                 if (response.data && response.data.status === "success" && Array.isArray(response.data.data)) {

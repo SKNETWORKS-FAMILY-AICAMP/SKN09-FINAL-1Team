@@ -233,9 +233,16 @@ const ParticipantList = ({
   };
 
   const handleSelectSuggestion = (user) => {
-    setSelectedSuggestion(user); // 선택된 추천 사용자 저장
-    setFilter(`${user.name} (${user.email})`); // 검색 필드를 선택된 사용자 정보로 채우기
-    setSuggestions([]); // 추천 목록 숨기기
+    const alreadyAdded = users.some(u => u.email === user.email);
+    if (alreadyAdded) {
+      alert("이미 추가된 사용자입니다.");
+      return;
+    }
+
+    onUpdateUsers([...users, { ...user, selected: false }]); // 바로 user 추가
+    setFilter('');
+    setSelectedSuggestion(null);
+    setSuggestions([]);
   };
 
   const handleRegister = () => {
@@ -277,7 +284,7 @@ const ParticipantList = ({
           value={inputValue}
           onChange={handleInputChange}
         />
-        <button className="register-btn" onClick={handleRegister}>추가</button>
+        {/* <button className="register-btn" onClick={handleRegister}>추가</button> */}
         {suggestions.length > 0 && (
           <ul className="suggestion-list">
             {suggestions.map((user, idx) => (

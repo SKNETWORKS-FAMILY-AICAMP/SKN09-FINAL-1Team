@@ -5,9 +5,14 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
+from dotenv import load_dotenv
+import os
 
 email_router = APIRouter()
+load_dotenv()
 
+email_id = os.getenv("SYSTEM_EMAIL_ID")
+email_password = os.getenv("SYSTEM_EMAIL_PASSWORD")
 
 @email_router.post("/send-email")
 async def send_proceedings_email_api(
@@ -17,9 +22,9 @@ async def send_proceedings_email_api(
     summary_file: UploadFile = None,
     transcript_file: UploadFile = None
 ):
-    sender = "skn09final01@gmail.com"
-    password = "kztcrzpmrmemmqtd"  # 앱 비밀번호 사용 (2단계 인증 필수)
-
+    sender = email_id
+    password = email_password
+    
     msg = MIMEMultipart()
     msg["From"] = sender
     msg["To"] = ", ".join(recipients)

@@ -57,7 +57,7 @@ const NoteMate = () => {
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("/api/employees");
+        const res = await fetch("/api/employees_general");
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
