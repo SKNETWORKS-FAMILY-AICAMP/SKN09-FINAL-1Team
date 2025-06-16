@@ -233,9 +233,21 @@ const ParticipantList = ({
   };
 
   const handleSelectSuggestion = (user) => {
+    const alreadyAdded = users.some(u => u.email === user.email);
+    if (alreadyAdded) {
+      alert("이미 추가된 사용자입니다.");
+      return;
+    }
+    
     setSelectedSuggestion(user); // 선택된 추천 사용자 저장
-    setFilter(`${user.name} (${user.email})`); // 검색 필드를 선택된 사용자 정보로 채우기
-    setSuggestions([]); // 추천 목록 숨기기
+    onUpdateUsers([...users, { ...selectedSuggestion, selected: false }]);
+    setFilter('');
+    setSelectedSuggestion(null);
+    setSuggestions([]);
+
+    // setSelectedSuggestion(user); // 선택된 추천 사용자 저장
+    // setFilter(`${user.name} (${user.email})`); // 검색 필드를 선택된 사용자 정보로 채우기
+    // setSuggestions([]); // 추천 목록 숨기기
   };
 
   const handleRegister = () => {

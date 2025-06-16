@@ -55,6 +55,10 @@ class PasswordResetRequest(BaseModel):
 async def get_all_employees():
     return await employee_service.get_all_employees()
 
+@router.get("/employees_general")
+async def get_employees_general():
+    return await employee_service.get_employees_general()
+
 @router.post("/login")
 async def login(request: Request, login_data: LoginRequest):
     employee = await employee_service.login(login_data.username, login_data.password)

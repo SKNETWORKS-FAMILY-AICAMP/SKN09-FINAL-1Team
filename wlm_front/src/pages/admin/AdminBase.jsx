@@ -321,7 +321,7 @@ function AdminBase() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('/api/employees', {
+                const response = await axios.get('/api/employees_general', {
                     withCredentials: true,
                 });
                 if (response.data && response.data.status === "success" && Array.isArray(response.data.data)) {
