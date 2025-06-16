@@ -12,7 +12,7 @@ import ollama
 from extraction.file_base_extraction import get_extractor_by_extension
 from extraction.prompt_extraction import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
-from module.module import State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
 
 
 
@@ -108,14 +108,14 @@ async def ask(
             page_texts = [p['text'] for p in pages]
             async with httpx.AsyncClient(timeout=300.0) as client:
                 await client.post(
-                    "http://localhost:8002/api/upload_vectors",
+                    "/vectors/api/upload_vectors",
                     json={"chunks": page_texts, "collection_name": "qdrant_temp"}
                 )
 
 
         async with httpx.AsyncClient(timeout=300.0) as client:
             search_resp = await client.post(
-                "http://localhost:8002/api/search_vectors",
+                "/vectors/api/search_vectors",
                 json={"question": question, "collection_name": "qdrant_temp"}
             )
 
@@ -157,7 +157,7 @@ async def ask(
             if evaluation_criteria is None:
                 async with httpx.AsyncClient(timeout=300.0) as client:
                     criteria_resp = await client.post(
-                        "http://localhost:8002/api/search_vectors",
+                        "/vectors/api/search_vectors",
                         json={"question": "평가 기준", "collection_name": "qdrant_temp"}
                     )
                 criteria_data = criteria_resp.json()
@@ -239,7 +239,7 @@ async def miniask(input: QuestionInput):
     # 벡터 검색
     async with httpx.AsyncClient(timeout=300.0) as client:
         search_resp = await client.post(
-            "http://localhost:8002/api/search_vectors",
+            "/vectors/api/search_vectors",
             json={"question": question, "collection_name": "wlmmate_vectors"}
         )
 
@@ -359,14 +359,20 @@ async def summarize_text(request: TextRequest):
     return {"summary": summary_clean}
 
 @router.post("/upload_audio")
-async def upload_audio(file: UploadFile = File(...)):
-    # 1. 파일 저장
+async def upload_audio(file: UploadFile = File(...)):        
+        # 1. 파일 저장
     save_path = f"./call_data/{file.filename}"
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    # 2. WhisperX + LLM Q&A 추출
+    # 2. WhisperX + LLM Q&A 추출 (리스트 형태로 반환)
     qna_data = await process_audio_and_extract_qna(save_path)
+    
+    # 3. 피드백 모델 호출 및 각 QnA에 피드백 추가
+    feedbacks = feedback_model(qna_data)
+    for i, qna in enumerate(qna_data):
+        qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
+    
     return JSONResponse(content={"qna": qna_data})
 
 @router.post("/ask_query")
@@ -374,7 +380,7 @@ async def ask_query(input: QuestionInput):
     query = input.question
     async with httpx.AsyncClient(timeout=300.0) as client:
         search_resp = await client.post(
-            "http://localhost:8002/api/search_vectors",
+            "/vectors/api/search_vectors",
             json={"question": query, "collection_name": "wlmmate_vectors"}
         )
 
@@ -394,9 +400,69 @@ async def ask_query(input: QuestionInput):
 
     return {"answer": final_answer}
 
-@router.get("/api/chat_list")
+
+@router.post("/generate-unanswered")
+async def generate_unanswered():
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    conn = checkpoint._get_connection()
+    try:
+        with conn.cursor() as cursor:
+            # 1. 답변 텍스트가 아직 없는 질문만 가져옴
+            cursor.execute("""
+                SELECT query_mate.query_no, query_mate.query_text
+                FROM query_mate
+                JOIN query_response ON query_mate.query_no = query_response.query_no
+                WHERE query_response.res_text IS NULL
+            """)
+            unanswered = cursor.fetchall()
+
+        for q in unanswered:
+            try:
+                print(f"🧠 답변 생성 중: query_no={q['query_no']}")
+                
+                # 2. 기존 ask_query 함수 직접 호출
+                input_data = QuestionInput(question=q["query_text"])
+                result = await ask_query(input_data)
+                answer = result.get("answer", "").strip()
+
+                # 3. DB에 답변 저장
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE query_response
+                        SET res_text = %s,
+                            res_write_dt = NOW()
+                        WHERE query_no = %s
+                    """, (answer, q["query_no"]))
+                conn.commit()
+
+            except Exception as e:
+                print(f"❌ query_no={q['query_no']} 처리 실패: {e}")
+
+        return {"success": True, "count": len(unanswered)}
+
+    except Exception as e:
+        print(f"❌ 전체 처리 실패: {e}")
+        return {"success": False}
+    finally:
+        conn.close()
+
+
+
+@router.get("/chat_list")
 async def chat_list(request: Request):
-    employee = request.session.get("employee")
+    async with httpx.AsyncClient(timeout=300.0) as client:
+        response = await client.get(
+            "http://15.164.36.159:8000/api/check-session")
+    
+
+    employee = response.json()
     emp_code = employee["emp_code"]
 
     checkpoint = MySQLCheckpoint(
@@ -409,7 +475,7 @@ async def chat_list(request: Request):
     )
     return checkpoint.get_chat_list(emp_code)
 
-@router.get("/api/chat_log")
+@router.get("/chat_log")
 async def chat_log(chat_no: int):
     checkpoint = MySQLCheckpoint(
         host=DB_HOST,
@@ -421,7 +487,7 @@ async def chat_log(chat_no: int):
     )
     return checkpoint.get_chat_log(chat_no)
 
-@router.delete("/api/delete_chat_room")
+@router.delete("/delete_chat_room")
 async def delete_chat_room(chat_no: int, request: Request):
     employee = request.session.get("employee")
     emp_code = employee["emp_code"]
@@ -455,6 +521,8 @@ async def check_session(request: Request):
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
     return {"employee": request.session["employee"]}
+
+
 
 ### uvicorn main:app --reload
  

@@ -39,6 +39,12 @@ __pycache__/
 */qdrant_data/
 qdrant_data/
 
+# SSL 인증서
+**/etc/keys/
+*/etc/keys/
+etc/keys/
+*.crt
+*.key
 
 package-lock.json*
 package.json*

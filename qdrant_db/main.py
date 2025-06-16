@@ -28,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(qdrant_router)
+app.include_router(qdrant_router, prefix="/vecotors")
 
 
 ### uvicorn main:app --reload

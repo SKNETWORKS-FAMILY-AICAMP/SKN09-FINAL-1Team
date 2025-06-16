@@ -14,9 +14,28 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
     setTempAnswer(data.answer ?? '');
   }, [data.answer]);
 
-  const handleClick = (action) => {
+  const updateAnswerOnServer = async (text, state) => {
+    try {
+      await fetch("/api/save-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query_no: data.id,
+          res_text: text,
+          res_state: state,
+        }),
+      });
+    } catch (err) {
+      console.error("답변 상태 저장 실패:", err);
+      alert("답변 저장 중 오류 발생");
+    }
+  };
+
+
+  const handleClick = async (action) => {
     switch (action) {
       case '등록':
+        await updateAnswerOnServer(answer, 1); // 상태 1 = 승인
         onStatusChange(data.id, '승인');
         setEditing(false);
         break;
@@ -26,6 +45,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
       case '수정완료':
         setAnswer(tempAnswer);
         setEditing(false);
+        await updateAnswerOnServer(tempAnswer, 2); // 상태 2 = 수정완료
         onStatusChange(data.id, '수정완료');
         break;
       case '수정취소':
@@ -36,6 +56,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
         break;
     }
   };
+
 
   // 답변 표시 로직
   const renderAnswer = () => {
