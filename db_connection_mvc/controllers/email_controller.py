@@ -12,7 +12,7 @@ email_router = APIRouter()
 load_dotenv()
 
 email_id = os.getenv("SYSTEM_EMAIL_ID")
-email_password = os.getenv("SYSTEM_EMAIL_PASSWOR")
+email_password = os.getenv("SYSTEM_EMAIL_PASSWORD")
 
 @email_router.post("/send-email")
 async def send_proceedings_email_api(

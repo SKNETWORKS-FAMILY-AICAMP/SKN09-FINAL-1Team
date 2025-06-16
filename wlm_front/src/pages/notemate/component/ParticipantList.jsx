@@ -284,7 +284,7 @@ const ParticipantList = ({
           value={inputValue}
           onChange={handleInputChange}
         />
-        <button className="register-btn" onClick={handleRegister}>추가</button>
+        {/* <button className="register-btn" onClick={handleRegister}>추가</button> */}
         {suggestions.length > 0 && (
           <ul className="suggestion-list">
             {suggestions.map((user, idx) => (

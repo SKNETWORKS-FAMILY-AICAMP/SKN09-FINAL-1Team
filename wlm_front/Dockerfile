@@ -19,9 +19,9 @@ COPY ./etc/keys/self.crt /etc/nginx/ssl/self.crt
 COPY ./etc/keys/self.key /etc/nginx/ssl/self.key
 
 # 환경 변수 설정
-ENV PORT=80
-# ENV PORT=443
-EXPOSE 80
-# EXPOSE 443
+# ENV PORT=80
+ENV PORT=443
+# EXPOSE 80
+EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"] 
