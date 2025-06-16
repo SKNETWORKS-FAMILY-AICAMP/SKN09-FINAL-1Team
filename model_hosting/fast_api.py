@@ -25,10 +25,10 @@ memory_agent.setup_model_with_tools(memory_tools.get_tools())
 prompt_extraction = PromptExtraction()
 
 DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
-DB_PORT = int(os.environ.get("MY_DB_PORT", "3306"))
-DB_USER = os.environ.get("MY_DB_USER", "wlb_mate")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "wlb_mate")  # 실제 비밀번호로 교체
-DB_NAME = os.environ.get("MY_DB_NAME", "wlb_mate")
+DB_PORT = int(os.environ.get("MY_DB_PORT", ""))
+DB_USER = os.environ.get("MY_DB_USER", "")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
+DB_NAME = os.environ.get("MY_DB_NAME", "")
 DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
 
 
@@ -456,12 +456,10 @@ async def generate_unanswered():
 
 @router.get("/chat_list")
 async def chat_list(request: Request):
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        response = await client.get(
-            "http://15.164.36.159:8000/api/check-session")
+    employee = request.session.get("employee")
+    if not employee:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
-
-    employee = response.json()
     emp_code = employee["emp_code"]
 
     checkpoint = MySQLCheckpoint(
