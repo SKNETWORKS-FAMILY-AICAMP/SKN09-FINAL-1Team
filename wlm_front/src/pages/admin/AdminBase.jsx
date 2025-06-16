@@ -313,7 +313,7 @@ import axios from 'axios';
 function AdminBase() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [showCreateForm, setShowCreateForm] = useState(false);
+     [showCreateForm, setShowCreateForm] = useState(false);
     const [searchType, setSearchType] = useState('all');
     const [searchText, setSearchText] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -321,7 +321,7 @@ function AdminBase() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/employees', {
+                const response = await axios.get('/api/employees', {
                     withCredentials: true,
                 });
                 if (response.data && response.data.status === "success" && Array.isArray(response.data.data)) {
@@ -371,7 +371,7 @@ function AdminBase() {
     const handleDeleteUser = async (emp_no) => {
         if (window.confirm('정말로 이 사용자를 삭제하시겠습니까?')) {
             try {
-                await axios.delete(`http://localhost:8000/api/employees/${emp_no}`, {
+                await axios.delete(`/api/employees/${emp_no}`, {
                     withCredentials: true,
                 });
                 setUsers(prev => prev.filter(user => user.emp_no !== emp_no));
@@ -388,7 +388,7 @@ function AdminBase() {
         if (user) {
             if (window.confirm(`${user.emp_name} (${user.emp_code}) 사원의 비밀번호를 "1234"로 초기화하시겠습니까?`)) {
                 try {
-                    await axios.put(`http://localhost:8000/api/employees/${emp_no}/reset-password`, {
+                    await axios.put(`/api/employees/${emp_no}/reset-password`, {
                         newPassword: "1234",
                     }, {
                         withCredentials: true,

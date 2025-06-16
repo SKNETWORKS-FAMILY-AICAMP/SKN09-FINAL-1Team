@@ -1,20 +1,31 @@
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.pagination button {
-  margin: 0 5px;
-  padding: 0.5rem 1rem;
+.pageButton {
+  padding: 8px 12px;       /* MainContent 스타일 기준 */
+  margin: 0 4px;
   border: none;
-  background: #ffffff;
+  background-color: #f0f0f0;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
+  color: black;
+  transition: background-color 0.2s ease;
 }
 
-.pagination button.active {
+.pageButton:hover:not(:disabled) {
   background-color: #000000;
-  font-weight: bold;
   color: white;
+}
+
+.pageButton:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.activePage {
+  background-color: #333;
+  color: white;
+}
+
+.activePage:hover {
+  background-color: #555;
 }

@@ -225,3 +225,158 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 };
 
 export default ChatArea;
+
+
+// chat 수정
+// import React, { useState, useRef, useEffect } from 'react';
+// import styles from '../css/ChatArea.module.css';
+// import ReactMarkdown from 'react-markdown';
+// import { FaFilePdf, FaTimes } from 'react-icons/fa';
+// import upArrowIcon from '../../images/up_arrow.png';
+
+// const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent, onSendMessage, onFileUpload }) => {
+//   const [messages, setMessages] = useState([]);
+//   const [firstView, setFirstView] = useState(true);
+//   const [input, setInput] = useState('');
+//   const [sending, setSending] = useState(false);
+//   const [files, setFiles] = useState([]);
+
+//   const fileInputRef = useRef(null);
+//   const chatContentRef = useRef(null);
+
+//   useEffect(() => {
+//     if (chatContentRef.current) {
+//       chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
+//     }
+//   }, [messages]);
+
+//   const handleSend = async () => {
+//     if (sending || !input.trim()) return;
+
+//     const message = input.trim();
+//     setInput('');
+//     setSending(true);
+
+//     if (firstView) {
+//       console.log('첫 메시지 전환: firstView=false');
+//       setFirstView(false);
+//       if (onFirstMessageSent) onFirstMessageSent();
+//     }
+
+//     // 예: 부모 콜백으로 메시지 API 전송
+//     const aiAnswer = await onSendMessage(message, files);
+
+//     setMessages(prev => [
+//       ...prev,
+//       { text: message, isUser: true },
+//       { text: aiAnswer, isUser: false }
+//     ]);
+
+//     setFiles([]);
+//     if (fileInputRef.current) fileInputRef.current.value = '';
+
+//     setSending(false);
+//   };
+
+//   const handleKeyDown = e => {
+//     if (e.key === 'Enter' && !e.shiftKey) {
+//       e.preventDefault();
+//       handleSend();
+//     }
+//   };
+
+//   const handleFileChange = e => {
+//     const selected = Array.from(e.target.files);
+//     setFiles(prev => [...prev, ...selected]);
+//     if (onFileUpload) onFileUpload(selected);
+//   };
+
+//   const handleRemoveFile = index => {
+//     const newArr = files.filter((_, i) => i !== index);
+//     setFiles(newArr);
+//   };
+
+//   return (
+//     <div className={styles.chatArea}>
+//       {firstView ? (
+//         <div className={styles.firstView}>
+//           <h2 className={styles.welcomeText}>채팅을 입력해주세요</h2>
+//           <div className={styles.firstInputBox}>
+//             <input
+//               type="file"
+//               accept="application/pdf"
+//               multiple
+//               style={{ display: 'none' }}
+//               ref={fileInputRef}
+//               onChange={handleFileChange}
+//             />
+//             <label htmlFor="pdf-upload" className={styles.uploadButton}>+</label>
+//             <input
+//               type="text"
+//               placeholder="메시지를 입력하세요"
+//               className={styles.input}
+//               value={input}
+//               onChange={e => setInput(e.target.value)}
+//               onKeyDown={handleKeyDown}
+//             />
+//             <button className={styles.sendButton} onClick={handleSend} disabled={sending}>
+//               <img src={upArrowIcon} alt="send" className={styles.sendIcon} />
+//             </button>
+//           </div>
+//           {files.length > 0 && (
+//             <div className={styles.selectedFileList}>
+//               {files.map((f, i) => (
+//                 <div key={i} className={styles.fileItem}>
+//                   <FaFilePdf className={styles.fileIcon} />
+//                   <span className={styles.fileName} title={f.name}>{f.name}</span>
+//                   <FaTimes className={styles.removeIcon} onClick={() => handleRemoveFile(i)} />
+//                 </div>
+//               ))}
+//             </div>
+//           )}
+//         </div>
+//       ) : (
+//         <>
+//           <div className={styles.chatContent} ref={chatContentRef}>
+//             {messages.map((msg, idx) => (
+//               <div key={idx} className={`${styles.message} ${msg.isUser ? styles.userMessage : styles.aiMessage}`}>
+//                 {msg.isUser ? msg.text : <ReactMarkdown>{msg.text}</ReactMarkdown>}
+//               </div>
+//             ))}
+//           </div>
+
+//           <div className={styles.inputWrapper}>
+//             <input
+//               type="file"
+//               accept="application/pdf"
+//               multiple
+//               style={{ display: 'none' }}
+//               ref={fileInputRef}
+//               onChange={handleFileChange}
+//             />
+//             <label htmlFor="pdf-upload" className={styles.uploadButton}>+</label>
+//             <input
+//               type="text"
+//               placeholder="메시지를 입력하세요"
+//               className={styles.input}
+//               value={input}
+//               onChange={e => setInput(e.target.value)}
+//               onKeyDown={handleKeyDown}
+//             />
+//             <button className={styles.sendButton} onClick={handleSend} disabled={sending}>
+//               <img src={upArrowIcon} alt="send" className={styles.sendIcon} />
+//             </button>
+//           </div>
+//         </>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ChatArea;
+
+
+
+
+
+

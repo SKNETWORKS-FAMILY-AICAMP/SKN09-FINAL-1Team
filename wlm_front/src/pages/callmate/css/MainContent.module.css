@@ -1,12 +1,12 @@
 .mainContent {
   flex: 1;
   padding: 30px;
-  background-color: #f5f5f5;
+  background-color: #2f2f2f;
   height: 100vh;
 }
 
 .contentWrapper {
-  background-color: white;
+  background-color: #2f2f2f;
   border-radius: 12px;
   padding: 24px;
   height: calc(100vh - 60px);
@@ -17,7 +17,7 @@
 
 .title {
   font-size: 28px;
-  color: #333;
+  color: #fff;
   margin-bottom: 20px;
   flex-shrink: 0;
 }
@@ -62,7 +62,9 @@
 }
 
 .qaItem {
-  background-color: #f8f9fa;
+  /* background-color: #808080; */
+  background-color: #3d3d3d; /* 기존 #808080에서 더 어두운 그레이로 변경 */
+  color: #f0f0f0;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 16px;
@@ -78,13 +80,15 @@
 
 .qaQuestion {
   font-size: 18px;
-  color: #333;
+  font-weight: 600;
+  color: #fff;
   margin: 0;
 }
 
 .qaDate {
-  color: #666;
+  color: #fff;
   font-size: 14px;
+  text-align: right;
 }
 
 .tagList {
@@ -93,12 +97,23 @@
   margin-bottom: 12px;
 }
 
-.tag {
+/* .tag {
   background-color: #e9ecef;
   color: #4a90e2;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
+} */
+
+.tag {
+  display: inline-block;
+  background-color: #777;
+  color: #fff;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+  margin-right: 6px;
+  margin-top: 4px;
 }
 
 .qaAnswer,
@@ -157,28 +172,45 @@
 
 .pageButton {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  background-color: white;
+  margin: 0 4px;
+  border: none;
+  background-color: #f0f0f0;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: black;
   transition: all 0.2s;
 }
 
+.pageButton:hover:not(.activePage) {
+  background-color: #e0e0e0;
+}
+
+.activePage {
+  background-color: #333;
+  color: white;
+}
+
+.inactivePage {
+  background-color: #ccc;
+  color: #666;
+}
+
 .pageButton:hover:not(:disabled) {
-  background-color: #f0f0f0;
+  /* background-color: #000000; */
+  background-color: #ccc;
+  color: #666;
   border-color: #999;
 }
 
 .pageButton:disabled {
-  background-color: #f5f5f5;
-  color: #999;
+  background-color: #ccc;
+  color: #666;
   cursor: not-allowed;
 }
 
 .activePage {
-  background-color: #4a90e2;
+  background-color: #000000;
   color: white;
   border-color: #4a90e2;
 }
@@ -216,7 +248,7 @@
 }
 
 .uploadButton:hover {
-  background-color: #357abd;
+  background-color: ;
   box-shadow: 0px 2px 0px #285a8c;
   transform: translateY(1px) scale(1.03);
 }
@@ -230,7 +262,7 @@
 .fileInfoContainer {
   margin-bottom: 20px;
   padding: 10px;
-  background-color: white;
+  background-color: #3a3a3a;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -248,7 +280,7 @@
 }
 
 .fileInfoRow strong {
-  color: #333;
+  color: #fff;
   min-width: 100px;
 }
 
@@ -302,7 +334,7 @@
   margin-top: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: #3a3a3a;
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
@@ -337,16 +369,18 @@
 
 .additionalInfo {
   display: flex;
+  background-color: #3a3a3a;
   flex-direction: column;
+  border-radius: 8px;
 }
 
 .fileInfoItem p {
   margin: 0;
-  color: #333;
+  color: #fff;
 }
 
 .fileInfoItem strong {
-  color: #333;
+  color: #fff;
   margin-right: 8px;
 }
 
@@ -370,18 +404,18 @@
 
 .feedbackInfo {
   padding: 10px;
-  background-color: white;
+  background-color: #3a3a3a;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .feedbackInfo p {
   margin: 0;
-  color: #666;
+  color: #fff;
 }
 
 .feedbackInfo strong {
-  color: #333;
+  color: #fff !important;
   margin-right: 8px;
 }
 
@@ -389,7 +423,7 @@
   margin-top: 1rem;
   margin-bottom: 20px;
   padding: 1rem;
-  background-color: #f8f9fa;
+  background-color: #3a3a3a;
   border-radius: 8px;
   border: 1px solid #e9ecef;
   cursor: pointer;
@@ -397,7 +431,7 @@
 }
 
 .answerSection:hover {
-  background-color: #f0f0f0;
+  background-color: #808080;
 }
 
 .answerHeader {
@@ -414,12 +448,12 @@
 .answerText {
   margin: 0;
   padding: 0.8rem;
-  background-color: white;
+  background-color: #3a3a3a;
   border-radius: 4px;
   border: 1px solid #e9ecef;
-  color: #495057;
+  color: #e0e0e0;
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -431,4 +465,38 @@
 .expanded .answerText {
   -webkit-line-clamp: unset;
   max-height: none;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.pageButton {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  color: #333;
+}
+
+.pageButton:hover:not(:disabled) {
+  background-color: #ddd;
+}
+
+.pageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.activePage {
+  background-color: #333;
+  color: #fff;
+  font-weight: bold;
+  cursor: default;
 }

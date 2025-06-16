@@ -2,7 +2,7 @@
   width: 320px;
   height: 100vh;
   padding: 30px;
-  background-color: white;
+  background-color: #5C5C5C;
   border-right: 1px solid #cce0f5;
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
@@ -34,12 +34,14 @@
 .searchInput {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #555555;
   border-radius: 6px;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
   margin-bottom: 25px;
+  background-color: #3c3c3c;          /* 약간 밝은 다크 그레이 필드 */
+  color: #ffffff;  
 }
 
 .searchInput:focus {
@@ -67,7 +69,7 @@
 
 .filterSection {
   font-size: 14px;
-  color: #666;
+  color: #cccccc;
   display: block;
   margin-bottom: 12px;
   margin-top: 20px;
@@ -97,6 +99,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: white;
   margin-bottom: 10px;
 }
 
@@ -126,16 +129,18 @@
 .dateLabel {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: #cccccc;
   margin-bottom: 5px;
 }
 
 .dateInput {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #555555;
   border-radius: 6px;
   font-size: 14px;
+  background-color: #3c3c3c;          /* 약간 밝은 다크 그레이 필드 */
+  color: #ffffff;
 }
 
 .dateInput:focus {

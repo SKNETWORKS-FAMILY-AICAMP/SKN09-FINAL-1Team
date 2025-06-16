@@ -292,7 +292,7 @@ const MainContent = ({ searchParams }) => {
     <div className={styles.mainContent}>
       <div className={styles.contentWrapper}>
         <div className={styles.headerSection}>
-          <h2 className={styles.title}>CALL MANAGEMENT LIST</h2>
+          <h2 className={styles.title}>📋 전화 관리 목록</h2>
           <div className={styles.uploadSection}>
             <input
               type="file"
@@ -396,10 +396,13 @@ const MainContent = ({ searchParams }) => {
             >
               이전
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <button
                 key={number}
-                className={`${styles.pageButton} ${currentPage === number ? styles.activePage : ''}`}
+                className={`
+                  ${styles.pageButton} 
+                  ${currentPage === number ? styles.activePage : styles.inactivePage}
+                `}
                 onClick={() => handlePageChange(number)}
               >
                 {number}

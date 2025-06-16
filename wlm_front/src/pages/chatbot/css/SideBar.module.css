@@ -8,19 +8,44 @@
 }
 
 /* ── 토글 버튼 */
-.toggleButton {
+/* .toggleButton {
   position: absolute;
   top: 12px;
   left: 88%;
   z-index: 10;
-  background-color: #f0f0f0;     /* 밝은 무채색 */
+  background-color: #f0f0f0;     
   border: none;
   border-radius: 0 6px 6px 0;
-  padding: 6px 12px;
+  padding: 6px 10px;
   font-size: 1rem;
   cursor: pointer;
+} */
+
+.toggleButton {
+  position: absolute;
+  top: 12px;
+  z-index: 10;
+  background-color: #f0f0f0;
+  border: none;
+  padding: 6px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 999px; /* 둥근 캡슐 모양 */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease;
 }
 
+/* 사이드바 열렸을 때 (사이드바 내부 오른쪽 끝) */
+.left {
+  left: 260px; /* 사이드바 너비(300px) - 버튼 너비(약 40px) 정도로 조절 */
+}
+
+/* 사이드바 닫혔을 때 (사이드바 바깥 왼쪽 가장자리) */
+.right {
+  left: 8px;
+}
+
+ 
 /* ── 사이드바 기본 스타일 */
 .sidebar {
   width: 300px;
@@ -137,3 +162,24 @@
 /* ────────────────────────────────────────────────────────── */
 
 /* FilterPanel 내부 스타일은 별도 파일에 정의해주세요. */
+
+/* 🔍 검색 헤더 (아이콘 + 텍스트 수평 정렬) */
+.searchHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+/* 🔍 검색 아이콘 */
+.searchIcon {
+  color: #ffffff;
+  font-size: 1.5rem;
+}
+
+/* "채팅 검색" 텍스트 */
+.searchTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+}
