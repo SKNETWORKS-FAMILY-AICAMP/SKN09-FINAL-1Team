@@ -59,7 +59,7 @@ const UserDetail = ({ user, onClose, onResetPassword }) => {
                         </tr>
                         <tr>
                             <th>계정 생성일</th>
-                            <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''}</td>
+                            <td>{user.emp_create_dt ? new Date(user.emp_create_dt).toLocaleDateString() : ''}</td>
                         </tr>
                     </tbody>
                 </table>
