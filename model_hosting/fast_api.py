@@ -358,8 +358,8 @@ async def summarize_text(request: TextRequest):
     return {"summary": summary_clean}
 
 @router.post("/upload_audio")
-async def upload_audio(file: UploadFile = File(...)):
-    # 1. 파일 저장
+async def upload_audio(file: UploadFile = File(...)):        
+        # 1. 파일 저장
     save_path = f"./call_data/{file.filename}"
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
