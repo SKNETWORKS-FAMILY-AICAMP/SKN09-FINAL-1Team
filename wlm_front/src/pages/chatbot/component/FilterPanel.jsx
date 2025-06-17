@@ -33,7 +33,7 @@ const FilterPanel = ({
             checked={filterByDate}
             onChange={handleDateToggle}
           />
-          <label>날짜로 필터</label>
+          <label>날짜 검색</label>
         </div>
         <div>
           <input
@@ -41,7 +41,7 @@ const FilterPanel = ({
             checked={filterByKeyword}
             onChange={handleKeywordToggle}
           />
-          <label>키워드로 필터</label>
+          <label>키워드 검색</label>
         </div>
       </div>
       {filterByDate && (

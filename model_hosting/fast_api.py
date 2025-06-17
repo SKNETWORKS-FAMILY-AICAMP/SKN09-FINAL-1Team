@@ -493,6 +493,12 @@ async def delete_chat_room(chat_no: int, request: Request):
         conn.close()
 
 
+@router.delete("/delete_temp_vectors")
+def delete_temp_vector():
+    delete_temp_vectors()
+    print("!! 임시 vector 삭제")
+
+
 @router.get("/check-session")
 async def check_session(request: Request):
     if "employee" not in request.session:

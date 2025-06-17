@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #9d9d9d;           /* 조금 더 밝은 그레이 */
+  background: #9d9d9d;
   flex: 1;
   padding: 1.5rem;
   box-sizing: border-box;
@@ -22,7 +22,7 @@
 }
 
 .inputWrapper {
-  background: #9d9d9d;           /* 약간 밝게 */
+  background: #9d9d9d;
   padding-top: 10px;
   display: flex;
   flex-direction: column;
@@ -40,8 +40,8 @@
 .fileItem {
   display: flex;
   align-items: center;
-  background: #4a4a4a;           /* 밝은 그레이 */
-  border: 1px solid #666666;     /* 경계선도 밝게 */
+  background: #4a4a4a;
+  border: 1px solid #666666;
   border-radius: 20px;
   padding: 6px 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
@@ -51,7 +51,7 @@
 }
 
 .fileIcon {
-  color: #e74c3c;                /* 원본 빨강 유지 */
+  color: #e74c3c;
   font-size: 1rem;
 }
 
@@ -66,11 +66,10 @@
 
 .removeIcon {
   cursor: pointer;
-  color: #aaaaaa;                /* 연하게 */
+  color: #aaaaaa;
   font-size: 1rem;
   transition: color 0.2s ease;
 }
-
 .removeIcon:hover {
   color: #ffffff;
 }
@@ -79,16 +78,12 @@
   display: flex;
   align-items: center;
   border-radius: 999px;
-  background: #4a4a4a;           /* 밝은 그레이 */
+  background: #4a4a4a;
   padding: 0.5rem 1rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   gap: 12px;
   justify-content: space-between;
 }
-
-.inputRow > *:first-child { order: 1; }
-.inputRow > .input       { order: 2; flex: 1; }
-.inputRow > .sendButton  { order: 3; }
 
 .input {
   padding: 12px 16px;
@@ -99,27 +94,25 @@
   background: transparent;
   color: #ffffff;
   transition: box-shadow 0.2s ease, border 0.2s ease;
+  flex: 1;
 }
-
 .input::placeholder {
   color: #aaaaaa;
 }
-
 .input:focus {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
   border: 1px solid #ffffff;
 }
 
 .uploadButton {
-  font-size: 1.1rem;
-  color: #cccccc;                /* 밝게 */
+  font-size: 0.9rem;
+  color: #cccccc;
   cursor: pointer;
   background: none;
   border: none;
   transition: color 0.3s;
-  filter:brightness(0)invert(1)
+  filter: brightness(0) invert(1);
 }
-
 .uploadButton:hover {
   color: #ffffff;
 }
@@ -127,7 +120,7 @@
 .sendButton {
   width: 44px;
   height: 44px;
-  background-color: #f2f2f2;     /* 밝은 버튼 */
+  background-color: #f2f2f2;
   border: none;
   border-radius: 50%;
   display: flex;
@@ -137,23 +130,18 @@
   font-size: 1.2rem;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  transition: background-color 0.3s ease,
-              transform 0.2s ease,
-              box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
-
 .sendButton:hover {
   background-color: #f9f9f9;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
-
 .sendButton:active {
   transform: translateY(0);
   background-color: #555555;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
-
 .sendButton:disabled {
   background-color: #444444;
   cursor: not-allowed;
@@ -176,14 +164,12 @@
   word-break: break-word;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
 }
-
 .userMessage {
   align-self: flex-end;
   background-color: #3c3c3c;
   color: white;
   border-bottom-right-radius: 4px;
 }
-
 .aiMessage {
   align-self: flex-start;
   background-color: #2c2c2c;
@@ -191,4 +177,29 @@
   border-bottom-left-radius: 4px;
 }
 
+.firstView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 20vh;
+  height: 100%;
+}
 
+.welcomeText {
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.firstInputBox {
+  display: flex;
+  align-items: center;
+  background: #4a4a4a;
+  padding: 2rem 2.5rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+}
