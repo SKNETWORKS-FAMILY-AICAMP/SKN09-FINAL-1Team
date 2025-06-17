@@ -429,6 +429,7 @@ async def ask_query(input: QuestionInput):
     print(f"생성된 답변: {final_answer[:100]}...")
     return {"answer": final_answer}
 
+
 @router.post("/generate-unanswered")
 async def generate_unanswered():
     checkpoint = MySQLCheckpoint(
@@ -455,14 +456,16 @@ async def generate_unanswered():
                 input_data = QuestionInput(question=q["query_text"])
                 result = await ask_query(input_data)
                 answer = result.get("answer", "").strip()
+                default_emp_no = 1
 
                 with conn.cursor(DictCursor) as cursor:
                     cursor.execute("""
-                        UPDATE query_response
-                        SET res_text = %s,
+                        INSERT INTO query_response (query_no, emp_no, res_text, res_state, res_write_dt)
+                        VALUES (%s, %s, %s, %s, NOW())
+                        ON DUPLICATE KEY UPDATE
+                            res_text = VALUES(res_text),
                             res_write_dt = NOW()
-                        WHERE query_no = %s
-                    """, (answer, q["query_no"]))
+                    """, (q["query_no"], default_emp_no, answer, 1))
                 conn.commit()
 
             except Exception as e:
@@ -476,7 +479,6 @@ async def generate_unanswered():
         return {"success": False}
     finally:
         conn.close()
-
 
 @router.get("/chat_log")
 async def chat_log(chat_no: int):

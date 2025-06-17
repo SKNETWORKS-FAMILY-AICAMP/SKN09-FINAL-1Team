@@ -57,6 +57,7 @@
 #         return {"success": False}
 #     finally:
 #         conn.close()
+
 from fastapi import APIRouter
 from models.database import Database # Database 클래스 경로를 실제 프로젝트에 맞게 확인해주세요.
 from pydantic import BaseModel
@@ -86,7 +87,7 @@ def get_query_list():
                 ORDER BY query_mate.query_create_dt DESC
             """)
             results = cursor.fetchall()
-            print("DEBUG: 쿼리 결과 (get_query_list):", results[:3])
+            # print("DEBUG: 쿼리 결과 (get_query_list):", results[:3])
         return results
     except Exception as e:
         print(f"ERROR: 민원 조회 실패: {e}")
