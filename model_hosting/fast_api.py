@@ -5,10 +5,10 @@ from typing import List
 from dotenv import load_dotenv
 import tempfile
 import os
-import httpx
 import torch
 import whisperx
 import ollama
+from ..qdrant_db.qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
 from extraction.file_base_extraction import get_extractor_by_extension
 from extraction.prompt_extraction import PromptExtraction
 from ollama_load.ollama_hosting import OllamaHosting
@@ -106,19 +106,10 @@ async def ask(
             filenames.append(file.filename)
 
             page_texts = [p['text'] for p in pages]
-            async with httpx.AsyncClient(timeout=300.0) as client:
-                await client.post(
-                    f"{qdrant_url}/vectors/api/upload_vectors",
-                    json={"chunks": page_texts, "collection_name": "qdrant_temp"}
-                )
+            store_temp_embedding(page_texts, "qdrant_temp")
 
 
-        async with httpx.AsyncClient(timeout=300.0) as client:
-            search_resp = await client.post(
-                f"{qdrant_url}/vectors/api/search_vectors",
-                json={"question": question, "collection_name": "qdrant_temp"}
-            )
-
+        search_resp = load_qdrant_db(question, "qdrant_temp")
         search_data = search_resp.json()
         context_texts = search_data.get("result", "")
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
@@ -155,11 +146,7 @@ async def ask(
         for filename, text in document_texts:
             # 한 번만 추출
             if evaluation_criteria is None:
-                async with httpx.AsyncClient(timeout=300.0) as client:
-                    criteria_resp = await client.post(
-                        f"{qdrant_url}/vectors/api/search_vectors",
-                        json={"question": "평가 기준", "collection_name": "qdrant_temp"}
-                    )
+                criteria_resp = load_qdrant_db("평가 기준", "qdrant_temp")
                 criteria_data = criteria_resp.json()
                 criteria_list = criteria_data.get("result", "")
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
@@ -237,11 +224,7 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        search_resp = await client.post(
-            f"{qdrant_url}/vectors/api/search_vectors",
-            json={"question": question, "collection_name": "wlmmate_vectors"}
-        )
+    search_resp = load_qdrant_db(question, "wlmmate_vectors")
 
     raw_results = search_resp.json().get("result", [])
     if isinstance(raw_results, str):
@@ -378,11 +361,7 @@ async def upload_audio(file: UploadFile = File(...)):
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
     query = input.question
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        search_resp = await client.post(
-            f"{qdrant_url}/vectors/api/search_vectors",
-            json={"question": query, "collection_name": "wlmmate_vectors"}
-        )
+    search_resp = load_qdrant_db(query, "wlmmate_vectors")
 
     raw_results = search_resp.json().get("result", [])
     if isinstance(raw_results, str):
