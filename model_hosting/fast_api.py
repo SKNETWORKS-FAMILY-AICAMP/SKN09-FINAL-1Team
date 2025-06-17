@@ -362,23 +362,10 @@ async def upload_audio(file: UploadFile = File(...)):
     return JSONResponse(content={"qna": qna_data})
 
 COLLECTIONS = [
-    # "wlmmate_business",
     "wlmmate_civil",
     "wlmmate_directive",
-    "wlmmate_law",
-    # "wlmmate_all"  # 기본 컬렉션
+    "wlmmate_law"
 ]
-
-def search_all_collections(question: str) -> list[str]:
-    all_contexts = []
-    for collection in COLLECTIONS:
-        try:
-            results = search_vectors(SearchRequest(question=question, collection_name=collection))
-            contexts = [r for r in results if isinstance(r, str) and r.strip()]
-            all_contexts.extend(contexts)
-        except Exception as e:
-            print(f" {collection} 검색 실패: {e}")
-    return all_contexts
 
 async def classify_collection_with_llm(question: str) -> str:
     prompt = f"""
@@ -390,64 +377,58 @@ async def classify_collection_with_llm(question: str) -> str:
     질문: {question}
     답변 형식: "컬렉션명"
     """
-    # 동기 함수인 get_model_response()를 비동기 처리
-    result = await run_in_threadpool(
-        lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
-    )
-    if result not in COLLECTIONS[:-1]:
-        return "wlmmate_all"
-    return result
+    try:
+        result = await run_in_threadpool(
+            lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
+        )
+        if result not in COLLECTIONS:
+            return "wlmmate_civil"
+        return result
+    except Exception as e:
+        print(f"분류 실패: {e}, 기본값 civil 사용")
+        return "wlmmate_civil"
 
-# def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
-#     try:
-#         results = search_vectors(SearchRequest(question=question, collection_name=collection))
-#         return [r for r in results if isinstance(r, str) and r.strip()]
-#     except Exception as e:
-#         print(f" {collection} 검색 실패: {e}")
-#         return []
 def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
     try:
-        # limit=1로 가장 유사한 1개만 검색
-        results = search_vectors(SearchRequest(question=question, collection_name=collection, limit=1))
-        # 결과가 리스트 형태일 경우 첫 결과만 반환
+        results = search_vectors(SearchRequest(question=question, collection_name=collection))
         if results and len(results) > 0:
             first_result = results[0]
             if isinstance(first_result, str):
                 return [first_result]
             elif isinstance(first_result, (list, tuple)) and len(first_result) > 0:
-                # 예: (text, score) 튜플일 경우 텍스트만 반환
                 return [first_result[0]]
         return []
     except Exception as e:
-        print(f" {collection} 검색 실패: {e}")
+        print(f"검색 실패 ({collection}): {e}")
         return []
-
 
 async def search_appropriate_collection(question: str) -> list[str]:
     collection = await classify_collection_with_llm(question)
-    if collection == "wlmmate_all":
-        return search_all_collections(question)
-    else:
-        # search_vectors는 동기 함수라면 run_in_threadpool로 감싸도 됨
-        return await run_in_threadpool(lambda: search_appropriate_collection_sync(question, collection))
+    print(f"분류된 컬렉션: {collection}")
+    return await run_in_threadpool(lambda: search_appropriate_collection_sync(question, collection))
 
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
     question = input.question.strip()
+    print(f"질문 처리: {question}")
 
     contexts = await search_appropriate_collection(question)
     context_text = "\n\n".join(contexts)
+    print(f"컨텍스트 길이: {len(context_text)}")
 
     if not context_text or len(context_text) < 30:
         prompt = prompt_extraction.make_fallback_prompt(question)
+        print("fallback 프롬프트 사용")
     else:
         prompt = prompt_extraction.make_contextual_prompt(question, context_text)
+        print("컨텍스트 기반 프롬프트 사용")
 
     final_answer = await run_in_threadpool(
         lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
     )
-
+    print(f"생성된 답변: {final_answer[:100]}...")
     return {"answer": final_answer}
+
 @router.post("/generate-unanswered")
 async def generate_unanswered():
     checkpoint = MySQLCheckpoint(
@@ -471,8 +452,6 @@ async def generate_unanswered():
 
         for q in unanswered:
             try:
-                print(f" 답변 생성 중: query_no={q['query_no']}")
-
                 input_data = QuestionInput(question=q["query_text"])
                 result = await ask_query(input_data)
                 answer = result.get("answer", "").strip()
@@ -487,35 +466,17 @@ async def generate_unanswered():
                 conn.commit()
 
             except Exception as e:
-                print(f" query_no={q['query_no']} 처리 실패: {e}")
+                print(f"query_no={q['query_no']} 처리 실패: {e}")
                 continue
 
         return {"success": True, "count": len(unanswered)}
 
     except Exception as e:
-        print(f" 전체 처리 실패: {e}")
+        print(f"전체 처리 실패: {e}")
         return {"success": False}
     finally:
         conn.close()
 
-
-@router.get("/chat_list")
-async def chat_list(request: Request):
-    employee = request.session.get("employee")
-    if not employee:
-        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
-    
-    emp_code = employee["emp_code"]
-
-    checkpoint = MySQLCheckpoint(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        db=DB_NAME,
-        charset=DB_CHARSET
-    )
-    return checkpoint.get_chat_list(emp_code)
 
 @router.get("/chat_log")
 async def chat_log(chat_no: int):
