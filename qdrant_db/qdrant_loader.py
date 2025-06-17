@@ -93,6 +93,66 @@ def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_
         )
         file_idx += 1
 
+def init_qdrant_combined_collection(
+    base_folder="../data/preprocess",
+    civil_data_path="../data/civil_data.json",
+    collection_name="wlmmate_all"
+):
+    # 컬렉션 초기화
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    file_idx = 0
+
+    # 폴더 데이터 통합 삽입
+    for folder in os.listdir(base_folder):
+        folder_path = os.path.join(base_folder, folder)
+        if not os.path.isdir(folder_path):
+            continue
+        for filename in os.listdir(folder_path):
+            if not filename.endswith(".json"):
+                continue
+            with open(os.path.join(folder_path, filename), 'r', encoding='utf-8') as file:
+                documents = json.load(file)
+            for doc in documents:
+                if not isinstance(doc, dict):
+                    continue
+                embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
+                embedding = get_embedding(embedding_input)
+                payload = {
+                    "content": embedding_input,
+                    "source": f"{folder}/{filename}"
+                }
+                client.upsert(
+                    collection_name=collection_name,
+                    points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                )
+                file_idx += 1
+
+    # 민원 데이터 통합 삽입
+    if os.path.exists(civil_data_path):
+        with open(civil_data_path, 'r', encoding='utf-8') as file:
+            documents = json.load(file)
+        for doc in documents:
+            if not isinstance(doc, dict):
+                continue
+            embedding_input = clean_doc(doc)
+            embedding = get_embedding(embedding_input)
+            payload = {
+                "content": embedding_input,
+                "source": "민원/civil_data.json"
+            }
+            client.upsert(
+                collection_name=collection_name,
+                points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+            )
+            file_idx += 1
+
+
+
 def load_qdrant_db(question, collection_name="wlmmate_law"):
     query_vector = get_embedding(question)
     search_results = client.search(
