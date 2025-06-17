@@ -362,11 +362,11 @@ async def upload_audio(file: UploadFile = File(...)):
     return JSONResponse(content={"qna": qna_data})
 
 COLLECTIONS = [
-    "wlmmate_business",
+    # "wlmmate_business",
     "wlmmate_civil",
     "wlmmate_directive",
     "wlmmate_law",
-    "wlmmate_all"  # 기본 컬렉션
+    # "wlmmate_all"  # 기본 컬렉션
 ]
 
 def search_all_collections(question: str) -> list[str]:
