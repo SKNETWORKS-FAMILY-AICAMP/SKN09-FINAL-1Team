@@ -109,9 +109,7 @@ async def ask(
             store_temp_embedding(page_texts, "qdrant_temp")
 
 
-        search_resp = load_qdrant_db(question, "qdrant_temp")
-        search_data = search_resp.json()
-        context_texts = search_data.get("result", "")
+        context_texts = load_qdrant_db(question, "qdrant_temp")
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
 
 
@@ -146,9 +144,7 @@ async def ask(
         for filename, text in document_texts:
             # 한 번만 추출
             if evaluation_criteria is None:
-                criteria_resp = load_qdrant_db("평가 기준", "qdrant_temp")
-                criteria_data = criteria_resp.json()
-                criteria_list = criteria_data.get("result", "")
+                criteria_list = load_qdrant_db("평가 기준", "qdrant_temp")
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
             agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
@@ -224,11 +220,11 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    search_resp = load_qdrant_db(question, "wlmmate_vectors")
+    raw_results = load_qdrant_db(question, "wlmmate_vectors")
 
-    raw_results = search_resp.json().get("result", [])
-    if isinstance(raw_results, str):
-        raw_results = [raw_results]
+    # raw_results = search_resp.json().get("result", [])
+    # if isinstance(raw_results, str):
+    #     raw_results = [raw_results]
 
     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
 
@@ -361,11 +357,11 @@ async def upload_audio(file: UploadFile = File(...)):
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
     query = input.question
-    search_resp = load_qdrant_db(query, "wlmmate_vectors")
+    raw_results = load_qdrant_db(query, "wlmmate_vectors")
 
-    raw_results = search_resp.json().get("result", [])
-    if isinstance(raw_results, str):
-        raw_results = [raw_results]
+    # raw_results = search_resp.json().get("result", [])
+    # if isinstance(raw_results, str):
+    #     raw_results = [raw_results]
 
     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
 
