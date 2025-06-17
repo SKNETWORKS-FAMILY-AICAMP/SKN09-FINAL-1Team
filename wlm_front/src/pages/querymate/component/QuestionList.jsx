@@ -214,7 +214,7 @@ const QuestionList = ({ searchParams }) => {
       }
 
       const data = await res.json();
-      console.log("서버 응답 데이터:", data);
+      // console.log("서버 응답 데이터:", data);
 
       if (!Array.isArray(data)) {
         throw new Error("응답 데이터가 배열이 아님");
