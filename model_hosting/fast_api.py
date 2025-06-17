@@ -358,27 +358,68 @@ async def upload_audio(file: UploadFile = File(...)):
     
     return JSONResponse(content={"qna": qna_data})
 
-@router.post("/ask_query")
-async def ask_query(input: QuestionInput):
-    query = input.question
-    raw_results = search_vectors(SearchRequest(question=query, collection_name="wlmmate_vectors"))
-    print(raw_results)
+# @router.post("/ask_query")
+# async def ask_query(input: QuestionInput):
+#     query = input.question
+#     raw_results = search_vectors(SearchRequest(question=query, collection_name="wlmmate_vectors"))
+#     print(raw_results)
 
-    # raw_results = search_resp.json().get("result", [])
-    # if isinstance(raw_results, str):
-    #     raw_results = [raw_results]
+#     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
 
-    context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
+#     if not context_text or len(context_text) < 30:
+#         prompt = prompt_extraction.make_fallback_prompt(query)
+#     else:
+#         prompt = prompt_extraction.make_contextual_prompt(query, context_text)
 
-    if not context_text or len(context_text) < 30:
-        prompt = prompt_extraction.make_fallback_prompt(query)
-    else:
-        prompt = prompt_extraction.make_contextual_prompt(query, context_text)
+#     ollama = OllamaHosting(model="qwen2.5", prompt=prompt)
+#     final_answer = ollama.get_model_response().strip()
 
+#     return {"answer": final_answer}
+# 컬렉션 분류 에이전트
+COLLECTIONS = [
+    "wlmmate_business",
+    "wlmmate_civil",
+    "wlmmate_directive",
+    "wlmmate_law",
+    "wlmmate_all"  # 기본 컬렉션
+]
+
+def search_all_collections(question: str) -> list[str]:
+    all_contexts = []
+    for collection in COLLECTIONS:
+        try:
+            results = search_vectors(SearchRequest(question=question, collection_name=collection))
+            contexts = [r for r in results if isinstance(r, str) and r.strip()]
+            all_contexts.extend(contexts)
+        except Exception as e:
+            print(f"⚠️ {collection} 검색 실패: {e}")
+    return all_contexts
+
+def classify_collection_with_llm(question: str) -> str:
+    prompt = f"""
+    다음 질문은 어떤 주제에 가장 적합한가요?
+    - 상업, 사업, 경제, 기업 (wlmmate_business)
+    - 민사, 개인, 생활, 민원 (wlmmate_civil)
+    - 지시, 규정, 정책, 행정 (wlmmate_directive)
+    - 법률, 법령, 규정, 판례 (wlmmate_law)
+
+    질문: {question}
+    답변 형식: "컬렉션명"
+    """
     ollama = OllamaHosting(model="qwen2.5", prompt=prompt)
-    final_answer = ollama.get_model_response().strip()
+    result = ollama.get_model_response().strip()
+    # 적합한 컬렉션이 없으면 wlmmate_all 반환
+    if result not in COLLECTIONS[:-1]:  # 마지막은 wlmmate_all
+        return "wlmmate_all"
+    return result
 
-    return {"answer": final_answer}
+def search_appropriate_collection(question: str) -> list[str]:
+    collection = classify_collection_with_llm(question)
+    if collection == "wlmmate_all":
+        return search_all_collections(question)
+    else:
+        results = search_vectors(SearchRequest(question=question, collection_name=collection))
+        return [r for r in results if isinstance(r, str) and r.strip()]
 
 
 @router.post("/generate-unanswered")
