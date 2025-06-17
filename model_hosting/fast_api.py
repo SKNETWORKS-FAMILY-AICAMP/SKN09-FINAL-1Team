@@ -431,7 +431,6 @@ async def ask_query(input: QuestionInput):
     )
 
     return {"answer": final_answer}
-
 @router.post("/generate-unanswered")
 async def generate_unanswered():
     checkpoint = MySQLCheckpoint(
@@ -448,7 +447,7 @@ async def generate_unanswered():
             cursor.execute("""
                 SELECT query_mate.query_no, query_mate.query_text
                 FROM query_mate
-                JOIN query_response ON query_mate.query_no = query_response.query_no
+                LEFT JOIN query_response ON query_mate.query_no = query_response.query_no
                 WHERE query_response.res_text IS NULL OR query_response.res_text = '' OR query_response.res_text = 'null'
             """)
             unanswered = cursor.fetchall()
@@ -472,6 +471,7 @@ async def generate_unanswered():
 
             except Exception as e:
                 print(f" query_no={q['query_no']} 처리 실패: {e}")
+                continue
 
         return {"success": True, "count": len(unanswered)}
 

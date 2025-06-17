@@ -48,7 +48,7 @@ def save_answer(input: SaveAnswerInput):
                 SET res_text = %s,
                     res_state = %s,
                     res_write_dt = NOW()
-                    query_no = %s
+                WHERE query_no = %s
             """, (input.res_text, input.res_state, input.query_no))
         conn.commit()
         return {"success": True}
