@@ -444,7 +444,7 @@ async def generate_unanswered():
     )
     conn = checkpoint._get_connection()
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(DictCursor) as cursor:
             cursor.execute("""
                 SELECT query_mate.query_no, query_mate.query_text
                 FROM query_mate
