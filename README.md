@@ -65,6 +65,7 @@
 ![meet (2)](https://github.com/user-attachments/assets/0a8749f4-5d68-451c-ba8a-c2497d205d82)
 ![rese (2)](https://github.com/user-attachments/assets/73ac1393-a5ee-4cb9-9f6c-dc984359fa80)
 ![call (2)](https://github.com/user-attachments/assets/45412638-3be4-4731-a2c5-759d6f3e40c5)
+![chat](https://github.com/user-attachments/assets/e4add64f-4732-4483-a141-4d7f389161f3)
 
 --- 
 # 수집한 데이터 및 전처리 요약
