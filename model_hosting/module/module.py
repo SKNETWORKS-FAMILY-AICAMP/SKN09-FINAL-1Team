@@ -9,13 +9,13 @@ from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
-from ollama_load.ollama_hosting import OllamaHosting
+from model_hosting.ollama_load.ollama_hosting import OllamaHosting
 from duckduckgo_search import DDGS
 from pydub import AudioSegment
 from datetime import datetime
 from types import SimpleNamespace
 from pydantic import BaseModel
-from extraction.prompt_extraction import PromptExtraction
+from model_hosting.extraction.prompt_extraction import PromptExtraction
 import whisperx
 import json
 import uuid
