@@ -8,7 +8,7 @@ import os
 import torch
 import whisperx
 import ollama
-from qdrant_db.qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
+from qdrant_db.qdrant_router import upload_vectors, search_vectors, delete_temp_vectors, SearchRequest, UploadRequest
 from model_hosting.extraction.file_base_extraction import get_extractor_by_extension
 from model_hosting.extraction.prompt_extraction import PromptExtraction
 from model_hosting.ollama_load.ollama_hosting import OllamaHosting
@@ -89,6 +89,7 @@ async def ask(
         document_texts = []
         filenames = []
 
+        print("!! 파일 입력됨")
         for file in files[:5]:  # 최대 5개 처리
             suffix = os.path.splitext(file.filename)[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -101,15 +102,17 @@ async def ask(
             pages = extractor.extract_text()
             os.remove(tmp_path)
 
+            print("!! 텍스트 추출 완료")
             text = "\n\n".join([p['text'] for p in pages])
             document_texts.append((file.filename, text))
             filenames.append(file.filename)
 
             page_texts = [p['text'] for p in pages]
-            store_temp_embedding(page_texts, "qdrant_temp")
+
+            upload_vectors(UploadRequest(chunks=page_texts, collection_name="qdrant_temp"))
 
 
-        context_texts = load_qdrant_db(question, "qdrant_temp")
+        context_texts = search_vectors(SearchRequest(question=question, collection_name="qdrant_temp"))
         print(context_texts)
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
         print(context)
@@ -145,7 +148,7 @@ async def ask(
         for filename, text in document_texts:
             # 한 번만 추출
             if evaluation_criteria is None:
-                criteria_list = load_qdrant_db("평가 기준", "qdrant_temp")
+                criteria_list = search_vectors(SearchRequest(question="평가 기준", collection_name="qdrant_temp"))
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
             agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
@@ -221,7 +224,7 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    raw_results = load_qdrant_db(question, "wlmmate_vectors")
+    raw_results = search_vectors(SearchRequest(question=question, collection_name="wlmmate_vectors"))
 
     # raw_results = search_resp.json().get("result", [])
     # if isinstance(raw_results, str):
@@ -358,7 +361,7 @@ async def upload_audio(file: UploadFile = File(...)):
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
     query = input.question
-    raw_results = load_qdrant_db(query, "wlmmate_vectors")
+    raw_results = search_vectors(SearchRequest(question=query, collection_name="wlmmate_vectors"))
     print(raw_results)
 
     # raw_results = search_resp.json().get("result", [])
