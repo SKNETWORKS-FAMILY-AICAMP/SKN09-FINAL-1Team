@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from fast_api import router, generate_unanswered
+from model_hosting.fast_api import router, generate_unanswered
 from dotenv import load_dotenv
 import os
 from contextlib import asynccontextmanager
