@@ -1,5 +1,5 @@
-from extraction.pdf_extraction import PDFExtraction
-from extraction.hwp_extraction import HWPExtraction
+from model_hosting.extraction.pdf_extraction import PDFExtraction
+from model_hosting.extraction.hwp_extraction import HWPExtraction
 
 class BaseExtractor:
     def extract_text(self):
