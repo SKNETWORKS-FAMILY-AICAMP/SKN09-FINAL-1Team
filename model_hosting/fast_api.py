@@ -15,6 +15,7 @@ from model_hosting.ollama_load.ollama_hosting import OllamaHosting
 from model_hosting.module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
 from pydantic import BaseModel
 from fastapi.concurrency import run_in_threadpool
+from pymysql.cursors import DictCursor
 
 
 
@@ -460,7 +461,7 @@ async def generate_unanswered():
                 result = await ask_query(input_data)
                 answer = result.get("answer", "").strip()
 
-                with conn.cursor() as cursor:
+                with conn.cursor(DictCursor) as cursor:
                     cursor.execute("""
                         UPDATE query_response
                         SET res_text = %s,
