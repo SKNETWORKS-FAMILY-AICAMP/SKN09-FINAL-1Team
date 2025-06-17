@@ -10,7 +10,7 @@ db = Database()
 def get_query_list():
     conn = db._get_connection()
     try:
-        with conn.cursor(DictCursor) as cursor:  # ✅ 여기에 DictCursor 지정
+        with conn.cursor(DictCursor) as cursor:  
             cursor.execute("""
                 SELECT 
                     query_mate.query_no,
@@ -48,7 +48,7 @@ def save_answer(input: SaveAnswerInput):
                 SET res_text = %s,
                     res_state = %s,
                     res_write_dt = NOW()
-                WHERE query_no = %s
+                    query_no = %s
             """, (input.res_text, input.res_state, input.query_no))
         conn.commit()
         return {"success": True}

@@ -13,6 +13,8 @@ from model_hosting.extraction.file_base_extraction import get_extractor_by_exten
 from model_hosting.extraction.prompt_extraction import PromptExtraction
 from model_hosting.ollama_load.ollama_hosting import OllamaHosting
 from model_hosting.module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from pydantic import BaseModel
+from fastapi.concurrency import run_in_threadpool
 
 
 
@@ -358,24 +360,6 @@ async def upload_audio(file: UploadFile = File(...)):
     
     return JSONResponse(content={"qna": qna_data})
 
-# @router.post("/ask_query")
-# async def ask_query(input: QuestionInput):
-#     query = input.question
-#     raw_results = search_vectors(SearchRequest(question=query, collection_name="wlmmate_vectors"))
-#     print(raw_results)
-
-#     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
-
-#     if not context_text or len(context_text) < 30:
-#         prompt = prompt_extraction.make_fallback_prompt(query)
-#     else:
-#         prompt = prompt_extraction.make_contextual_prompt(query, context_text)
-
-#     ollama = OllamaHosting(model="qwen2.5", prompt=prompt)
-#     final_answer = ollama.get_model_response().strip()
-
-#     return {"answer": final_answer}
-# 컬렉션 분류 에이전트
 COLLECTIONS = [
     "wlmmate_business",
     "wlmmate_civil",
@@ -392,10 +376,10 @@ def search_all_collections(question: str) -> list[str]:
             contexts = [r for r in results if isinstance(r, str) and r.strip()]
             all_contexts.extend(contexts)
         except Exception as e:
-            print(f"⚠️ {collection} 검색 실패: {e}")
+            print(f" {collection} 검색 실패: {e}")
     return all_contexts
 
-def classify_collection_with_llm(question: str) -> str:
+async def classify_collection_with_llm(question: str) -> str:
     prompt = f"""
     다음 질문은 어떤 주제에 가장 적합한가요?
     - 상업, 사업, 경제, 기업 (wlmmate_business)
@@ -406,21 +390,47 @@ def classify_collection_with_llm(question: str) -> str:
     질문: {question}
     답변 형식: "컬렉션명"
     """
-    ollama = OllamaHosting(model="qwen2.5", prompt=prompt)
-    result = ollama.get_model_response().strip()
-    # 적합한 컬렉션이 없으면 wlmmate_all 반환
-    if result not in COLLECTIONS[:-1]:  # 마지막은 wlmmate_all
+    # 동기 함수인 get_model_response()를 비동기 처리
+    result = await run_in_threadpool(
+        lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
+    )
+    if result not in COLLECTIONS[:-1]:
         return "wlmmate_all"
     return result
 
-def search_appropriate_collection(question: str) -> list[str]:
-    collection = classify_collection_with_llm(question)
+def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
+    try:
+        results = search_vectors(SearchRequest(question=question, collection_name=collection))
+        return [r for r in results if isinstance(r, str) and r.strip()]
+    except Exception as e:
+        print(f" {collection} 검색 실패: {e}")
+        return []
+
+async def search_appropriate_collection(question: str) -> list[str]:
+    collection = await classify_collection_with_llm(question)
     if collection == "wlmmate_all":
         return search_all_collections(question)
     else:
-        results = search_vectors(SearchRequest(question=question, collection_name=collection))
-        return [r for r in results if isinstance(r, str) and r.strip()]
+        # search_vectors는 동기 함수라면 run_in_threadpool로 감싸도 됨
+        return await run_in_threadpool(lambda: search_appropriate_collection_sync(question, collection))
 
+@router.post("/ask_query")
+async def ask_query(input: QuestionInput):
+    question = input.question.strip()
+
+    contexts = await search_appropriate_collection(question)
+    context_text = "\n\n".join(contexts)
+
+    if not context_text or len(context_text) < 30:
+        prompt = prompt_extraction.make_fallback_prompt(question)
+    else:
+        prompt = prompt_extraction.make_contextual_prompt(question, context_text)
+
+    final_answer = await run_in_threadpool(
+        lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
+    )
+
+    return {"answer": final_answer}
 
 @router.post("/generate-unanswered")
 async def generate_unanswered():
@@ -435,25 +445,22 @@ async def generate_unanswered():
     conn = checkpoint._get_connection()
     try:
         with conn.cursor() as cursor:
-            # 1. 답변 텍스트가 아직 없는 질문만 가져옴
             cursor.execute("""
                 SELECT query_mate.query_no, query_mate.query_text
                 FROM query_mate
                 JOIN query_response ON query_mate.query_no = query_response.query_no
-                WHERE query_response.res_text IS NULL
+                WHERE query_response.res_text IS NULL OR query_response.res_text = '' OR query_response.res_text = 'null'
             """)
             unanswered = cursor.fetchall()
 
         for q in unanswered:
             try:
-                print(f"🧠 답변 생성 중: query_no={q['query_no']}")
-                
-                # 2. 기존 ask_query 함수 직접 호출
+                print(f" 답변 생성 중: query_no={q['query_no']}")
+
                 input_data = QuestionInput(question=q["query_text"])
                 result = await ask_query(input_data)
                 answer = result.get("answer", "").strip()
 
-                # 3. DB에 답변 저장
                 with conn.cursor() as cursor:
                     cursor.execute("""
                         UPDATE query_response
@@ -464,16 +471,15 @@ async def generate_unanswered():
                 conn.commit()
 
             except Exception as e:
-                print(f"❌ query_no={q['query_no']} 처리 실패: {e}")
+                print(f" query_no={q['query_no']} 처리 실패: {e}")
 
         return {"success": True, "count": len(unanswered)}
 
     except Exception as e:
-        print(f"❌ 전체 처리 실패: {e}")
+        print(f" 전체 처리 실패: {e}")
         return {"success": False}
     finally:
         conn.close()
-
 
 
 @router.get("/chat_list")
