@@ -59,4 +59,14 @@
 
 
 ---
-# 
+# 요구사항 명세서
+![admin (2)](https://github.com/user-attachments/assets/d5afeb62-3ce5-4e43-bb7f-1e30d1a04733)
+![info (2)](https://github.com/user-attachments/assets/dc4c511b-dee3-419c-946f-54efb92fcb1c)
+![meet (2)](https://github.com/user-attachments/assets/0a8749f4-5d68-451c-ba8a-c2497d205d82)
+![rese (2)](https://github.com/user-attachments/assets/73ac1393-a5ee-4cb9-9f6c-dc984359fa80)
+![call (2)](https://github.com/user-attachments/assets/45412638-3be4-4731-a2c5-759d6f3e40c5)
+
+--- 
+# 수집한 데이터 및 전처리 요약
+
+ 
