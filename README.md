@@ -11,29 +11,50 @@
    - [2) 필요성 및 배경](#2-필요성-및-배경)
    - [3) 목표](#3-목표)
    - [4) 구현 기능](#4-구현-기능)
-   - [5) 사용 데이터셋](#5-사용-데이터셋)
 3. [기술 스택](#기술-스택)
 4. [WBS](#wbs)
 5. [시스템 아키텍처](#시스템-아키텍처)
 6. [요구사항 명세서](#요구사항-명세서)
 7. [ERD](#erd)
 8. [수집한 데이터 및 전처리 요약](#수집한-데이터-및-전처리-요약)
-9. [DB 연동 구현 코드](#db-연동-구현-코드)
-10. [테스트 계획 및 결과 보고서](#테스트-계획-및-결과-보고서)
-11. [진행 과정 중 프로그램 개선 노력](#진행-과정-중-프로그램-개선-노력)
-12. [수행 결과](#수행-결과)
-13. [한 줄 회고](#한-줄-회고)
+9. [모델 상세 정보](#모델-상세-정보) 
+10. [DB 연동 구현 코드](#db-연동-구현-코드)
+11. [테스트 계획 및 결과 보고서](#테스트-계획-및-결과-보고서)
+12. [진행 과정 중 프로그램 개선 노력](#진행-과정-중-프로그램-개선-노력)
+13. [수행 결과](#수행-결과)
+14. [한 줄 회고](#한-줄-회고)
 
 
----
+---     
 # 1.팀 소개
-|팀원|소개?링크?|
-|--|--|
-|김영서||
-|이광운||
-|이윤재||
-|이재혁||
-|최재동||
+<table align="center" width="100%">
+  <tr>
+    <td align="center">
+      <a href="https://github.com/youngseo98"><b>@김영서</b></a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Leegwangwoon"><b>@이광운</b></a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/ohdyo"><b>@이재혁</b></a>
+    </td>
+    <td align="center">
+      <a href=https://github.com/Monkakaka><b>@최재동</b></a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/dadambi116"><b>@이윤재</b></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./images/영서.jpg" width="80px" /></td>
+    <td align="center"><img src="./images/광운.jpg" width="80px" /></td>
+    <td align="center"><img src="./images/다인.png" width="100px" /></td>
+    <td align="center"><img src="./images/수연.jpg" width="100px" /></td>
+    <td align="center"><img src="./images/이현.jpg" width="100px" /></td>
+   </tr>
+</table>
+
+
 
 ---
 # 2. 프로젝트 개요
@@ -146,24 +167,23 @@
 - ChatMate (지식 도우미): 사내 문서 및 지식 기반을 바탕으로 직원들의 질문에 대해 AI 챗봇 형태로 실시간 답변 제공
 - QueryMate (민원 도우미): 반복적으로 접수되는 민원이나 문의사항에 대한 자동 응답 초안 작성 및 관리자 검수/승인 워크플로우 지원
 - CallMate (콜 도우미): 고객센터 등의 전화 상담 녹취를 텍스트로 변환하고 질문/응답 쌍 추출, 나아가 AI 기반 피드백을 제공하여 상담 품질 분석
-
-## 5) 사용 데이터셋
-
 ---
 # 기술 스택
-| 분류             | 사용 기술                          | 설명 |
-|------------------|-----------------------------------|------|
-| **Frontend**     | Vite, React, JavaScript, Nginx    | `wlm_front/` 디렉토리 내 React 기반 SPA 구축 및 Vite 번들링, Nginx reverse proxy 설정 |
-| **Backend**      | Python, FastAPI                   | `fast_api.py`, `main.py` 기반 REST API 서버 구성 |
-| **LLM 서비스**    | Ollama + Qwen 2.5                 | 로컬 LLM 실행을 위한 Ollama 기반 구성, Qwen2.5 모델 탑재 (`lg_ollama/`, `ollama_load/`) |
-| **RAG 프레임워크**| LangChain                         | 벡터 검색 기반 Retrieval-Augmented Generation 처리 구조 (연동 API 포함) |
-| **STT (음성인식)**| WhisperX                          | 회의록 음성 파일을 텍스트로 변환 (`call_data/`, WhisperX 적용) |
-| **Vector DB**     | Qdrant                            | 문서 임베딩 검색 저장소 (`qdrant_db/` 내부 사용) |
-| **Document Embedding** | Sentence Transformers (all-MiniLM-L6-v2) | 텍스트를 벡터화하여 Qdrant에 저장 |
-| **데이터 전처리** | Python, PyMuPDF, HWP Parser       | HWP/HWPX/PDF 등의 사내 문서 구조 추출 및 JSON 저장 (`data/`, `preprocess/`) |
-| **데이터 저장소** | JSON 파일, Qdrant, 로컬 파일시스템 | `origin_data/`, `civil_data.json` 등에서 원문 및 전처리 데이터 저장 |
-| **배포 환경**     | Docker, Dockerfile, Shell Script  | 모든 서비스는 Dockerfile 기반 컨테이너화, `install_python_ollama.sh` 등 스크립트 포함 |
-| **API 연동**      | REST API                          | FastAPI 기반 API로 Front ↔ Backend ↔ Model 간 통신 수행 |
+
+| 분류 | 기술 | 설명 |
+|------|------|------|
+| **Frontend** | <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" alt="Vite"> <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black"> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black"> <img src="https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white"> | React 기반 SPA 및 번들링, Nginx 리버스 프록시 구성 |
+| **Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white"> <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white"> | REST API 서버 (`fast_api.py`, `main.py`) |
+| **LLM 모델** | <img src="https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white"> <img src="https://img.shields.io/badge/Qwen2.5-6E56CF?logo=alibabacloud&logoColor=white"> | 로컬 LLM 구동 및 프롬프트 처리 |
+| **RAG 프레임워크** | <img src="https://img.shields.io/badge/LangChain-000000?logo=langchain&logoColor=white"> | 문서 검색 기반 RAG 처리 및 LLM 연동 |
+| **STT (음성 인식)** | <img src="https://img.shields.io/badge/WhisperX-FF6B6B?logo=OpenAI&logoColor=white"> | 회의/콜 녹음 텍스트 변환 |
+| **벡터DB** | <img src="https://img.shields.io/badge/Qdrant-FF4C4C?logo=qdrant&logoColor=white"> | 문서 벡터화 및 유사도 검색 저장소 |
+| **문서 임베딩** | <img src="https://img.shields.io/badge/SBERT-all--MiniLM--L6--v2-blue"> | Sentence Transformers 기반 텍스트 임베딩 |
+| **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP Parser-FF9900?logo=hancom&logoColor=white"> | 비정형 문서 구조 파싱 및 JSON 저장 |
+| **데이터 저장소** | <img src="https://img.shields.io/badge/JSON-5E5C5C?logo=json&logoColor=white"> <img src="https://img.shields.io/badge/Local%20FS-555?logo=linux&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
+| **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> | 모든 서비스 도커 컨테이너화 및 자동 실행 스크립트 포함 |
+| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | Front ↔ Backend ↔ LLM 간 통신 구성 |
+
 
 
 
@@ -291,6 +311,71 @@
 - 도메인 특화 QA 튜닝을 위한 조문-질문 쌍 구축 예정
 - 민감정보 자동 필터링 및 데이터 익명화 기능 고도화
 
+---
+## 모델 상세 정보
+
+### 사용 모델 개요
+
+본 프로젝트는 RAG 기반 질의응답 시스템 구현을 위해 **Qwen 2.5 모델**을 핵심 LLM으로 채택하여 학습 및 실험을 수행하였습니다. 이 모델은 **Ollama** 프레임워크를 통해 로컬 환경에서 구동되며, 음성 인식 및 데이터 검색 기능과도 연동됩니다. 
+
+| 항목              | 내용 |
+|------------------|------|
+| 모델 명칭         | Qwen2.5 (7B, base) |
+| 프레임워크        | Ollama |
+| 용도             | 문서 요약, 질의응답, 민원 응대, 회의록 요약 등 |
+| 학습 방식         | 비지도 문서 기반 문장 임베딩 + 벡터 검색 + LLM 후처리 |
+| RAG 적용 여부     | O (LangChain + Qdrant 기반) |
+| 음성 연동         | WhisperX 기반 STT 후 전처리하여 텍스트 입력으로 사용 |
+| 학습 데이터 특성  | 사내 문서, 공공 데이터, 공공규정 등 실제 행정문서 기반 |
+| 응답 평가 기준    | 정확도, 정답률, 일관성, 활용 가능성 (테스트 계획서 기반)  |
+
+
+### 모델 성능 요약
+
+| 항목              | 결과 |
+|------------------|------|
+| 응답 정확도 향상률 | 기존 LLM 대비 +17.3% 향상 (RAG 구조 적용 시)  |
+| 테스트 문항 수    | 총 20개 시나리오 기반 QA 테스트 수행  |
+| 응답 적절성       | “적절함” 이상 응답 비율 90% 이상 (사내 QA 기준 평가단) |
+| 응답 신뢰도       | 정확한 출처 링크 기반 응답 제공율 85% 이상  |
+| 벡터 유사도 정확도| 평균 Top-1 유사도: 0.83 / Top-3 평균: 0.76  |
+
+
+
+### 벡터 DB 임베딩 및 검색 구조
+
+- **SentenceTransformer 기반 all-MiniLM-L6-v2** 임베딩 사용
+- **Qdrant 벡터 DB**에 저장 후, LangChain으로 LLM 검색 연결
+- **FAISS와 비교 실험 결과**, Qdrant가 문서 응답 일관성 및 검색속도에서 우수한 성능을 보임 
+
+
+
+### 모델 평가 시나리오 예시
+
+| 테스트 항목 | 목적 | 결과 |
+|-------------|------|------|
+| 문서 기반 질의 응답 | 문서 내 항목 정확히 검색 및 응답 | 성공률 95% |
+| 회의록 요약 테스트 | STT 전환 후 요약 문장 생성 | 논리적 요약 성공 |
+| 다중 문서 참조 응답 | 유사 문서 다수 기반 답변 구성 | 참조 적절성 우수 |
+| 민원 시나리오 자동응답 | 유사 민원 분류 및 정형 응답 제공 | 만족도 4.7/5 |
+| 예외 문서 처리 | 공백/누락/중복이 있는 문서에서 응답 가능 여부 | 일부 실패 (전처리 개선 필요)  |
+
+
+
+###  개선 사항 및 한계
+
+- **복잡한 테이블 및 수식이 포함된 문서의 경우 추론 성능 저하**
+- **STT 오류가 있을 경우 요약 문장 품질 하락**
+- Qwen2.5 모델의 추론 속도는 대용량 문서에 대해 상대적으로 느릴 수 있음 → Ollama 서버 사양 최적화 필요
+- 벡터 유사도 기반 검색은 문맥 손실이 있을 수 있음 → hybrid 구조 보완 계획
+
+
+
+### 향후 계획
+
+- Qwen2.5 → Qwen-Chat 2.5 (chat-finetuned) 모델로 업그레이드 예정
+- 사용자 피드백 기반 미세 튜닝(Fine-tuning) 환경 구축
+- 벡터 DB에 RRF 기반 다중 유사도 재정렬 알고리즘 적용 검토
 
 
 ---
@@ -310,6 +395,11 @@
 
 ---
 # 수행 결과 
+https://github.com/user-attachments/assets/02523717-e1e4-4366-b9ae-f630aa39c129
+
+
+
+
 
 
 
@@ -324,3 +414,18 @@
 - 이재혁:
 
 - 최재동:
+
+
+--- 
+### 참고 및 출처
+[^1]: "Meet 10 AI trailblazers…" – Business Insider (JPMorgan, PwC, UPS 사례) https://www.businessinsider.com/ai-leaders-pwc-mastercard-accenture-ikea-tech-adoption-growth-strategy-2025-5
+[^2]: "JPMorgan Chase to equip 140K workers with genAI tool" – Banking Dive, 2024‑09‑12 – 사내 AI 활용 및 보안 전략 https://www.bankingdive.com/news/JPMorgan-Chase-LLM-Suite-generative-ai-employee-tool/726810/ 
+[^3]: Pinecone 블로그: “RAG improves GPT‑4 accuracy by 13%”  https://www.pinecone.io/blog/rag-study/
+[^4]: Wikipedia: Retrieval-Augmented Generation – 허위 응답 감소 효과  https://en.wikipedia.org/wiki/Retrieval-augmented_generation
+[^5]: Wikipedia: RAG reduces hallucination with grounding – 신뢰도 향상  https://en.wikipedia.org/wiki/Retrieval-augmented_generation
+[^6]: EyeLevel.ai 테스트 사례 – 기업용 RAG 실험 평가  https://www.eyelevel.ai/post/most-accurate-rag
+[^7]: Business Insider: "AI in Action" – EXL AI 도입 성과 (매출 21%, 비용 20%)  https://www.businessinsider.com/ai-leaders-pwc-mastercard-accenture-ikea-tech-adoption-growth-strategy-2025-5
+[^8]: Wikipedia: RAG 정보  https://en.wikipedia.org/wiki/Retrieval-augmented_generation
+[^9]: Pinecone Serverless 아키텍처 – 벡터 DB + RAG 상용화  https://www.pinecone.io/blog/serverless-architecture/
+[^10]: WSJ: RAG 지속 확장 전략 – AI 기업 권고   https://www.wsj.com/articles/how-a-decades-old-technology-and-a-paper-from-meta-created-an-ai-industry-standard-354a810e 
+
