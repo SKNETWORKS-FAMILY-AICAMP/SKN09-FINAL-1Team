@@ -110,8 +110,9 @@ async def ask(
 
 
         context_texts = load_qdrant_db(question, "qdrant_temp")
+        print(context_texts)
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
-
+        print(context)
 
         # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
@@ -358,6 +359,7 @@ async def upload_audio(file: UploadFile = File(...)):
 async def ask_query(input: QuestionInput):
     query = input.question
     raw_results = load_qdrant_db(query, "wlmmate_vectors")
+    print(raw_results)
 
     # raw_results = search_resp.json().get("result", [])
     # if isinstance(raw_results, str):
