@@ -34,10 +34,6 @@ __pycache__/
 **/.env
 */.env
 
-# qdrant_data
-**/qdrant_data/
-*/qdrant_data/
-qdrant_data/
 
 # SSL 인증서
 **/etc/keys/

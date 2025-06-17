@@ -24,7 +24,8 @@ embedding_dim = 768
 FOLDER_TO_COLLECTION = {
     "법령": "law",
     "사업": "business",
-    "훈령": "directive"
+    "훈령": "directive",
+    "민원": "civil"
 }
 
 def get_embedding(text: str):
@@ -71,7 +72,7 @@ def init_qdrant_from_folders(base_folder="../data/preprocess"):
                 )
                 file_idx += 1
 
-def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_name="wlmmate_law", id_offset=100000):
+def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_name="wlmmate_civil"):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
@@ -79,7 +80,7 @@ def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_
         )
     with open(civil_data_path, 'r', encoding='utf-8') as file:
         documents = json.load(file)
-    file_idx = id_offset
+    file_idx = 0
     for doc in documents:
         if not isinstance(doc, dict):
             continue

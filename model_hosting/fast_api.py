@@ -224,7 +224,7 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    raw_results = search_vectors(SearchRequest(question=question, collection_name="wlmmate_vectors"))
+    raw_results = search_vectors(SearchRequest(question=question, collection_name="wlmmate_civil"))
 
     # raw_results = search_resp.json().get("result", [])
     # if isinstance(raw_results, str):
