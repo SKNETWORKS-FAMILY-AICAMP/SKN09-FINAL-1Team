@@ -383,7 +383,6 @@ def search_all_collections(question: str) -> list[str]:
 async def classify_collection_with_llm(question: str) -> str:
     prompt = f"""
     다음 질문은 어떤 주제에 가장 적합한가요?
-    - 상업, 사업, 경제, 기업 (wlmmate_business)
     - 민사, 개인, 생활, 민원 (wlmmate_civil)
     - 지시, 규정, 정책, 행정 (wlmmate_directive)
     - 법률, 법령, 규정, 판례 (wlmmate_law)
@@ -399,13 +398,30 @@ async def classify_collection_with_llm(question: str) -> str:
         return "wlmmate_all"
     return result
 
+# def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
+#     try:
+#         results = search_vectors(SearchRequest(question=question, collection_name=collection))
+#         return [r for r in results if isinstance(r, str) and r.strip()]
+#     except Exception as e:
+#         print(f" {collection} 검색 실패: {e}")
+#         return []
 def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
     try:
-        results = search_vectors(SearchRequest(question=question, collection_name=collection))
-        return [r for r in results if isinstance(r, str) and r.strip()]
+        # limit=1로 가장 유사한 1개만 검색
+        results = search_vectors(SearchRequest(question=question, collection_name=collection, limit=1))
+        # 결과가 리스트 형태일 경우 첫 결과만 반환
+        if results and len(results) > 0:
+            first_result = results[0]
+            if isinstance(first_result, str):
+                return [first_result]
+            elif isinstance(first_result, (list, tuple)) and len(first_result) > 0:
+                # 예: (text, score) 튜플일 경우 텍스트만 반환
+                return [first_result[0]]
+        return []
     except Exception as e:
         print(f" {collection} 검색 실패: {e}")
         return []
+
 
 async def search_appropriate_collection(question: str) -> list[str]:
     collection = await classify_collection_with_llm(question)
