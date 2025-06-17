@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
-from qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
+from qdrant_db.qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
 
 qdrant_router = APIRouter()
 
