@@ -632,17 +632,15 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
         password=DB_PASSWORD,
         db=DB_NAME,
         charset=DB_CHARSET,
-        cursorclass=DictCursor
     )
     conn = checkpoint._get_connection()
 
     with conn.cursor() as cursor:
         cursor.execute("""
             SELECT 
-                call_mate.call_no,
-                call_mate.call_path,
                 call_counsel.coun_question,
-                call_counsel.coun_answer
+                call_counsel.coun_answer,
+                call_counse.coun_feedback
             FROM call_mate
             JOIN call_counsel ON call_mate.call_no = call_counsel.call_no
         """)
@@ -657,9 +655,6 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
             embedding = get_embedding(content_text)
 
             payload = {
-                "call_no": row["call_no"],
-                "emp_no": row["emp_no"],
-                "call_path": row["call_path"],
                 "content": content_text
             }
 
