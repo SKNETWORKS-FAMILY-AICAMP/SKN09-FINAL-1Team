@@ -233,13 +233,15 @@ class PromptExtraction:
 
     def make_audio_transcription_prompt(self, transcript: str) -> str:
         return f"""
-반드시 한국어로 대답하세요.    
-다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다. 질문과 답변을 구분해 JSON 배열 형태로 만들어 주세요.
-반드시 JSON 형식만 출력해 주세요.
+당신은 한국어 사용자를 위한 도우미입니다. 반드시 한국어를 사용해 대답하세요.
+다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다.
+질문과 답변을 구분해 "question"과 "answer"를 키값으로 하는 JSON 배열 형태로 만들어 주세요.
+반드시 JSON 형식의 데이터만을 출력하고 이외에는 출력하지 마세요.
+내용은 반드시 한국어만을 이용해 응답하세요
 
 형식:
 [
-  {{ "question": "질문 내용", "answer": "답변 내용" }},
+  {{ "question": "민원인의 질문 내용", "answer": "상담사의 답변 내용" }},
   ...
 ]
 
@@ -304,7 +306,7 @@ class PromptExtraction:
             - 친절하고 공손한 말투를 유지하십시오.
             """
 
-    def make_feedback_prompt(self, qna_data):
+    def make_feedback_prompt(self, qna_data, context):
         qna_text = "".join(
             f"[질문: {qna['question']}\n답변: {qna['answer']}\n\n" for qna in qna_data
         )
@@ -318,11 +320,13 @@ class PromptExtraction:
 3. 회사나 기관의 정책, 지침과 충돌하지 않는가?
 4. 질문자에 대한 태도는 정중하고 신뢰를 줄 수 있는가?
 5. 답변의 구성은 명확하고 정보 전달이 효과적인가?
+6. 유사 Q&A가 있다면 일관된 내용의 답변을 제공하고 있는가?
 
 작성 지침:
 - 각 Q&A 쌍마다 하나의 피드백을 생성하십시오.
 - 피드백은 2~4문장 정도로 자세하게 작성하되, 명확하고 실용적으로 서술하십시오.
 - Q&A 리스트 전체에 대한 요약이 아니라, 개별 항목에 대해 독립적으로 평가하십시오.
+- 검색된 유사 Q&A에 유사한 내용이 있을 경우에만 참고해서 평가하십시오.
 - 출력은 다음과 같은 구조를 따르십시오:
 
 예시 출력:
@@ -331,5 +335,11 @@ class PromptExtraction:
     ...
 - "feedbackN": Q&A세트 N번에 대한 피드백 내용
 
+<유사 Q&A>
+{context}
+</유사 Q&A>
+
+<평가 Q&A>
 {qna_text}
+</평가 Q&A>
 """

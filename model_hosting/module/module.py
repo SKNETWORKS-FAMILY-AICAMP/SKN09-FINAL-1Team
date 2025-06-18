@@ -9,20 +9,20 @@ from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
 from langchain_core.tools import tool, StructuredTool
-from ollama_load.ollama_hosting import OllamaHosting
+from model_hosting.ollama_load.ollama_hosting import OllamaHosting
 from duckduckgo_search import DDGS
 from pydub import AudioSegment
 from datetime import datetime
 from types import SimpleNamespace
 from pydantic import BaseModel
-from extraction.prompt_extraction import PromptExtraction
+from model_hosting.extraction.prompt_extraction import PromptExtraction
+from qdrant_db.qdrant_loader import load_qdrant_db
 import whisperx
 import json
 import uuid
 import pymysql
 import re
 import torch
-import ollama
 
 prompt_extraction = PromptExtraction()
 
@@ -559,7 +559,9 @@ async def process_audio_and_extract_qna(audio_path):
 def feedback_model(qna_data):
     print(qna_data)
     model = ChatOllama(model="qwen2.5")
-    prompt = prompt_extraction.make_feedback_prompt(qna_data)
+    qna_text = "".join(f"[질문: {qna['question']}\n답변: {qna['answer']}\n\n" for qna in qna_data)
+    context = load_qdrant_db(question=qna_text, collection_name="wlmmate_call")
+    prompt = prompt_extraction.make_feedback_prompt(qna_data, context)
     response = model.invoke(prompt)
 
     # 응답을 개별 피드백으로 분리하고 빈 문자열 제거
@@ -588,3 +590,4 @@ def get_from_state(state, key, default):
     elif hasattr(state, "values") and key in state.values:
         return state.values.get(key, default)
     return default
+

@@ -3,7 +3,9 @@ import json
 import torch
 from transformers import AutoTokenizer, AutoModel
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import PointIdsList
 from qdrant_client.models import Distance, VectorParams, PointStruct
+import pymysql
 from dotenv import load_dotenv
 
 # 환경변수 로드
@@ -21,10 +23,22 @@ tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 model = AutoModel.from_pretrained(embedding_model_name)
 embedding_dim = 768
 
+conn = pymysql.connect(
+    host=os.environ.get("MY_DB_HOST", "localhost"),
+    port=int(os.environ.get("MY_DB_PORT", "3306")),
+    user=os.environ.get("MY_DB_USER", "root"),
+    password=os.environ.get("MY_DB_PASSWORD", ""),
+    db=os.environ.get("MY_DB_NAME", ""),
+    charset=os.environ.get("MY_DB_CHARSET", "utf8mb4"),
+)
+
 FOLDER_TO_COLLECTION = {
+    "전체": "all",
     "법령": "law",
     "사업": "business",
-    "훈령": "directive"
+    "훈령": "directive",
+    "민원": "civil",
+    "콜메이트": "call"
 }
 
 def get_embedding(text: str):
@@ -71,7 +85,7 @@ def init_qdrant_from_folders(base_folder="../data/preprocess"):
                 )
                 file_idx += 1
 
-def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_name="wlmmate_law", id_offset=100000):
+def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_name="wlmmate_civil"):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
@@ -79,7 +93,7 @@ def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_
         )
     with open(civil_data_path, 'r', encoding='utf-8') as file:
         documents = json.load(file)
-    file_idx = id_offset
+    file_idx = 0
     for doc in documents:
         if not isinstance(doc, dict):
             continue
@@ -91,6 +105,66 @@ def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_
             points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
         )
         file_idx += 1
+
+def init_qdrant_combined_collection(
+    base_folder="../data/preprocess",
+    civil_data_path="../data/civil_data.json",
+    collection_name="wlmmate_all"
+):
+    # 컬렉션 초기화
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    file_idx = 0
+
+    # 폴더 데이터 통합 삽입
+    for folder in os.listdir(base_folder):
+        folder_path = os.path.join(base_folder, folder)
+        if not os.path.isdir(folder_path):
+            continue
+        for filename in os.listdir(folder_path):
+            if not filename.endswith(".json"):
+                continue
+            with open(os.path.join(folder_path, filename), 'r', encoding='utf-8') as file:
+                documents = json.load(file)
+            for doc in documents:
+                if not isinstance(doc, dict):
+                    continue
+                embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
+                embedding = get_embedding(embedding_input)
+                payload = {
+                    "content": embedding_input,
+                    "source": f"{folder}/{filename}"
+                }
+                client.upsert(
+                    collection_name=collection_name,
+                    points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                )
+                file_idx += 1
+
+    # 민원 데이터 통합 삽입
+    if os.path.exists(civil_data_path):
+        with open(civil_data_path, 'r', encoding='utf-8') as file:
+            documents = json.load(file)
+        for doc in documents:
+            if not isinstance(doc, dict):
+                continue
+            embedding_input = clean_doc(doc)
+            embedding = get_embedding(embedding_input)
+            payload = {
+                "content": embedding_input,
+                "source": "민원/civil_data.json"
+            }
+            client.upsert(
+                collection_name=collection_name,
+                points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+            )
+            file_idx += 1
+
+
 
 def load_qdrant_db(question, collection_name="wlmmate_law"):
     query_vector = get_embedding(question)
@@ -142,5 +216,52 @@ def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
 def delete_collection(collection_name="qdrant_temp"):
     if client.collection_exists(collection_name=collection_name):
         client.delete_collection(collection_name=collection_name)
+        return True
+    return False
+
+
+def init_qdrant_from_call_db(collection_name="wlmmate_call"):
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                call_counsel.coun_no,
+                call_counsel.coun_question,
+                call_counsel.coun_answer
+            FROM call_counsel
+        """)
+
+        rows = cursor.fetchall()
+
+        for row in rows:
+            coun_no, coun_question, coun_answer = row
+            if not coun_question or not coun_answer:
+                continue
+
+            content_text = f"질문: {coun_question}\n답변: {coun_answer}"
+            embedding = get_embedding(content_text)
+
+            payload = {
+                "content": content_text
+            }
+
+            point = PointStruct(
+                id=coun_no,
+                vector=embedding.tolist(),
+                payload=payload
+            )
+            client.upsert(collection_name=collection_name, points=[point])
+
+def delete_point_by_id(collection_name: str, point_id: int):
+    if client.collection_exists(collection_name=collection_name):
+        client.delete(
+            collection_name=collection_name,
+            points_selector=PointIdsList(points=[point_id])
+        )
         return True
     return False

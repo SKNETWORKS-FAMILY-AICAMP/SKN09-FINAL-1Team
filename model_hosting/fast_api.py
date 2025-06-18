@@ -1,18 +1,22 @@
-from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException
+from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException, Query
 from fastapi.responses import JSONResponse
 from langchain_core.messages import AIMessage, HumanMessage
 from typing import List
 from dotenv import load_dotenv
 import tempfile
 import os
-import httpx
 import torch
 import whisperx
 import ollama
-from extraction.file_base_extraction import get_extractor_by_extension
-from extraction.prompt_extraction import PromptExtraction
-from ollama_load.ollama_hosting import OllamaHosting
-from module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from qdrant_db.qdrant_loader import init_qdrant_from_call_db, delete_point_by_id
+from qdrant_db.qdrant_router import upload_vectors, search_vectors, delete_vectors, SearchRequest, UploadRequest
+from model_hosting.extraction.file_base_extraction import get_extractor_by_extension
+from model_hosting.extraction.prompt_extraction import PromptExtraction
+from model_hosting.ollama_load.ollama_hosting import OllamaHosting
+from model_hosting.module.module import feedback_model, State, TextRequest, QuestionInput, EmbeddingManager, MemoryTools, MySQLCheckpoint, MemoryAgent, search_web_duckduckgo, summarize_body, clean_korean_only, classify_question_mode, get_from_state, split_audio, transcribe_chunk, process_audio_and_extract_qna
+from pydantic import BaseModel
+from fastapi.concurrency import run_in_threadpool
+from pymysql.cursors import DictCursor
 
 
 
@@ -89,6 +93,7 @@ async def ask(
         document_texts = []
         filenames = []
 
+        print("!! 파일 입력됨")
         for file in files[:5]:  # 최대 5개 처리
             suffix = os.path.splitext(file.filename)[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -101,28 +106,20 @@ async def ask(
             pages = extractor.extract_text()
             os.remove(tmp_path)
 
+            print("!! 텍스트 추출 완료")
             text = "\n\n".join([p['text'] for p in pages])
             document_texts.append((file.filename, text))
             filenames.append(file.filename)
 
             page_texts = [p['text'] for p in pages]
-            async with httpx.AsyncClient(timeout=300.0) as client:
-                await client.post(
-                    f"{qdrant_url}/vectors/api/upload_vectors",
-                    json={"chunks": page_texts, "collection_name": "qdrant_temp"}
-                )
+
+            upload_vectors(UploadRequest(chunks=page_texts, collection_name="qdrant_temp"))
 
 
-        async with httpx.AsyncClient(timeout=300.0) as client:
-            search_resp = await client.post(
-                f"{qdrant_url}/vectors/api/search_vectors",
-                json={"question": question, "collection_name": "qdrant_temp"}
-            )
-
-        search_data = search_resp.json()
-        context_texts = search_data.get("result", "")
+        context_texts = search_vectors(SearchRequest(question=question, collection_name="qdrant_temp"))
+        print(context_texts)
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
-
+        print(context)
 
         # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
@@ -155,13 +152,7 @@ async def ask(
         for filename, text in document_texts:
             # 한 번만 추출
             if evaluation_criteria is None:
-                async with httpx.AsyncClient(timeout=300.0) as client:
-                    criteria_resp = await client.post(
-                        f"{qdrant_url}/vectors/api/search_vectors",
-                        json={"question": "평가 기준", "collection_name": "qdrant_temp"}
-                    )
-                criteria_data = criteria_resp.json()
-                criteria_list = criteria_data.get("result", "")
+                criteria_list = search_vectors(SearchRequest(question="평가 기준", collection_name="qdrant_temp"))
                 evaluation_criteria = "\n".join(criteria_list if isinstance(criteria_list, list) else [criteria_list])
 
             agent_state = State(messages=current_messages, recall_memories=current_recall_memories)
@@ -237,15 +228,11 @@ async def miniask(input: QuestionInput):
     question = input.question.strip()
 
     # 벡터 검색
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        search_resp = await client.post(
-            f"{qdrant_url}/vectors/api/search_vectors",
-            json={"question": question, "collection_name": "wlmmate_vectors"}
-        )
+    raw_results = search_vectors(SearchRequest(question=question, collection_name="wlmmate_all"))
 
-    raw_results = search_resp.json().get("result", [])
-    if isinstance(raw_results, str):
-        raw_results = [raw_results]
+    # raw_results = search_resp.json().get("result", [])
+    # if isinstance(raw_results, str):
+    #     raw_results = [raw_results]
 
     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
 
@@ -362,6 +349,7 @@ async def summarize_text(request: TextRequest):
 async def upload_audio(file: UploadFile = File(...)):        
         # 1. 파일 저장
     save_path = f"./call_data/{file.filename}"
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
 
@@ -372,32 +360,75 @@ async def upload_audio(file: UploadFile = File(...)):
     feedbacks = feedback_model(qna_data)
     for i, qna in enumerate(qna_data):
         qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
-    
+
     return JSONResponse(content={"qna": qna_data})
+
+COLLECTIONS = [
+    "wlmmate_civil",
+    "wlmmate_directive",
+    "wlmmate_law"
+]
+
+async def classify_collection_with_llm(question: str) -> str:
+    prompt = f"""
+    다음 질문은 어떤 주제에 가장 적합한가요?
+    - 민사, 개인, 생활, 민원 (wlmmate_civil)
+    - 지시, 규정, 정책, 행정 (wlmmate_directive)
+    - 법률, 법령, 규정, 판례 (wlmmate_law)
+
+    질문: {question}
+    답변 형식: "컬렉션명"
+    """
+    try:
+        result = await run_in_threadpool(
+            lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
+        )
+        if result not in COLLECTIONS:
+            return "wlmmate_civil"
+        return result
+    except Exception as e:
+        print(f"분류 실패: {e}, 기본값 civil 사용")
+        return "wlmmate_civil"
+
+def search_appropriate_collection_sync(question: str, collection: str) -> list[str]:
+    try:
+        results = search_vectors(SearchRequest(question=question, collection_name=collection))
+        if results and len(results) > 0:
+            first_result = results[0]
+            if isinstance(first_result, str):
+                return [first_result]
+            elif isinstance(first_result, (list, tuple)) and len(first_result) > 0:
+                return [first_result[0]]
+        return []
+    except Exception as e:
+        print(f"검색 실패 ({collection}): {e}")
+        return []
+
+async def search_appropriate_collection(question: str) -> list[str]:
+    collection = await classify_collection_with_llm(question)
+    print(f"분류된 컬렉션: {collection}")
+    return await run_in_threadpool(lambda: search_appropriate_collection_sync(question, collection))
 
 @router.post("/ask_query")
 async def ask_query(input: QuestionInput):
-    query = input.question
-    async with httpx.AsyncClient(timeout=300.0) as client:
-        search_resp = await client.post(
-            f"{qdrant_url}/vectors/api/search_vectors",
-            json={"question": query, "collection_name": "wlmmate_vectors"}
-        )
+    question = input.question.strip()
+    print(f"질문 처리: {question}")
 
-    raw_results = search_resp.json().get("result", [])
-    if isinstance(raw_results, str):
-        raw_results = [raw_results]
-
-    context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
+    contexts = await search_appropriate_collection(question)
+    context_text = "\n\n".join(contexts)
+    print(f"컨텍스트 길이: {len(context_text)}")
 
     if not context_text or len(context_text) < 30:
-        prompt = prompt_extraction.make_fallback_prompt(query)
+        prompt = prompt_extraction.make_fallback_prompt(question)
+        print("fallback 프롬프트 사용")
     else:
-        prompt = prompt_extraction.make_contextual_prompt(query, context_text)
+        prompt = prompt_extraction.make_contextual_prompt(question, context_text)
+        print("컨텍스트 기반 프롬프트 사용")
 
-    ollama = OllamaHosting(model="qwen2.5", prompt=prompt)
-    final_answer = ollama.get_model_response().strip()
-
+    final_answer = await run_in_threadpool(
+        lambda: OllamaHosting(model="qwen2.5", prompt=prompt).get_model_response().strip()
+    )
+    print(f"생성된 답변: {final_answer[:100]}...")
     return {"answer": final_answer}
 
 
@@ -413,47 +444,43 @@ async def generate_unanswered():
     )
     conn = checkpoint._get_connection()
     try:
-        with conn.cursor() as cursor:
-            # 1. 답변 텍스트가 아직 없는 질문만 가져옴
+        with conn.cursor(DictCursor) as cursor:
             cursor.execute("""
                 SELECT query_mate.query_no, query_mate.query_text
                 FROM query_mate
-                JOIN query_response ON query_mate.query_no = query_response.query_no
-                WHERE query_response.res_text IS NULL
+                LEFT JOIN query_response ON query_mate.query_no = query_response.query_no
+                WHERE query_response.res_text IS NULL OR query_response.res_text = '' OR query_response.res_text = 'null'
             """)
             unanswered = cursor.fetchall()
 
         for q in unanswered:
             try:
-                print(f"🧠 답변 생성 중: query_no={q['query_no']}")
-                
-                # 2. 기존 ask_query 함수 직접 호출
                 input_data = QuestionInput(question=q["query_text"])
                 result = await ask_query(input_data)
                 answer = result.get("answer", "").strip()
+                default_emp_no = 1
 
-                # 3. DB에 답변 저장
-                with conn.cursor() as cursor:
+                with conn.cursor(DictCursor) as cursor:
                     cursor.execute("""
-                        UPDATE query_response
-                        SET res_text = %s,
+                        INSERT INTO query_response (query_no, emp_no, res_text, res_state, res_write_dt)
+                        VALUES (%s, %s, %s, %s, NOW())
+                        ON DUPLICATE KEY UPDATE
+                            res_text = VALUES(res_text),
                             res_write_dt = NOW()
-                        WHERE query_no = %s
-                    """, (answer, q["query_no"]))
+                    """, (q["query_no"], default_emp_no, answer, 1))
                 conn.commit()
 
             except Exception as e:
-                print(f"❌ query_no={q['query_no']} 처리 실패: {e}")
+                print(f"query_no={q['query_no']} 처리 실패: {e}")
+                continue
 
         return {"success": True, "count": len(unanswered)}
 
     except Exception as e:
-        print(f"❌ 전체 처리 실패: {e}")
+        print(f"전체 처리 실패: {e}")
         return {"success": False}
     finally:
         conn.close()
-
-
 
 @router.get("/chat_list")
 async def chat_list(request: Request):
@@ -472,6 +499,7 @@ async def chat_list(request: Request):
         charset=DB_CHARSET
     )
     return checkpoint.get_chat_list(emp_code)
+
 
 @router.get("/chat_log")
 async def chat_log(chat_no: int):
@@ -511,6 +539,30 @@ async def delete_chat_room(chat_no: int, request: Request):
         return {"success": True}
     finally:
         conn.close()
+
+@router.post("/create_vectors")
+def upload_vectors(collection_name="wlmmate_call"):
+    init_qdrant_from_call_db(collection_name=collection_name)
+    return {"success": True, "deleted_collection": collection_name}
+
+@router.delete("/delete_vectors")
+def delete_conn_vectors(collection_name: str = Query(..., description="삭제할 Qdrant 컬렉션 이름")):
+    delete_vectors(collection_name)
+    print(f"컬렉션 삭제: {collection_name}")
+    print(f"!! {collection_name} 컬렉션 삭제")
+    return {"success": True, "deleted_collection": collection_name}
+    
+
+@router.delete("/delete_vector_by_id")
+def delete_vector_by_id(
+    collection_name: str = Query(...),
+    point_id: int = Query(...)
+):
+    success = delete_point_by_id(collection_name, point_id)
+    if success:
+        return {"message": f"Point {point_id} deleted from {collection_name}"}
+    else:
+        return {"error": "Collection not found or deletion failed"}
 
 
 @router.get("/check-session")

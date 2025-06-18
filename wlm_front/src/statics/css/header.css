@@ -2,8 +2,8 @@
   position: relative;
   top: 0;
   left: 0;
-  width: 100vw;       /* 전체 너비 */
-  min-width: 1280px;  /* 필요시 최소 너비 지정 */
+  width: 100%;       /* 전체 너비 */
+  /* min-width: 1280px;  필요시 최소 너비 지정 */
   height: 50px;
   background-color: #1e1e1e; /* 흰색 → 다크 그레이 */
   color: #ffffff;            /* 검은색 텍스트 → 흰색 */
