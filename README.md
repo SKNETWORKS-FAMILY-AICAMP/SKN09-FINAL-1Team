@@ -14,15 +14,15 @@
 3. [기술 스택](#기술-스택)
 4. [WBS](#wbs)
 5. [시스템 아키텍처](#시스템-아키텍처)
-6. [요구사항 명세서](#요구사항-명세서)
-7. [ERD](#erd)
-8. [수집한 데이터 및 전처리 요약](#수집한-데이터-및-전처리-요약)
-9. [모델 상세 정보](#모델-상세-정보) 
-10. [DB 연동 구현 코드](#db-연동-구현-코드)
+6. [디렉토리 구조](#디렉토리-구조)
+7. [요구사항 명세서](#요구사항-명세서)
+8. [ERD](#erd)
+9. [수집한 데이터 및 전처리 요약](#수집한-데이터-및-전처리-요약)
+10. [모델 상세 정보](#모델-상세-정보) 
 11. [테스트 계획 및 결과 보고서](#테스트-계획-및-결과-보고서)
 12. [진행 과정 중 프로그램 개선 노력](#진행-과정-중-프로그램-개선-노력)
 13. [수행 결과](#수행-결과)
-14. [한 줄 회고](#한-줄-회고)
+14. [회고](#회고)
 
 
 ---     
@@ -168,7 +168,7 @@
 - QueryMate (민원 도우미): 반복적으로 접수되는 민원이나 문의사항에 대한 자동 응답 초안 작성 및 관리자 검수/승인 워크플로우 지원
 - CallMate (콜 도우미): 고객센터 등의 전화 상담 녹취를 텍스트로 변환하고 질문/응답 쌍 추출, 나아가 AI 기반 피드백을 제공하여 상담 품질 분석
 ---
-# 기술 스택
+# 3. 기술 스택
 
 | 분류 | 기술 | 설명 |
 |------|------|------|
@@ -188,16 +188,278 @@
 
 
 ---
-# WBS
+# 4. WBS
 ![WBS](https://github.com/user-attachments/assets/7d978a23-f0a7-4f1f-905b-ef4d25263c61)
 
 ---
-# 시스템 아키텍처
-![시스템 아키텍쳐](https://github.com/user-attachments/assets/728049de-07c4-4952-a4f2-c4169afc7a2b)
+# 5. 시스템 아키텍처
+![image](https://github.com/user-attachments/assets/48639b86-da63-4e84-a7c9-bf45dfae4a76)
+
+
 
 
 ---
-# 요구사항 명세서
+# 6. 디렉토리 구조
+<details>
+
+<summary>디렉토리 구조</summary>
+
+```
+SKN09-FINAL-1Team/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   └── pull_request_template.md
+├── .gitignore
+├── README.md
+├── package.json
+├── package-lock.json
+├── data/
+│   ├── 1.pdf
+│   ├── civil_data.json
+│   ├── json_docs_data/
+│   │   ├── 법령/
+│   │   ├── 사업_문서/
+│   │   └── 훈령/
+│   ├── origin_data/
+│   │   ├── 법령/
+│   │   ├── 사업/
+│   │   └── 훈령/
+│   ├── preprocess/
+│   │   ├── 법령/
+│   │   ├── 사업/
+│   │   └── 훈령/
+│   └── qdrant_db/
+│       ├── .lock
+│       ├── meta.json
+│       └── collection/
+│           └── wlmmate_vectors/
+│               └── storage.sqlite
+├── db_connection_mvc/
+│   ├── .env
+│   ├── Dockerfile
+│   ├── install_docker.sh
+│   ├── install_python3.sh
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── controllers/
+│   │   ├── __init__.py
+│   │   ├── call_controller.py
+│   │   ├── email_controller.py
+│   │   ├── employee_controller.py
+│   │   ├── query_controller.py
+│   │   └── __pycache__/
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   └── __pycache__/
+│   └── services/
+│       ├── __init__.py
+│       ├── call_service.py
+│       ├── employee_service.py
+│       └── __pycache__/
+├── model_hosting/
+│   ├── .env
+│   ├── Dockerfile
+│   ├── fast_api.py
+│   ├── install_python_ollama.sh
+│   ├── main.py
+│   ├── qdrantest.ipynb
+│   ├── requirements.txt
+│   ├── call_data/
+│   │   ├── 05.mp3
+│   │   └── news.mp3
+│   ├── data/
+│   │   └── temp_uploaded.json
+│   ├── data_loader/
+│   │   └── qdrant_chat.py
+│   ├── extraction/
+│   │   ├── __init__.py
+│   │   ├── extractor_test.ipynb
+│   │   ├── file_base_extraction.py
+│   │   ├── hwp_extraction.py
+│   │   ├── pdf_extraction.py
+│   │   └── prompt_extraction.py
+│   ├── lg_ollama/
+│   ├── module/
+│   │   └── module.py
+│   └── ollama_load/
+│       ├── __init__.py
+│       ├── ollama_hosting.py
+│       ├── ollama_serve.ipynb
+│       └── data/
+│           └── 1.pdf
+├── qdrant_db/
+│   ├── main.py
+│   ├── qdrant_loader.py
+│   └── qdrant_router.py
+└── wlm_front/
+    ├── .dockerignore
+    ├── Dockerfile
+    ├── eslint.config.js
+    ├── index.html
+    ├── install_docker.sh
+    ├── nginx.conf
+    ├── package.json
+    ├── package-lock.json
+    ├── vite.config.js
+    ├── public/
+    │   ├── vite.svg
+    │   └── images/
+    │       ├── callbot.png
+    │       ├── chatmate.png
+    │       ├── claimmate.png
+    │       ├── notemate.png
+    │       ├── wlbmate_logo.png
+    └── src/
+        ├── App.jsx
+        ├── App.module.css
+        ├── index.css
+        ├── main.jsx
+        ├── assets/
+        │   └── react.svg
+        ├── context/
+        │   └── AuthContext.jsx
+        ├── pages/
+        │   ├── admin/
+        │   │   ├── AdminBase.jsx
+        │   │   ├── component/
+        │   │   │   ├── AdminHeader.jsx
+        │   │   │   ├── AdminMain.jsx
+        │   │   │   ├── AdminSidebar.jsx
+        │   │   │   ├── UserCreate.jsx
+        │   │   │   ├── UserDetail.jsx
+        │   │   │   ├── UserList.jsx
+        │   │   │   └── UserSearch.jsx
+        │   │   └── css/
+        │   │       ├── AdminSidebar.module.css
+        │   │       ├── UserCreate.module.css
+        │   │       ├── UserDetail.module.css
+        │   │       ├── UserList.module.css
+        │   │       └── UserSearch.module.css
+        │   ├── callmate/
+        │   │   ├── Callmate.jsx
+        │   │   ├── components/
+        │   │   │   ├── MainContent.jsx
+        │   │   │   └── Sidebar.jsx
+        │   │   └── css/
+        │   │       ├── Callmate.module.css
+        │   │       ├── MainContent.module.css
+        │   │       └── Sidebar.module.css
+        │   ├── chatbot/
+        │   │   ├── chatbot_con/
+        │   │   │   ├── Base.jsx
+        │   │   │   └── Base.module.css
+        │   │   ├── component/
+        │   │   │   ├── ChatArea.jsx
+        │   │   │   ├── FilterPanel.jsx
+        │   │   │   └── sideBar.jsx
+        │   │   └── css/
+        │   │       ├── ChatArea.module.css
+        │   │       ├── FilterPanel.module.css
+        │   │       └── SideBar.module.css
+        │   ├── images/
+        │   │   ├── after-meeting.png
+        │   │   ├── before-meeting.png
+        │   │   ├── callbot-dark-light.png
+        │   │   ├── callbot-image.png
+        │   │   ├── chatbot-dark-light.png
+        │   │   ├── chatbot-image.png
+        │   │   ├── file_upload.png
+        │   │   ├── logo-image.png
+        │   │   ├── logo-image2.png
+        │   │   ├── notemate-dark-light.png
+        │   │   ├── notemate-image.png
+        │   │   ├── querymate-dark-light.png
+        │   │   ├── querymate-image.png
+        │   │   └── up_arrow.png
+        │   ├── login/
+        │   │   ├── component/
+        │   │   │   ├── forgotpasswordmodal.jsx
+        │   │   │   └── login.jsx
+        │   │   └── css/
+        │   │       ├── forgotpasswordmodal.css
+        │   │       └── login.css
+        │   ├── mainpage/
+        │   │   ├── component/
+        │   │   │   └── mainpage.jsx
+        │   │   ├── mainpage_con/
+        │   │   │   └── base.jsx
+        │   │   └── css/
+        │   │       ├── call.jpeg
+        │   │       ├── call.png
+        │   │       ├── call2.jpeg
+        │   │       ├── chat.jpeg
+        │   │       ├── chat.png
+        │   │       ├── mainpage.css
+        │   │       ├── meet.jpeg
+        │   │       ├── note.png
+        │   │       ├── query.jpg
+        │   │       ├── query.png
+        │   │       └── wlbmate_logo.png
+        │   ├── mypage/
+        │   │   ├── component/
+        │   │   │   ├── MyPage.jsx
+        │   │   │   ├── PasswordChangeModal.jsx
+        │   │   │   └── UserInfo.jsx
+        │   │   └── css/
+        │   │       ├── MyPage.module.css
+        │   │       ├── PasswordChangeModal.module.css
+        │   │       ├── ResultModal.css
+        │   │       └── UserInfo.module.css
+        │   ├── notemate/
+        │   │   ├── component/
+        │   │   │   ├── ConfirmModal.jsx
+        │   │   │   ├── InfoButton.jsx
+        │   │   │   ├── InfoModal.jsx
+        │   │   │   ├── MicButton.jsx
+        │   │   │   ├── notemate.jsx
+        │   │   │   ├── ParticipantList.jsx
+        │   │   │   └── TranscriptBox.jsx
+        │   │   └── css/
+        │   │       ├── ConfirmModal.css
+        │   │       ├── InfoButton.css
+        │   │       ├── InfoModal.css
+        │   │       ├── notemate.css
+        │   │       ├── ParticipantList.css
+        │   │       └── TranscriptBox.css
+        │   ├── querymate/
+        │   │   ├── querymate.jsx
+        │   │   ├── component/
+        │   │   │   ├── Pagination.jsx
+        │   │   │   ├── QuestionItem.jsx
+        │   │   │   ├── QuestionList.jsx
+        │   │   │   └── Sidebar.jsx
+        │   │   └── css/
+        │   │       ├── pagination.css
+        │   │       ├── querymate.css
+        │   │       ├── questionitem.css
+        │   │       ├── questionList.module.css
+        │   │       └── sidebar.module.css
+        └── statics/
+             ├── chat_modal/
+             │   ├── component/
+             │   │   ├── ChatHistory.jsx
+             │   │   ├── ChatInput.jsx
+             │   │   ├── ChatModal.jsx
+             │   │   └── MessageButton.jsx
+             │   └── css/
+             │       ├── ChatHistory.module.css
+             │       ├── ChatInput.module.css
+             │       ├── ChatModal.module.css
+             │       └── MessageButton.module.css
+             ├── component/
+             |   ├── footer.jsx
+             |   └── header.jsx
+             └── css/
+                 ├── footer.css
+                 └── header.css
+
+```
+
+
+</details>
+
+# 7. 요구사항 명세서
 
 ![admin (2)](https://github.com/user-attachments/assets/d5afeb62-3ce5-4e43-bb7f-1e30d1a04733)
 ![info (2)](https://github.com/user-attachments/assets/dc4c511b-dee3-419c-946f-54efb92fcb1c)
@@ -207,15 +469,15 @@
 ![chat](https://github.com/user-attachments/assets/e4add64f-4732-4483-a141-4d7f389161f3)  
 
 ---
-# ERD
+# 8. ERD
 ![image](https://github.com/user-attachments/assets/ceb4a430-71b9-4499-afae-5a34b0e51d65)
 
 
 
 ---
-# 수집한 데이터 및 전처리 요약 
+# 9. 수집한 데이터 및 전처리 요약 
 
-### 1. 데이터 수집 개요
+### 1) 데이터 수집 개요
 
 워라벨 메이트 프로젝트는 LLM 기반 문서 검색 및 QA 시스템의 성능 고도화를 위해 **다양한 실무 행정 문서 및 법령 데이터를 수집**하여 임베딩 및 검색에 활용하였습니다.
 
@@ -230,7 +492,7 @@
 
 
 
-### 2. 수집 문서 상세 목록
+### 2) 수집 문서 상세 목록
 
 | No. | 제목 | 설명 | 활용 방식 | 형식 | 크기 |
 |-----|------|------|------------|------|------|
@@ -247,7 +509,7 @@
 
 
 
-### 3. 전처리 과정 요약
+### 3) 전처리 과정 요약
 
 #### 비정형 문서 (HWP, HWPX, PDF)
 
@@ -282,7 +544,7 @@
 
 
 
-### 4. 텍스트 임베딩 및 벡터화
+### 4) 텍스트 임베딩 및 벡터화
 
 - **임베딩 모델**: `sentence-transformers/all-MiniLM-L6-v2`
 - **임베딩 방식**:
@@ -295,7 +557,7 @@
 
 
 
-### 5. 고려사항 및 한계
+### 5) 고려사항 및 한계
 
 - PDF 내 OCR 미처리 영역 존재 → 이미지 내 텍스트 인식 필요
 - 일부 HWP 문서에서 표 구조가 복잡해 추출 누락 가능성 존재
@@ -304,7 +566,7 @@
 
 
 
-### 6. 향후 계획
+### 6) 향후 계획
 
 - Tesseract 기반 OCR 도입하여 이미지 내 텍스트 인식 적용
 - 표 → Pandas 또는 관계형 DB 구조 변환 자동화
@@ -312,7 +574,7 @@
 - 민감정보 자동 필터링 및 데이터 익명화 기능 고도화
 
 ---
-## 모델 상세 정보
+# 10. 모델 상세 정보
 
 ### 사용 모델 개요
 
@@ -377,24 +639,18 @@
 - 사용자 피드백 기반 미세 튜닝(Fine-tuning) 환경 구축
 - 벡터 DB에 RRF 기반 다중 유사도 재정렬 알고리즘 적용 검토
 
-
 ---
-# DB 연동 구현 코드 
-
-
-
----
-# 테스트 계획 및 결과 보고서 
+# 11. 테스트 계획 및 결과 보고서 
 
 
 
 ---
-# 진행 과정 중 프로그램 개선 노력 
+# 12. 진행 과정 중 프로그램 개선 노력 
 
 
 
 ---
-# 수행 결과 
+# 13. 수행 결과 
 https://github.com/user-attachments/assets/02523717-e1e4-4366-b9ae-f630aa39c129
 
 
@@ -404,7 +660,7 @@ https://github.com/user-attachments/assets/02523717-e1e4-4366-b9ae-f630aa39c129
 
 
 --- 
-# 한 줄 회고 
+# 14. 회고 
 - 김영서:
 
 - 이광운:
