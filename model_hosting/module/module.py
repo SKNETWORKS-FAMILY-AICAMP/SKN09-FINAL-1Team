@@ -641,14 +641,13 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
                 call_counsel.coun_question,
                 call_counsel.coun_answer
             FROM call_counsel
-            WHERE call_counsel.coun_question IS NOT NULL
-              AND call_counsel.coun_answer IS NOT NULL;
         """)
 
         rows = cursor.fetchall()
 
         for row in rows:
-            if not row["coun_question"] or not row["coun_answer"]:
+            coun_question, coun_answer = row  # row는 tuple임
+            if not coun_question or not coun_answer:
                 continue
 
             content_text = f"질문: {row['coun_question']}\n답변: {row['coun_answer']}"
