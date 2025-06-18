@@ -19,7 +19,7 @@ from model_hosting.extraction.prompt_extraction import PromptExtraction
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from transformers import AutoTokenizer, AutoModel
-from qdrant_db.qdrant_loader import get_embedding
+from qdrant_db.qdrant_loader import get_embedding, load_qdrant_db
 import os
 import whisperx
 import json
@@ -565,7 +565,8 @@ async def process_audio_and_extract_qna(audio_path):
 def feedback_model(qna_data):
     print(qna_data)
     model = ChatOllama(model="qwen2.5")
-    prompt = prompt_extraction.make_feedback_prompt(qna_data)
+    context = load_qdrant_db(question=qna_data, collection_name="wlmmate_call")
+    prompt = prompt_extraction.make_feedback_prompt(qna_data, context)
     response = model.invoke(prompt)
 
     # 응답을 개별 피드백으로 분리하고 빈 문자열 제거

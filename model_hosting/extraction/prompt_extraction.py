@@ -306,7 +306,7 @@ class PromptExtraction:
             - 친절하고 공손한 말투를 유지하십시오.
             """
 
-    def make_feedback_prompt(self, qna_data):
+    def make_feedback_prompt(self, qna_data, context):
         qna_text = "".join(
             f"[질문: {qna['question']}\n답변: {qna['answer']}\n\n" for qna in qna_data
         )
@@ -320,6 +320,7 @@ class PromptExtraction:
 3. 회사나 기관의 정책, 지침과 충돌하지 않는가?
 4. 질문자에 대한 태도는 정중하고 신뢰를 줄 수 있는가?
 5. 답변의 구성은 명확하고 정보 전달이 효과적인가?
+6. 기존 유사 Q&A와 유사한 일관된 답변을 제공하고 있는가?
 
 작성 지침:
 - 각 Q&A 쌍마다 하나의 피드백을 생성하십시오.
@@ -333,5 +334,11 @@ class PromptExtraction:
     ...
 - "feedbackN": Q&A세트 N번에 대한 피드백 내용
 
+<기존 Q&A>
+{context}
+</기존 Q&A>
+
+<평가 Q&A>
 {qna_text}
+</평가 Q&A>
 """
