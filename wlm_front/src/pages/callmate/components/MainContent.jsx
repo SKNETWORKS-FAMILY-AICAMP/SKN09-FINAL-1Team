@@ -253,7 +253,7 @@ const MainContent = ({ searchParams }) => {
       });
       if (!res.ok) throw new Error('삭제 실패');
 
-      await fetch(`/api/delete_vector_by_id?collection_name=wlmmate_call&point_id=${id}`, {
+      await fetch(`/model/delete_vector_by_id?collection_name=wlmmate_call&point_id=${id}`, {
         method: 'DELETE',
       });
       
