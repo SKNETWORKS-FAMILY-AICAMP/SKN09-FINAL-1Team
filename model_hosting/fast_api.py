@@ -1,4 +1,4 @@
-from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException
+from fastapi import File, UploadFile, Form, APIRouter, Request, HTTPException, Query
 from fastapi.responses import JSONResponse
 from langchain_core.messages import AIMessage, HumanMessage
 from typing import List
@@ -8,7 +8,8 @@ import os
 import torch
 import whisperx
 import ollama
-from qdrant_db.qdrant_router import upload_vectors, search_vectors, delete_temp_vectors, SearchRequest, UploadRequest
+from qdrant_db.qdrant_loader import init_qdrant_from_call_db, delete_point_by_id
+from qdrant_db.qdrant_router import upload_vectors, search_vectors, delete_vectors, SearchRequest, UploadRequest
 from model_hosting.extraction.file_base_extraction import get_extractor_by_extension
 from model_hosting.extraction.prompt_extraction import PromptExtraction
 from model_hosting.ollama_load.ollama_hosting import OllamaHosting
@@ -541,11 +542,29 @@ async def delete_chat_room(chat_no: int, request: Request):
     finally:
         conn.close()
 
+@router.post("/create_vectors")
+def upload_vectors(collection_name="wlmmate_call"):
+    init_qdrant_from_call_db(collection_name=collection_name)
+    return {"success": True, "deleted_collection": collection_name}
 
-@router.delete("/delete_temp_vectors")
-def delete_temp_vector():
-    delete_temp_vectors()
-    print("!! 임시 vector 삭제")
+@router.delete("/delete_vectors")
+def delete_conn_vectors(collection_name: str = Query(..., description="삭제할 Qdrant 컬렉션 이름")):
+    delete_vectors(collection_name)
+    print(f"컬렉션 삭제: {collection_name}")
+    print(f"!! {collection_name} 컬렉션 삭제")
+    return {"success": True, "deleted_collection": collection_name}
+    
+
+@router.delete("/delete_vector_by_id")
+def delete_vector_by_id(
+    collection_name: str = Query(...),
+    point_id: int = Query(...)
+):
+    success = delete_point_by_id(collection_name, point_id)
+    if success:
+        return {"message": f"Point {point_id} deleted from {collection_name}"}
+    else:
+        return {"error": "Collection not found or deletion failed"}
 
 
 @router.get("/check-session")

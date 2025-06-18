@@ -2,26 +2,30 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from model_hosting.fast_api import router, generate_unanswered
+from model_hosting.module.module import init_qdrant_from_call_db
 from dotenv import load_dotenv
 import os
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 
-import asyncio
 
 scheduler = BackgroundScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 1. 서버 시작 시 1회 실행
-    await generate_unanswered()
 
-    # # 2. 스케줄러 등록 (30분 간격)
-    # scheduler.add_job(lambda: asyncio.run(generate_unanswered()),"interval", minutes=30, id="auto_generate_unanswered" )
-    # scheduler.start()
-    yield  # 앱 실행됨
-    # 3. 종료 시
-    # scheduler.shutdown()
+    # 매일 오후 6시 실행 스케줄 등록
+    scheduler.add_job(
+        func=init_qdrant_from_call_db,
+        trigger="cron",
+        hour=18,
+        minute=0,
+        id="daily_qdrant_refresh"
+    )
+
+    scheduler.start()
+    yield
+    scheduler.shutdown()
 
 
 app = FastAPI(lifespan=lifespan)

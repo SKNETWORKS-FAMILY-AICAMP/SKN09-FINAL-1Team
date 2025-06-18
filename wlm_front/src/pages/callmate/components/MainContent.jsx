@@ -202,6 +202,10 @@ const MainContent = ({ searchParams }) => {
             throw new Error(errorData.detail || 'Q&A 데이터 저장 실패');
           }
 
+          await fetch('/model/create_vectors', {
+            method: 'POST'
+          })
+
           // 기존 데이터에 새 데이터 추가
           setQaList(prev => [
             ...prev,
@@ -248,6 +252,11 @@ const MainContent = ({ searchParams }) => {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('삭제 실패');
+
+      await fetch(`/api/delete_vector_by_id?collection_name=wlmmate_call&point_id=${id}`, {
+        method: 'DELETE',
+      });
+      
       setQaList((prev) => prev.filter((qa) => qa.id !== id));
     } catch (err) {
       alert('삭제 중 오류 발생');

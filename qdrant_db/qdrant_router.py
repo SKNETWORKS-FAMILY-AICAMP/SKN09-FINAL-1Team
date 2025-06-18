@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import List
-from qdrant_db.qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection
+from qdrant_db.qdrant_loader import load_qdrant_db, store_temp_embedding, delete_collection, delete_point_by_id
 
 qdrant_router = APIRouter()
 
@@ -24,11 +24,23 @@ def search_vectors(request: SearchRequest):
     print(f"=>벡터 검색결과: {result}")
     return result
 
-@qdrant_router.delete("/api/delete_temp_vectors")
-def delete_temp_vectors():
+@qdrant_router.delete("/api/delete_vectors")
+def delete_vectors(collection_name):
     collection_name = "qdrant_temp"
     deleted = delete_collection(collection_name)
     if deleted:
         return {"message": f"Collection '{collection_name}' has been deleted."}
     else:
         return {"message": f"Collection '{collection_name}' does not exist."}
+
+
+@qdrant_router.delete("/api/delete_vector_by_id")
+def delete_vector_by_id(
+    collection_name: str = Query(...),
+    point_id: int = Query(...)
+):
+    success = delete_point_by_id(collection_name, point_id)
+    if success:
+        return {"message": f"Point {point_id} deleted from {collection_name}"}
+    else:
+        return {"error": "Collection not found or deletion failed"}

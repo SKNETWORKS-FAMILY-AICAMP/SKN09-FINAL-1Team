@@ -16,19 +16,13 @@ from datetime import datetime
 from types import SimpleNamespace
 from pydantic import BaseModel
 from model_hosting.extraction.prompt_extraction import PromptExtraction
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
-from transformers import AutoTokenizer, AutoModel
-from qdrant_db.qdrant_loader import get_embedding, load_qdrant_db
-import os
+from qdrant_db.qdrant_loader import load_qdrant_db
 import whisperx
 import json
 import uuid
 import pymysql
-from pymysql.cursors import DictCursor
 import re
 import torch
-import ollama
 
 prompt_extraction = PromptExtraction()
 
@@ -597,70 +591,3 @@ def get_from_state(state, key, default):
         return state.values.get(key, default)
     return default
 
-
-embedding_model_name = "BM-K/KoSimCSE-roberta"
-tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
-model = AutoModel.from_pretrained(embedding_model_name)
-embedding_dim = 768
-
-# 환경변수 로드
-QDRANT_URL = os.environ.get("QDRANT_URL")
-QDRANT_KEY = os.environ.get("QDRANT_KEY")
-client = QdrantClient(
-    url=QDRANT_URL,
-    api_key=QDRANT_KEY,
-)
-
-DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
-DB_PORT = int(os.environ.get("MY_DB_PORT", ""))
-DB_USER = os.environ.get("MY_DB_USER", "")
-DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
-DB_NAME = os.environ.get("MY_DB_NAME", "")
-DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
-
-def init_qdrant_from_call_db(collection_name="wlmmate_call"):
-    if not client.collection_exists(collection_name=collection_name):
-        client.recreate_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
-        )
-
-    checkpoint = MySQLCheckpoint(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        db=DB_NAME,
-        charset=DB_CHARSET,
-    )
-    conn = checkpoint._get_connection()
-
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                call_counsel.coun_no,
-                call_counsel.coun_question,
-                call_counsel.coun_answer
-            FROM call_counsel
-        """)
-
-        rows = cursor.fetchall()
-
-        for row in rows:
-            coun_no, coun_question, coun_answer = row
-            if not coun_question or not coun_answer:
-                continue
-
-            content_text = f"질문: {coun_question}\n답변: {coun_answer}"
-            embedding = get_embedding(content_text)
-
-            payload = {
-                "content": content_text
-            }
-
-            point = PointStruct(
-                id=coun_no,
-                vector=embedding.tolist(),
-                payload=payload
-            )
-            client.upsert(collection_name=collection_name, points=[point])

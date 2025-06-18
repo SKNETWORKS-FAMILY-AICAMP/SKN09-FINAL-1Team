@@ -131,11 +131,12 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 
   const handleRemoveFile = async (index) => {
     try {
-      fetch("/model/delete_temp_vectors", {
+      await fetch("/model/delete_temp_vectors?collection_name=qdrant_temp", {
         method: 'DELETE',
       });
+      console.log("Qdrant 컬렉션 삭제 완료");
     } catch (err) {
-      console.error("=> Qdrant 컬렉션 삭제 실패:", err);
+      console.error("Qdrant 컬렉션 삭제 실패:", err);
     }
 
     const updated = files.filter((_, i) => i !== index);

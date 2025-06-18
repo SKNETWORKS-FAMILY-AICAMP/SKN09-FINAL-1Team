@@ -4,6 +4,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
+import pymysql
 from dotenv import load_dotenv
 
 # 환경변수 로드
@@ -21,11 +22,22 @@ tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 model = AutoModel.from_pretrained(embedding_model_name)
 embedding_dim = 768
 
+conn = pymysql.connect(
+    host=os.environ.get("MY_DB_HOST", "localhost"),
+    port=int(os.environ.get("MY_DB_PORT", "3306")),
+    user=os.environ.get("MY_DB_USER", "root"),
+    password=os.environ.get("MY_DB_PASSWORD", ""),
+    db=os.environ.get("MY_DB_NAME", ""),
+    charset=os.environ.get("MY_DB_CHARSET", "utf8mb4"),
+)
+
 FOLDER_TO_COLLECTION = {
+    "전체": "all",
     "법령": "law",
     "사업": "business",
     "훈령": "directive",
-    "민원": "civil"
+    "민원": "civil",
+    "콜메이트": "call"
 }
 
 def get_embedding(text: str):
@@ -203,5 +215,52 @@ def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
 def delete_collection(collection_name="qdrant_temp"):
     if client.collection_exists(collection_name=collection_name):
         client.delete_collection(collection_name=collection_name)
+        return True
+    return False
+
+
+def init_qdrant_from_call_db(collection_name="wlmmate_call"):
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                call_counsel.coun_no,
+                call_counsel.coun_question,
+                call_counsel.coun_answer
+            FROM call_counsel
+        """)
+
+        rows = cursor.fetchall()
+
+        for row in rows:
+            coun_no, coun_question, coun_answer = row
+            if not coun_question or not coun_answer:
+                continue
+
+            content_text = f"질문: {coun_question}\n답변: {coun_answer}"
+            embedding = get_embedding(content_text)
+
+            payload = {
+                "content": content_text
+            }
+
+            point = PointStruct(
+                id=coun_no,
+                vector=embedding.tolist(),
+                payload=payload
+            )
+            client.upsert(collection_name=collection_name, points=[point])
+
+def delete_point_by_id(collection_name: str, point_id: int):
+    if client.collection_exists(collection_name=collection_name):
+        client.delete(
+            collection_name=collection_name,
+            points_selector={"points": [point_id]}
+        )
         return True
     return False
