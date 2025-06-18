@@ -236,12 +236,9 @@
 ```
 SKN09-FINAL-1Team/
 ├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   └── pull_request_template.md
 ├── .gitignore
 ├── README.md
 ├── data/
-│   ├── 1.pdf
 │   ├── civil_data.json
 │   ├── json_docs_data/
 │   │   ├── 법령/
@@ -251,16 +248,10 @@ SKN09-FINAL-1Team/
 │   │   ├── 법령/
 │   │   ├── 사업/
 │   │   └── 훈령/
-│   ├── preprocess/
-│   │   ├── 법령/
-│   │   ├── 사업/
-│   │   └── 훈령/
-│   └── qdrant_db/
-│       ├── .lock
-│       ├── meta.json
-│       └── collection/
-│           └── wlmmate_vectors/
-│               └── storage.sqlite
+│   └── preprocess/
+│       ├── 법령/
+│       ├── 사업/
+│       └── 훈령/
 ├── db_connection_mvc/
 │   ├── .env
 │   ├── Dockerfile
@@ -323,8 +314,6 @@ SKN09-FINAL-1Team/
     │   └── images/
     └── src/
         ├── App.jsx
-        ├── App.module.css
-        ├── index.css
         ├── main.jsx
         ├── assets/
         │   └── react.svg
