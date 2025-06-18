@@ -641,7 +641,72 @@ SKN09-FINAL-1Team/
 
 ---
 # 11. 테스트 계획 및 결과 보고서 
+<details>
+<summary>계정 로그인</summary>
+ 
+![스크린샷 2025-06-18 142734](https://github.com/user-attachments/assets/0a7216ea-3d26-4aa9-8b7b-4f60150e2144)
+![스크린샷 2025-06-18 142747](https://github.com/user-attachments/assets/2235ac57-b8a3-4ef7-ac26-83402e99f929)
+</details> 
 
+<details>
+<summary>관리자</summary>
+
+![스크린샷 2025-06-18 142755](https://github.com/user-attachments/assets/915ab3da-3735-45c3-859d-58771f38414b)
+![스크린샷 2025-06-18 142807](https://github.com/user-attachments/assets/9d073400-7eed-4948-b58f-69e076368473)
+![스크린샷 2025-06-18 142814](https://github.com/user-attachments/assets/afcd7e40-4754-455f-8841-d4bdd947d8c0)
+![스크린샷 2025-06-18 142822](https://github.com/user-attachments/assets/a023dbe3-34ef-4c84-8ad9-01430d7758c9)
+</details>
+
+<details>
+<summary>정보 조회</summary>
+ 
+![스크린샷 2025-06-18 142830](https://github.com/user-attachments/assets/cf64b9cb-acda-41fb-a3d8-eee3719a1964)
+![스크린샷 2025-06-18 142837](https://github.com/user-attachments/assets/5af98c64-22df-467a-aa41-0884583ed241)
+</details>
+
+<details>
+ <summary>NoteMate</summary>
+
+ ![스크린샷 2025-06-18 142945](https://github.com/user-attachments/assets/75df70cf-88ae-4bc4-9d1b-00b477b4e302)
+
+</details>
+
+
+<details>
+ <summary>QueryMate</summary>
+
+![스크린샷 2025-06-18 143002](https://github.com/user-attachments/assets/88de4b3c-a359-4b09-9c8f-3ce89d565b6a)
+![스크린샷 2025-06-18 143010](https://github.com/user-attachments/assets/7d3a4e67-e007-40a5-ac54-3e2abbea6673)
+![스크린샷 2025-06-18 143018](https://github.com/user-attachments/assets/58757c22-f08a-437b-901b-142b9497fcfe)
+![스크린샷 2025-06-18 143024](https://github.com/user-attachments/assets/9c44d378-e75d-451a-b2c5-3c7e6378070b)
+![스크린샷 2025-06-18 143030](https://github.com/user-attachments/assets/4cd1931d-205e-476d-ba46-d1ddcc033703)
+![스크린샷 2025-06-18 143038](https://github.com/user-attachments/assets/84f9bb0a-8a23-4eff-8112-c9fdfb3d18f6)
+![스크린샷 2025-06-18 143048](https://github.com/user-attachments/assets/9aef0cc3-7a75-4318-b6ab-1e9eea52b93a)
+![스크린샷 2025-06-18 143057](https://github.com/user-attachments/assets/3c08e374-4856-4475-a7ef-d5fd78a4fe69)
+![스크린샷 2025-06-18 143105](https://github.com/user-attachments/assets/8db89797-eebd-453f-aaa5-57cb26343d8a)
+![스크린샷 2025-06-18 143114](https://github.com/user-attachments/assets/60975b1d-eafe-4fc3-9bb2-7731bcd8710c)
+
+</details>
+
+<details>
+ <summary>ChatMate</summary>
+
+![스크린샷 2025-06-18 143124](https://github.com/user-attachments/assets/b3a46328-8f9a-4c26-985c-03717e830857)
+![스크린샷 2025-06-18 143132](https://github.com/user-attachments/assets/30ec7b9a-1cbb-462e-957e-abb597428d50)
+![스크린샷 2025-06-18 143138](https://github.com/user-attachments/assets/0508f7ab-d833-46ce-9bbf-92bc99795e89)
+![스크린샷 2025-06-18 143147](https://github.com/user-attachments/assets/656c9ad3-f10e-41ee-bfd1-05778ba37c96)
+
+
+</details>
+
+<details>
+ <summary>CallMate</summary>
+
+![스크린샷 2025-06-18 143155](https://github.com/user-attachments/assets/e6d3f8b2-57a4-4ff1-b7f1-834d2bac0fa3)
+![스크린샷 2025-06-18 143204](https://github.com/user-attachments/assets/dcac3afd-3910-4fb0-86c6-22342b046c19)
+![스크린샷 2025-06-18 143217](https://github.com/user-attachments/assets/60618367-47d7-4098-bf02-a4b769d65c89)
+
+</details>
 
 
 ---
