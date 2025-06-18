@@ -3,6 +3,7 @@ import json
 import torch
 from transformers import AutoTokenizer, AutoModel
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import PointIdsList
 from qdrant_client.models import Distance, VectorParams, PointStruct
 import pymysql
 from dotenv import load_dotenv
@@ -260,7 +261,7 @@ def delete_point_by_id(collection_name: str, point_id: int):
     if client.collection_exists(collection_name=collection_name):
         client.delete(
             collection_name=collection_name,
-            points_selector={"points": [point_id]}
+            points_selector=PointIdsList(points=[point_id])
         )
         return True
     return False

@@ -360,8 +360,6 @@ async def upload_audio(file: UploadFile = File(...)):
     feedbacks = feedback_model(qna_data)
     for i, qna in enumerate(qna_data):
         qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
-    
-    init_qdrant_from_call_db()
 
     return JSONResponse(content={"qna": qna_data})
 
