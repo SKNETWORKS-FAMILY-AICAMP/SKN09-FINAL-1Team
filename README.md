@@ -61,7 +61,7 @@
 
 ## 1) 프로젝트 개요
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/786e722c-41b7-461f-ad77-816c858d0b7c" width="300"/>
+  <img src="https://github.com/user-attachments/assets/6714ed43-3719-425c-83ac-87953f17b086" width="300"/>
 </p>
 
  워라벨 메이트는 조직 내부 구성원의 워크라이프 밸런스 향상을 목표로 한 LLM 기반 업무 자동화 시스템입니다. 일상 업무에서 시간을 많이 소모하는 작업들을 인공지능으로 자동화하여, 직원들이 보다 핵심 업무에 집중하고 업무 효율을 높일 수 있도록 도와줍니다. 주요 기능으로 **회의록 자동 작성 및 요약 (NoteMate)**, **사내 문서 기반 질의 응답 (ChatMate)**, **반복 민원 자동 응답 처리 (QueryMate)**, **전화 상담 녹취 분석 (CallMate)** 의 네 가지 모듈을 제공합니다. 각 모듈은 최신 **대규모 언어 모델(LLM)** 과 사내 데이터를 활용하여 자연어 처리 작업을 수행하며, 이를 통해 업무 생산성과 정확성을 높이고 업무 시간 단축에 기여합니다. 
@@ -116,8 +116,8 @@
 
 #### 기술 성숙도 상승
 
-- FAISS, Qdrant 등 **벡터 DB 기술 상용화**  
-- GPU 기반 LLM 배포 도구(SageMaker, Ollama 등)의 활용으로 도입 장벽 낮아짐 [^9]
+- Qdrant **벡터 DB 기술 상용화**  
+- GPU 기반 LLM 배포 도구(langchain, Ollama 등)의 활용으로 도입 장벽 낮아짐 [^9]
 
 #### 보안 규제 강제화
 
@@ -180,9 +180,9 @@
 | **벡터DB** | <img src="https://img.shields.io/badge/Qdrant-FF4C4C?logo=qdrant&logoColor=white"> | 문서 벡터화 및 유사도 검색 저장소 |
 | **문서 임베딩** | <img src="https://img.shields.io/badge/SBERT-all--MiniLM--L6--v2-blue"> | Sentence Transformers 기반 텍스트 임베딩 |
 | **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP Parser-FF9900?logo=hancom&logoColor=white"> | 비정형 문서 구조 파싱 및 JSON 저장 |
-| **데이터 저장소** | <img src="https://img.shields.io/badge/JSON-5E5C5C?logo=json&logoColor=white"> <img src="https://img.shields.io/badge/Local%20FS-555?logo=linux&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
+| **데이터 저장소** | <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Qdrant_Client-FF4C4C?logo=qdrant&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
 | **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> | 모든 서비스 도커 컨테이너화 및 자동 실행 스크립트 포함 |
-| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | Front ↔ Backend ↔ LLM 간 통신 구성 |
+| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | 프론트에서 사용자 흐름에 따라 백엔드/LLM에 개별 호출. |
 
 
 
@@ -211,8 +211,6 @@ SKN09-FINAL-1Team/
 │   └── pull_request_template.md
 ├── .gitignore
 ├── README.md
-├── package.json
-├── package-lock.json
 ├── data/
 │   ├── 1.pdf
 │   ├── civil_data.json
@@ -263,18 +261,11 @@ SKN09-FINAL-1Team/
 │   ├── fast_api.py
 │   ├── install_python_ollama.sh
 │   ├── main.py
-│   ├── qdrantest.ipynb
 │   ├── requirements.txt
-│   ├── call_data/
-│   │   ├── 05.mp3
-│   │   └── news.mp3
-│   ├── data/
-│   │   └── temp_uploaded.json
 │   ├── data_loader/
 │   │   └── qdrant_chat.py
 │   ├── extraction/
 │   │   ├── __init__.py
-│   │   ├── extractor_test.ipynb
 │   │   ├── file_base_extraction.py
 │   │   ├── hwp_extraction.py
 │   │   ├── pdf_extraction.py
@@ -284,10 +275,7 @@ SKN09-FINAL-1Team/
 │   │   └── module.py
 │   └── ollama_load/
 │       ├── __init__.py
-│       ├── ollama_hosting.py
-│       ├── ollama_serve.ipynb
-│       └── data/
-│           └── 1.pdf
+│       └── ollama_hosting.py
 ├── qdrant_db/
 │   ├── main.py
 │   ├── qdrant_loader.py
@@ -303,13 +291,7 @@ SKN09-FINAL-1Team/
     ├── package-lock.json
     ├── vite.config.js
     ├── public/
-    │   ├── vite.svg
     │   └── images/
-    │       ├── callbot.png
-    │       ├── chatmate.png
-    │       ├── claimmate.png
-    │       ├── notemate.png
-    │       ├── wlbmate_logo.png
     └── src/
         ├── App.jsx
         ├── App.module.css
@@ -323,136 +305,38 @@ SKN09-FINAL-1Team/
         │   ├── admin/
         │   │   ├── AdminBase.jsx
         │   │   ├── component/
-        │   │   │   ├── AdminHeader.jsx
-        │   │   │   ├── AdminMain.jsx
-        │   │   │   ├── AdminSidebar.jsx
-        │   │   │   ├── UserCreate.jsx
-        │   │   │   ├── UserDetail.jsx
-        │   │   │   ├── UserList.jsx
-        │   │   │   └── UserSearch.jsx
         │   │   └── css/
-        │   │       ├── AdminSidebar.module.css
-        │   │       ├── UserCreate.module.css
-        │   │       ├── UserDetail.module.css
-        │   │       ├── UserList.module.css
-        │   │       └── UserSearch.module.css
         │   ├── callmate/
         │   │   ├── Callmate.jsx
         │   │   ├── components/
-        │   │   │   ├── MainContent.jsx
-        │   │   │   └── Sidebar.jsx
         │   │   └── css/
-        │   │       ├── Callmate.module.css
-        │   │       ├── MainContent.module.css
-        │   │       └── Sidebar.module.css
         │   ├── chatbot/
         │   │   ├── chatbot_con/
-        │   │   │   ├── Base.jsx
-        │   │   │   └── Base.module.css
         │   │   ├── component/
-        │   │   │   ├── ChatArea.jsx
-        │   │   │   ├── FilterPanel.jsx
-        │   │   │   └── sideBar.jsx
         │   │   └── css/
-        │   │       ├── ChatArea.module.css
-        │   │       ├── FilterPanel.module.css
-        │   │       └── SideBar.module.css
         │   ├── images/
-        │   │   ├── after-meeting.png
-        │   │   ├── before-meeting.png
-        │   │   ├── callbot-dark-light.png
-        │   │   ├── callbot-image.png
-        │   │   ├── chatbot-dark-light.png
-        │   │   ├── chatbot-image.png
-        │   │   ├── file_upload.png
-        │   │   ├── logo-image.png
-        │   │   ├── logo-image2.png
-        │   │   ├── notemate-dark-light.png
-        │   │   ├── notemate-image.png
-        │   │   ├── querymate-dark-light.png
-        │   │   ├── querymate-image.png
-        │   │   └── up_arrow.png
         │   ├── login/
         │   │   ├── component/
-        │   │   │   ├── forgotpasswordmodal.jsx
-        │   │   │   └── login.jsx
         │   │   └── css/
-        │   │       ├── forgotpasswordmodal.css
-        │   │       └── login.css
         │   ├── mainpage/
         │   │   ├── component/
-        │   │   │   └── mainpage.jsx
         │   │   ├── mainpage_con/
-        │   │   │   └── base.jsx
         │   │   └── css/
-        │   │       ├── call.jpeg
-        │   │       ├── call.png
-        │   │       ├── call2.jpeg
-        │   │       ├── chat.jpeg
-        │   │       ├── chat.png
-        │   │       ├── mainpage.css
-        │   │       ├── meet.jpeg
-        │   │       ├── note.png
-        │   │       ├── query.jpg
-        │   │       ├── query.png
-        │   │       └── wlbmate_logo.png
         │   ├── mypage/
         │   │   ├── component/
-        │   │   │   ├── MyPage.jsx
-        │   │   │   ├── PasswordChangeModal.jsx
-        │   │   │   └── UserInfo.jsx
         │   │   └── css/
-        │   │       ├── MyPage.module.css
-        │   │       ├── PasswordChangeModal.module.css
-        │   │       ├── ResultModal.css
-        │   │       └── UserInfo.module.css
         │   ├── notemate/
         │   │   ├── component/
-        │   │   │   ├── ConfirmModal.jsx
-        │   │   │   ├── InfoButton.jsx
-        │   │   │   ├── InfoModal.jsx
-        │   │   │   ├── MicButton.jsx
-        │   │   │   ├── notemate.jsx
-        │   │   │   ├── ParticipantList.jsx
-        │   │   │   └── TranscriptBox.jsx
         │   │   └── css/
-        │   │       ├── ConfirmModal.css
-        │   │       ├── InfoButton.css
-        │   │       ├── InfoModal.css
-        │   │       ├── notemate.css
-        │   │       ├── ParticipantList.css
-        │   │       └── TranscriptBox.css
         │   ├── querymate/
-        │   │   ├── querymate.jsx
         │   │   ├── component/
-        │   │   │   ├── Pagination.jsx
-        │   │   │   ├── QuestionItem.jsx
-        │   │   │   ├── QuestionList.jsx
-        │   │   │   └── Sidebar.jsx
         │   │   └── css/
-        │   │       ├── pagination.css
-        │   │       ├── querymate.css
-        │   │       ├── questionitem.css
-        │   │       ├── questionList.module.css
-        │   │       └── sidebar.module.css
         └── statics/
              ├── chat_modal/
              │   ├── component/
-             │   │   ├── ChatHistory.jsx
-             │   │   ├── ChatInput.jsx
-             │   │   ├── ChatModal.jsx
-             │   │   └── MessageButton.jsx
              │   └── css/
-             │       ├── ChatHistory.module.css
-             │       ├── ChatInput.module.css
-             │       ├── ChatModal.module.css
-             │       └── MessageButton.module.css
              ├── component/
-             |   ├── footer.jsx
-             |   └── header.jsx
              └── css/
-                 ├── footer.css
-                 └── header.css
 
 ```
 
