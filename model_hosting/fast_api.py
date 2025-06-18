@@ -348,6 +348,7 @@ async def summarize_text(request: TextRequest):
 async def upload_audio(file: UploadFile = File(...)):        
         # 1. 파일 저장
     save_path = f"./call_data/{file.filename}"
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
 
