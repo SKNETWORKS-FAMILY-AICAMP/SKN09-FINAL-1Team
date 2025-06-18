@@ -360,7 +360,7 @@ async def upload_audio(file: UploadFile = File(...)):
         qna['feedback'] = feedbacks[i] if i < len(feedbacks) else ""
     
     init_qdrant_from_call_db()
-    
+
     return JSONResponse(content={"qna": qna_data})
 
 COLLECTIONS = [
@@ -481,6 +481,25 @@ async def generate_unanswered():
         return {"success": False}
     finally:
         conn.close()
+
+@router.get("/chat_list")
+async def chat_list(request: Request):
+    employee = request.session.get("employee")
+    if not employee:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    emp_code = employee["emp_code"]
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    return checkpoint.get_chat_list(emp_code)
+
 
 @router.get("/chat_log")
 async def chat_log(chat_no: int):
