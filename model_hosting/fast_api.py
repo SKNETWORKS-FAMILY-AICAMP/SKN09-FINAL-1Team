@@ -541,7 +541,7 @@ async def delete_chat_room(chat_no: int, request: Request):
         conn.close()
 
 @router.post("/create_vectors")
-def upload_vectors(collection_name="wlmmate_call"):
+def upload_call_vectors(collection_name="wlmmate_call"):
     init_qdrant_from_call_db(collection_name=collection_name)
     return {"success": True, "deleted_collection": collection_name}
 
