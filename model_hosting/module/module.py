@@ -16,6 +16,11 @@ from datetime import datetime
 from types import SimpleNamespace
 from pydantic import BaseModel
 from model_hosting.extraction.prompt_extraction import PromptExtraction
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+from transformers import AutoTokenizer, AutoModel
+from qdrant_db.qdrant_loader import get_embedding
+import os
 import whisperx
 import json
 import uuid
@@ -588,3 +593,79 @@ def get_from_state(state, key, default):
     elif hasattr(state, "values") and key in state.values:
         return state.values.get(key, default)
     return default
+
+
+embedding_model_name = "BM-K/KoSimCSE-roberta"
+tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
+model = AutoModel.from_pretrained(embedding_model_name)
+embedding_dim = 768
+
+# 환경변수 로드
+QDRANT_URL = os.environ.get("QDRANT_URL")
+QDRANT_KEY = os.environ.get("QDRANT_KEY")
+client = QdrantClient(
+    url=QDRANT_URL,
+    api_key=QDRANT_KEY,
+)
+
+DB_HOST = os.environ.get("MY_DB_HOST", "localhost")
+DB_PORT = int(os.environ.get("MY_DB_PORT", ""))
+DB_USER = os.environ.get("MY_DB_USER", "")
+DB_PASSWORD = os.environ.get("MY_DB_PASSWORD", "")  # 실제 비밀번호로 교체
+DB_NAME = os.environ.get("MY_DB_NAME", "")
+DB_CHARSET = os.environ.get("MY_DB_CHARSET", "utf8mb4")
+
+def init_qdrant_from_call_db(collection_name="wlmmate_call"):
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    point_id = 0
+
+    checkpoint = MySQLCheckpoint(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        charset=DB_CHARSET
+    )
+    conn = checkpoint._get_connection()
+
+    with conn.cursor(dictionary=True) as cursor:
+        # 별칭 없이 테이블명 직접 사용
+        cursor.execute("""
+            SELECT 
+                call_mate.call_no,
+                call_mate.call_path,
+                call_counsel.coun_question,
+                call_counsel.coun_answer
+            FROM call_mate
+            JOIN call_counsel ON call_mate.call_no = call_counsel.call_no
+        """)
+
+        rows = cursor.fetchall()
+
+        for row in rows:
+            if not row["coun_question"] or not row["coun_answer"]:
+                continue
+
+            content_text = f"질문: {row['coun_question']}\n답변: {row['coun_answer']}"
+            embedding = get_embedding(content_text)
+
+            payload = {
+                "call_no": row["call_no"],
+                "emp_no": row["emp_no"],
+                "call_path": row["call_path"],
+                "content": content_text
+            }
+
+            point = PointStruct(
+                id=point_id,
+                vector=embedding.tolist(),
+                payload=payload
+            )
+            client.upsert(collection_name=collection_name, points=[point])
+            point_id += 1

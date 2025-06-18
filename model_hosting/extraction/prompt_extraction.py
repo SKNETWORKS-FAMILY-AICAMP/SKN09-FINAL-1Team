@@ -233,13 +233,15 @@ class PromptExtraction:
 
     def make_audio_transcription_prompt(self, transcript: str) -> str:
         return f"""
-반드시 한국어로 대답하세요.    
-다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다. 질문과 답변을 구분해 JSON 배열 형태로 만들어 주세요.
-반드시 JSON 형식만 출력해 주세요.
+당신은 한국어 사용자를 위한 도우미입니다. 반드시 한국어를 사용해 대답하세요.
+다음 텍스트는 민원 전화 상담 내용을 전사한 것입니다.
+질문과 답변을 구분해 "question"과 "answer"를 키값으로 하는 JSON 배열 형태로 만들어 주세요.
+반드시 JSON 형식의 데이터만을 출력하고 이외에는 출력하지 마세요.
+내용은 반드시 한국어만을 이용해 응답하세요
 
 형식:
 [
-  {{ "question": "질문 내용", "answer": "답변 내용" }},
+  {{ "question": "민원인의 질문 내용", "answer": "상담사의 답변 내용" }},
   ...
 ]
 
