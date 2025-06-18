@@ -202,7 +202,7 @@ const MainContent = ({ searchParams }) => {
             throw new Error(errorData.detail || 'Q&A 데이터 저장 실패');
           }
 
-          await fetch('/model/create_vectors', {
+          await fetch('/model/create_vectors?collection_name=wlmmate_call', {
             method: 'POST'
           })
 
