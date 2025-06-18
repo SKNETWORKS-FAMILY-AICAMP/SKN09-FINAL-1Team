@@ -639,8 +639,7 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
         cursor.execute("""
             SELECT 
                 call_counsel.coun_question,
-                call_counsel.coun_answer,
-                call_counse.coun_feedback
+                call_counsel.coun_answer
             FROM call_mate
             JOIN call_counsel ON call_mate.call_no = call_counsel.call_no
         """)
