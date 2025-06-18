@@ -449,7 +449,7 @@ async def generate_unanswered():
                 SELECT query_mate.query_no, query_mate.query_text
                 FROM query_mate
                 LEFT JOIN query_response ON query_mate.query_no = query_response.query_no
-                WHERE query_response.res_text IS NULL OR query_response.res_text = '' OR query_response.res_text = 'null'
+                WHERE query_response.res_state = 0
             """)
             unanswered = cursor.fetchall()
 
@@ -467,7 +467,7 @@ async def generate_unanswered():
                         ON DUPLICATE KEY UPDATE
                             res_text = VALUES(res_text),
                             res_write_dt = NOW()
-                    """, (q["query_no"], default_emp_no, answer, 1))
+                    """, (q["query_no"], default_emp_no, answer, 0))
                 conn.commit()
 
             except Exception as e:
