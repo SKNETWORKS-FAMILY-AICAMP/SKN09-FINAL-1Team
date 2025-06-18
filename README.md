@@ -163,10 +163,38 @@
   - 규제 대응이 필요한 기관/기업에서도 사내 LLM 기반 AI 운영 가능
 
 ## 4) 구현 기능
-- NoteMate (회의록 도우미): 회의 내용을 STT(Speech-to-Text)로 자동 기록하고, 중요한 내용을 발췌하여 요약본 작성 및 회의록 공유까지 자동화
-- ChatMate (지식 도우미): 사내 문서 및 지식 기반을 바탕으로 직원들의 질문에 대해 AI 챗봇 형태로 실시간 답변 제공
-- QueryMate (민원 도우미): 반복적으로 접수되는 민원이나 문의사항에 대한 자동 응답 초안 작성 및 관리자 검수/승인 워크플로우 지원
-- CallMate (콜 도우미): 고객센터 등의 전화 상담 녹취를 텍스트로 변환하고 질문/응답 쌍 추출, 나아가 AI 기반 피드백을 제공하여 상담 품질 분석
+#### NoteMate (회의록 도우미)
+- **회의 생성부터 요약 공유까지 전체 자동화**:
+  - 회의 생성 시 날짜, 시간, 참여자 이메일 입력 → 녹음 시작 버튼 클릭
+  - WhisperX 기반 음성 인식 → 회의 전체 음성 텍스트로 변환
+  - 텍스트 요약 및 회의록 자동 작성
+  - 회의록 요약본 자동 생성 및 이메일 전송
+  - 참여자 이메일 수정 후 회의 요약본 전송 가능
+  - **예외 흐름 대응**: 정보 미입력 시 에러 메시지 안내 / 중도 종료 시 녹취 미저장 처리
+ 
+#### ChatMate (지식 도우미)
+- **챗봇 기반 실시간 문서 질의응답 시스템**:
+  - 메인페이지 → 챗봇 메뉴 클릭 → 질의 입력 시 AI 응답 생성
+  - 질의 유형 분석 → 정확한 응답 제공 (LangChain + Qwen 2.5 기반)
+  - 과거 대화 히스토리 리스트 및 상세 내역 조회 가능
+  - 파일 업로드 기능으로 문서 기반 질의 대응
+  - **예외 흐름 대응**: 챗봇 내 검색 불가 시 메시지로 안내
+
+#### QueryMate (민원 도우미)
+- **반복 민원 자동 응답 초안 생성 및 검수 프로세스**:
+  - 민원 게시판 접속 → 민원 검색 및 상세 내용 조회
+  - 답변 초안 작성 → 작성 완료 후 확인 버튼 클릭 시 등록
+  - 등록된 답변에 대해 수정/삭제 가능
+  - AI 답변 초안 확인 → 승인, 수정, 거부 기능 제공
+  - 승인 시 게시판 등록 / 거부 시 목록에서 제거
+  - **예외 흐름 대응**: 검색 조건 미충족 시 안내 메시지 출력
+
+#### CallMate (콜 도우미)
+- **고객센터 등의 전화 상담 녹취 텍스트 변환하고 질문/응답 쌍 추출**:
+  - 음성 파일 업로드 시 WhisperX → 텍스트 변환
+  - LLM 분석으로 모범답안 자동 생성
+  - 게시물로 등록되며, 상세 조회 및 출력 가능
+  - 답변에 대한 AI의 피드백과 모법 답변 -> 상담 품질 개선
 ---
 # 3. 기술 스택
 
@@ -182,7 +210,7 @@
 | **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP Parser-FF9900?logo=hancom&logoColor=white"> | 비정형 문서 구조 파싱 및 JSON 저장 |
 | **데이터 저장소** | <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Qdrant_Client-FF4C4C?logo=qdrant&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
 | **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> | 모든 서비스 도커 컨테이너화 및 자동 실행 스크립트 포함 |
-| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | 프론트에서 사용자 흐름에 따라 백엔드/LLM에 개별 호출. |
+| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | 프론트에서 사용자 흐름에 따라 백엔드/LLM 개별 호출. |
 
 
 
