@@ -623,8 +623,6 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
             vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
         )
 
-    point_id = 0
-
     checkpoint = MySQLCheckpoint(
         host=DB_HOST,
         port=DB_PORT,
@@ -638,6 +636,7 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
     with conn.cursor() as cursor:
         cursor.execute("""
             SELECT 
+                call_counsel.coun_no,
                 call_counsel.coun_question,
                 call_counsel.coun_answer
             FROM call_counsel
@@ -646,11 +645,11 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
         rows = cursor.fetchall()
 
         for row in rows:
-            coun_question, coun_answer = row  # row는 tuple임
+            coun_no, coun_question, coun_answer = row
             if not coun_question or not coun_answer:
                 continue
 
-            content_text = f"질문: {row['coun_question']}\n답변: {row['coun_answer']}"
+            content_text = f"질문: {coun_question}\n답변: {coun_answer}"
             embedding = get_embedding(content_text)
 
             payload = {
@@ -658,9 +657,8 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
             }
 
             point = PointStruct(
-                id=point_id,
+                id=coun_no,
                 vector=embedding.tolist(),
                 payload=payload
             )
             client.upsert(collection_name=collection_name, points=[point])
-            point_id += 1
