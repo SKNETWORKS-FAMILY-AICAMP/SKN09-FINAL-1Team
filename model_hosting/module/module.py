@@ -640,8 +640,9 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
             SELECT 
                 call_counsel.coun_question,
                 call_counsel.coun_answer
-            FROM call_mate
-            JOIN call_counsel ON call_mate.call_no = call_counsel.call_no
+            FROM call_counsel
+            WHERE call_counsel.coun_question IS NOT NULL
+              AND call_counsel.coun_answer IS NOT NULL;
         """)
 
         rows = cursor.fetchall()
