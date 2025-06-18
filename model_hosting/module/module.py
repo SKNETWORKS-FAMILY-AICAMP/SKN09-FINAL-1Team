@@ -25,6 +25,7 @@ import whisperx
 import json
 import uuid
 import pymysql
+from pymysql.cursors import DictCursor
 import re
 import torch
 import ollama
@@ -630,12 +631,12 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
         user=DB_USER,
         password=DB_PASSWORD,
         db=DB_NAME,
-        charset=DB_CHARSET
+        charset=DB_CHARSET,
+        cursorclass=DictCursor
     )
     conn = checkpoint._get_connection()
 
-    with conn.cursor(dictionary=True) as cursor:
-        # 별칭 없이 테이블명 직접 사용
+    with conn.cursor() as cursor:
         cursor.execute("""
             SELECT 
                 call_mate.call_no,
