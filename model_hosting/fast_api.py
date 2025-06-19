@@ -544,7 +544,7 @@ async def delete_chat_room(chat_no: int, request: Request):
 def create_vectors(collection_name: str):
     if collection_name == "wlmmate_call":
         init_qdrant_from_call_db(collection_name)
-    elif collection_name == "wlmmate_query":
+    elif collection_name == "wlmmate_civil":
         init_qdrant_from_querymate()
     else:
         raise HTTPException(status_code=400, detail=f"Unknown collection name: {collection_name}")

@@ -287,7 +287,7 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
                 print(f"[{collection_name}] upsert 실패 ({coun_no}): {e}")
 
 
-def init_qdrant_from_querymate(collection_name = "wlmmate_query"):
+def init_qdrant_from_querymate(collection_name = "wlmmate_civil"):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
