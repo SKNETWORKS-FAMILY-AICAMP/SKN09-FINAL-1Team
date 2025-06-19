@@ -38,7 +38,8 @@ FOLDER_TO_COLLECTION = {
     "사업": "business",
     "훈령": "directive",
     "민원": "civil",
-    "콜메이트": "call"
+    "콜메이트": "call",
+    "쿼리메이트": "query",
 }
 
 def get_embedding(text: str):
@@ -255,7 +256,57 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
                 vector=embedding.tolist(),
                 payload=payload
             )
-            client.upsert(collection_name=collection_name, points=[point])
+            try:
+                client.upsert(collection_name=collection_name, points=[point])
+            except Exception as e:
+                print(f"[{collection_name}] upsert 실패 ({coun_no}): {e}")
+
+
+def init_qdrant_from_querymate(collection_name = "wlmmate_query"):
+    if not client.collection_exists(collection_name=collection_name):
+        client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+        )
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                query_mate.query_no,
+                query_mate.query_text,
+                query_response.res_text
+            FROM query_mate
+            JOIN query_response ON query_mate.query_no = query_response.query_no
+            WHERE query_response.res_state IN (1, 2)
+        """)
+        rows = cursor.fetchall()
+
+        for row in rows:
+            query_no, query_text, res_text = row
+            if not query_text.strip() or not res_text.strip():
+                continue
+
+            content_text = f"질문: {query_text}\n답변: {res_text}"
+            embedding = get_embedding(content_text)
+            if embedding is None:
+                continue
+
+            payload = {
+                "content": content_text,
+                "query_no": query_no
+            }
+
+            point = PointStruct(
+                id=query_no,
+                vector=embedding.tolist(),
+                payload=payload
+            )
+
+            try:
+                client.upsert(collection_name=collection_name, points=[point])
+            except Exception as e:
+                print(f"[{collection_name}] upsert 실패 ({query_no}): {e}")
+
 
 def delete_point_by_id(collection_name: str, point_id: int):
     if client.collection_exists(collection_name=collection_name):

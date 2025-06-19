@@ -8,7 +8,7 @@ import os
 import torch
 import whisperx
 import ollama
-from qdrant_db.qdrant_loader import init_qdrant_from_call_db, delete_point_by_id
+from qdrant_db.qdrant_loader import init_qdrant_from_call_db, delete_point_by_id, init_qdrant_from_querymate
 from qdrant_db.qdrant_router import upload_vectors, search_vectors, delete_vectors, SearchRequest, UploadRequest
 from model_hosting.extraction.file_base_extraction import get_extractor_by_extension
 from model_hosting.extraction.prompt_extraction import PromptExtraction
@@ -541,9 +541,15 @@ async def delete_chat_room(chat_no: int, request: Request):
         conn.close()
 
 @router.post("/create_vectors")
-def upload_call_vectors(collection_name="wlmmate_call"):
-    init_qdrant_from_call_db(collection_name=collection_name)
-    return {"success": True, "deleted_collection": collection_name}
+def create_vectors(collection_name: str):
+    if collection_name == "wlmmate_call":
+        init_qdrant_from_call_db(collection_name)
+    elif collection_name == "wlmmate_query":
+        init_qdrant_from_querymate()
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown collection name: {collection_name}")
+    return {"success": True, "collection": collection_name}
+
 
 @router.delete("/delete_vectors")
 def delete_conn_vectors(collection_name: str = Query(..., description="삭제할 Qdrant 컬렉션 이름")):

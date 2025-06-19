@@ -31,6 +31,16 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
     }
   };
 
+  const updateQdrantFromDB = async () => {
+    try {
+      await fetch('/model/create_vectors?collection_name=wlmmate_query', {
+        method: 'POST'
+      })
+    } catch (err) {
+      console.error("컬렉션 저장 실패:", err);
+    }
+  };
+
 
   const handleClick = async (action) => {
     switch (action) {
@@ -38,6 +48,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
         await updateAnswerOnServer(answer, 1); // 상태 1 = 승인
         onStatusChange(data.id, '승인');
         setEditing(false);
+        await updateQdrantFromDB();
         break;
       case '수정':
         setEditing(true);
@@ -47,6 +58,7 @@ const QuestionItem = ({ data, onDelete, onStatusChange }) => {
         setEditing(false);
         await updateAnswerOnServer(tempAnswer, 2); // 상태 2 = 수정완료
         onStatusChange(data.id, '수정완료');
+        await updateQdrantFromDB();
         break;
       case '수정취소':
         setTempAnswer(answer);
