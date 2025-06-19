@@ -125,10 +125,14 @@ async def ask(
                     for res in results
                 ]
             )
-            # 웹 검색 결과는 DB에 저장하지 않는 것으로 판단하여, 이전 메시지만 저장
-            chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
+            # 검색 결과를 AI 메시지로 만들어 메모리에 반영
+            agent_response_content = f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}"
+            ai_message = AIMessage(content=agent_response_content)
+            all_messages = current_messages + [ai_message]
+            chat_no = checkpoint.save_tuple(config, all_messages, current_recall_memories)
+
             return {
-                "answer": f"문서를 기반으로 유사 사업을 검색한 결과입니다 (검색어: {search_query}):\n\n{results_text}",
+                "answer": agent_response_content,
                 "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
                 "chat_no": chat_no
             }
@@ -177,9 +181,14 @@ async def ask(
                 for res in results
             ]
         )
-        chat_no = checkpoint.save_tuple(config, current_messages, current_recall_memories)
+        # 검색 결과를 AI 메시지로 만들어 메모리에 반영
+        agent_response_content = f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}"
+        ai_message = AIMessage(content=agent_response_content)
+        all_messages = current_messages + [ai_message]
+        chat_no = checkpoint.save_tuple(config, all_messages, current_recall_memories)
+
         return {
-            "answer": f"인터넷에서 '{search_query}' 관련 정보를 검색한 결과입니다:\n\n{results_text}",
+            "answer": agent_response_content,
             "evaluation_criteria": "해당 모드에서는 평가 기준 추출이 제공되지 않습니다.",
             "chat_no": chat_no
         }
