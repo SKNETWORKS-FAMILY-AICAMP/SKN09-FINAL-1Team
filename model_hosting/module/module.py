@@ -560,7 +560,7 @@ def feedback_model(qna_data):
     print(qna_data)
     model = ChatOllama(model="qwen2.5")
     qna_text = "".join(f"[질문: {qna['question']}\n답변: {qna['answer']}\n\n" for qna in qna_data)
-    context = load_qdrant_db(question=qna_text, collection_name="wlmmate_call")
+    context = load_qdrant_db(question=qna_text, collection_name="wlmmate_all")
     prompt = prompt_extraction.make_feedback_prompt(qna_data, context)
     response = model.invoke(prompt)
 
