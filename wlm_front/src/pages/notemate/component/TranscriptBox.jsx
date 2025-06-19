@@ -282,7 +282,7 @@ const TranscriptBox = forwardRef((props, ref) => {
         onChange={(e) => setSummary(e.target.value)}
         placeholder="요약 결과"
         rows={10}
-        readOnly={true}
+        disabled={step !== 'summarized'}
       />
 
       <button
