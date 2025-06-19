@@ -7,7 +7,7 @@
 # 목차
 1. [팀 소개](#1팀-소개)
 2. [프로젝트 개요](#2-프로젝트-개요)
-   - [1) 프로젝트 개요](#1-프로젝트-개요-1)
+   - [1) 프로젝트 개요](#1-프로젝트-개요)
    - [2) 필요성 및 배경](#2-필요성-및-배경)
    - [3) 목표](#3-목표)
    - [4) 구현 기능](#4-구현-기능)
@@ -46,11 +46,11 @@
     </td>
   </tr>
   <tr>
-    <td align="center"><img src="./images/영서.jpg" width="80px" /></td>
-    <td align="center"><img src="./images/광운.jpg" width="80px" /></td>
-    <td align="center"><img src="./images/다인.png" width="100px" /></td>
-    <td align="center"><img src="./images/수연.jpg" width="100px" /></td>
-    <td align="center"><img src="./images/이현.jpg" width="100px" /></td>
+    <td align="center"><img src="https://avatars.githubusercontent.com/u/190351737?v=4" width="100px" /></td>
+    <td align="center"><img src="https://avatars.githubusercontent.com/u/91147494?v=4" width="100px" /></td>
+    <td align="center"><img src="https://avatars.githubusercontent.com/u/130668289?v=4" width="100px" /></td>
+    <td align="center"><img src="https://avatars.githubusercontent.com/u/144273482?v=4" width="100px" /></td>
+    <td align="center"><img src="https://avatars.githubusercontent.com/u/192313693?v=4" width="100px" /></td>
    </tr>
 </table>
 
@@ -208,7 +208,7 @@
 | **STT (음성 인식)** | <img src="https://img.shields.io/badge/WhisperX-FF6B6B?logo=OpenAI&logoColor=white"> | 회의/콜 녹음 텍스트 변환 |
 | **벡터DB** | <img src="https://img.shields.io/badge/Qdrant-FF4C4C?logo=qdrant&logoColor=white"> | 문서 벡터화 및 유사도 검색 저장소 |
 | **문서 임베딩** | <img src="https://img.shields.io/badge/SBERT-all--MiniLM--L6--v2-blue"> | Sentence Transformers 기반 텍스트 임베딩 |
-| **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP Parser-FF9900?logo=hancom&logoColor=white"> | 비정형 문서 구조 파싱 및 JSON 저장 |
+| **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP-olefile-FF990"> | 비정형 문서 구조 파싱 및 JSON 저장 |
 | **데이터 저장소** | <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Qdrant_Client-FF4C4C?logo=qdrant&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
 | **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> | 모든 서비스 도커 컨테이너화 및 자동 실행 스크립트 포함 |
 | **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | 프론트에서 사용자 흐름에 따라 백엔드/LLM 개별 호출. |
