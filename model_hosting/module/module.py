@@ -259,11 +259,12 @@ class MySQLCheckpoint:
                         user_msg, bot_msg
                     )
                     try:
-                        title = (
+                        uncleaned_title = (
                             OllamaHosting("qwen2.5", title_prompt)
                             .get_model_response()
                             .strip()
                         )
+                        title = clean_korean_only(uncleaned_title)
                         print("=> 생성된 제목:", title)
                     except Exception as e:
                         print("=> 제목 생성 실패:", e)
