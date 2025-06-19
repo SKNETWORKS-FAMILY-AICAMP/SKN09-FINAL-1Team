@@ -362,16 +362,6 @@ const MainContent = ({ searchParams }) => {
                               {qa.audioFileName}
                             </a>
                           </div>
-                          <div className={styles.fileInfoRow}>
-                            <strong>원본 텍스트:</strong>
-                            <a
-                              href={`/api/download/${qa.textFileName}`}
-                              download={qa.textFileName}
-                              className={styles.downloadLink}
-                            >
-                              {qa.textFileName}
-                            </a>
-                          </div>
                         </div>
                       </div>
                       <div className={styles.feedbackInfo}>
