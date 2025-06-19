@@ -424,7 +424,7 @@ SKN09-FINAL-1Team/
 
 #### 비정형 문서 (HWP, HWPX, PDF)
 
-- **텍스트 추출**: `pdfplumber`, `python-hwp`, `fitz` 등으로 페이지 단위 추출
+- **텍스트 추출**: `pdfplumber`, `olefile` 등으로 페이지 단위 추출
 - **표 추출**: 표 탐지 및 셀 단위 데이터 리스트화
 - **이미지 추출**: `PyMuPDF` + `PIL.Image`를 사용하여 PNG 저장
 - **결과 저장**: JSON 구조로 각 페이지의 텍스트, 표, 이미지 저장
@@ -457,13 +457,13 @@ SKN09-FINAL-1Team/
 
 ### 4) 텍스트 임베딩 및 벡터화
 
-- **임베딩 모델**: `sentence-transformers/all-MiniLM-L6-v2`
+- **임베딩 모델**: `BM-K/KoSimCSE-roberta`
 - **임베딩 방식**:
   - `AutoTokenizer` → 토큰화
   - `AutoModel` → 문장 임베딩
   - 평균 풀링 → 최종 벡터 생성
 - **활용 방식**:
-  - FAISS 기반 벡터 검색
+  - Qdrant 기반 벡터 검색
   - 유사 문서 탐색 + RAG QA 응답 생성
 
 
@@ -517,7 +517,7 @@ SKN09-FINAL-1Team/
 
 ### 벡터 DB 임베딩 및 검색 구조
 
-- **SentenceTransformer 기반 all-MiniLM-L6-v2** 임베딩 사용
+- **SentenceTransformer 기반 BM-K/KoSimCSE-roberta** 임베딩 모델 사용
 - **Qdrant 벡터 DB**에 저장 후, LangChain으로 LLM 검색 연결
 - **FAISS와 비교 실험 결과**, Qdrant가 문서 응답 일관성 및 검색속도에서 우수한 성능을 보임 
 
