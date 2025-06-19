@@ -42,19 +42,26 @@ FOLDER_TO_COLLECTION = {
     "쿼리메이트": "query",
 }
 
+
 def get_embedding(text: str):
-    inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         outputs = model(**inputs)
     return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
+
 
 def clean_doc(doc):
     질문 = doc.get("질문", "").split("\n")[0].strip()
     답변 = doc.get("답변", "")
     unwanted_keywords = ["담당부서", "관련법령", "첨부파일"]
-    cleaned_lines = [line for line in 답변.split("\n") if not any(keyword in line for keyword in unwanted_keywords)]
+    cleaned_lines = [
+        line
+        for line in 답변.split("\n")
+        if not any(keyword in line for keyword in unwanted_keywords)
+    ]
     답변 = "\n".join(cleaned_lines).strip()
     return f"질문: {질문}\n답변: {답변}"
+
 
 def init_qdrant_from_folders(base_folder="../data/preprocess"):
     for folder in os.listdir(base_folder):
@@ -66,13 +73,17 @@ def init_qdrant_from_folders(base_folder="../data/preprocess"):
         if not client.collection_exists(collection_name=collection_name):
             client.recreate_collection(
                 collection_name=collection_name,
-                vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+                vectors_config=VectorParams(
+                    size=embedding_dim, distance=Distance.COSINE
+                ),
             )
         file_idx = 0
         for filename in os.listdir(folder_path):
             if not filename.endswith(".json"):
                 continue
-            with open(os.path.join(folder_path, filename), 'r', encoding='utf-8') as file:
+            with open(
+                os.path.join(folder_path, filename), "r", encoding="utf-8"
+            ) as file:
                 documents = json.load(file)
             for doc in documents:
                 if not isinstance(doc, dict):
@@ -82,17 +93,24 @@ def init_qdrant_from_folders(base_folder="../data/preprocess"):
                 payload = {"content": embedding_input}
                 client.upsert(
                     collection_name=collection_name,
-                    points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                    points=[
+                        PointStruct(
+                            id=file_idx, vector=embedding.tolist(), payload=payload
+                        )
+                    ],
                 )
                 file_idx += 1
 
-def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_name="wlmmate_civil"):
+
+def init_qdrant_from_file(
+    civil_data_path="../data/civil_data.json", collection_name="wlmmate_civil"
+):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
         )
-    with open(civil_data_path, 'r', encoding='utf-8') as file:
+    with open(civil_data_path, "r", encoding="utf-8") as file:
         documents = json.load(file)
     file_idx = 0
     for doc in documents:
@@ -103,20 +121,23 @@ def init_qdrant_from_file(civil_data_path="../data/civil_data.json", collection_
         payload = {"content": embedding_input}
         client.upsert(
             collection_name=collection_name,
-            points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+            points=[
+                PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)
+            ],
         )
         file_idx += 1
+
 
 def init_qdrant_combined_collection(
     base_folder="../data/preprocess",
     civil_data_path="../data/civil_data.json",
-    collection_name="wlmmate_all"
+    collection_name="wlmmate_all",
 ):
     # 컬렉션 초기화
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
         )
 
     file_idx = 0
@@ -129,50 +150,49 @@ def init_qdrant_combined_collection(
         for filename in os.listdir(folder_path):
             if not filename.endswith(".json"):
                 continue
-            with open(os.path.join(folder_path, filename), 'r', encoding='utf-8') as file:
+            with open(
+                os.path.join(folder_path, filename), "r", encoding="utf-8"
+            ) as file:
                 documents = json.load(file)
             for doc in documents:
                 if not isinstance(doc, dict):
                     continue
                 embedding_input = "\n".join([f"{k}: {v}" for k, v in doc.items() if v])
                 embedding = get_embedding(embedding_input)
-                payload = {
-                    "content": embedding_input,
-                    "source": f"{folder}/{filename}"
-                }
+                payload = {"content": embedding_input, "source": f"{folder}/{filename}"}
                 client.upsert(
                     collection_name=collection_name,
-                    points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                    points=[
+                        PointStruct(
+                            id=file_idx, vector=embedding.tolist(), payload=payload
+                        )
+                    ],
                 )
                 file_idx += 1
 
     # 민원 데이터 통합 삽입
     if os.path.exists(civil_data_path):
-        with open(civil_data_path, 'r', encoding='utf-8') as file:
+        with open(civil_data_path, "r", encoding="utf-8") as file:
             documents = json.load(file)
         for doc in documents:
             if not isinstance(doc, dict):
                 continue
             embedding_input = clean_doc(doc)
             embedding = get_embedding(embedding_input)
-            payload = {
-                "content": embedding_input,
-                "source": "민원/civil_data.json"
-            }
+            payload = {"content": embedding_input, "source": "민원/civil_data.json"}
             client.upsert(
                 collection_name=collection_name,
-                points=[PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)]
+                points=[
+                    PointStruct(id=file_idx, vector=embedding.tolist(), payload=payload)
+                ],
             )
             file_idx += 1
-
 
 
 def load_qdrant_db(question, collection_name="wlmmate_law"):
     query_vector = get_embedding(question)
     search_results = client.search(
-        collection_name=collection_name,
-        query_vector=query_vector,
-        limit=3
+        collection_name=collection_name, query_vector=query_vector, limit=3
     )
     response = f"'{question}'에 대한 관련 문서 검색 결과:\n"
     if search_results:
@@ -182,6 +202,7 @@ def load_qdrant_db(question, collection_name="wlmmate_law"):
     else:
         response = f"{question}'에 관한 문서가 존재하지 않습니다."
     return response
+
 
 def split_into_chunks(text, max_length=300):
     text = text.strip()
@@ -196,11 +217,12 @@ def split_into_chunks(text, max_length=300):
         chunks.append(text)
     return chunks
 
+
 def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
     if not client.collection_exists(collection_name):
         client.recreate_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
         )
     points = []
     idx = 0
@@ -209,10 +231,13 @@ def store_temp_embedding(text_blocks, collection_name="qdrant_temp"):
         for chunk in sub_chunks:
             embedding = get_embedding(chunk)
             payload = {"content": chunk}
-            points.append(PointStruct(id=idx, vector=embedding.tolist(), payload=payload))
+            points.append(
+                PointStruct(id=idx, vector=embedding.tolist(), payload=payload)
+            )
             idx += 1
     client.upsert(collection_name=collection_name, points=points)
     return collection_name
+
 
 def delete_collection(collection_name="qdrant_temp"):
     if client.collection_exists(collection_name=collection_name):
@@ -225,17 +250,19 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
     if not client.collection_exists(collection_name=collection_name):
         client.recreate_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
         )
 
     with conn.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 call_counsel.coun_no,
                 call_counsel.coun_question,
                 call_counsel.coun_answer
             FROM call_counsel
-        """)
+        """
+        )
 
         rows = cursor.fetchall()
 
@@ -247,9 +274,7 @@ def init_qdrant_from_call_db(collection_name="wlmmate_call"):
             content_text = f"질문: {coun_question}\n답변: {coun_answer}"
             embedding = get_embedding(content_text)
 
-            payload = {
-                "content": content_text
-            }
+            payload = {"content": content_text}
 
             point = PointStruct(
                 id=coun_no,
@@ -312,7 +337,41 @@ def delete_point_by_id(collection_name: str, point_id: int):
     if client.collection_exists(collection_name=collection_name):
         client.delete(
             collection_name=collection_name,
-            points_selector=PointIdsList(points=[point_id])
+            points_selector=PointIdsList(points=[point_id]),
         )
         return True
     return False
+
+
+def move_collection_points(src_collection: str, dst_collection: str):
+    if not client.collection_exists(collection_name=src_collection):
+        return f"Source collection '{src_collection}' does not exist."
+    if not client.collection_exists(collection_name=dst_collection):
+        client.recreate_collection(
+            collection_name=dst_collection,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
+        )
+    all_points = client.scroll(collection_name=src_collection, limit=10000)[0]
+    if not all_points:
+        return f"No points found in '{src_collection}'."
+    # dst의 모든 content set 만들기
+    dst_points = client.scroll(collection_name=dst_collection, limit=10000)[0]
+    dst_contents = set()
+    for p in dst_points:
+        if p.payload and "content" in p.payload:
+            dst_contents.add(p.payload["content"])
+    # 중복 아닌 것만 추가
+    new_points = []
+    next_id = max([p.id for p in dst_points], default=-1) + 1
+    for i, p in enumerate(all_points):
+        content = p.payload.get("content") if p.payload else None
+        if content and content in dst_contents:
+            continue  # 이미 있음, 건너뜀
+        new_points.append(
+            PointStruct(
+                id=next_id + len(new_points), vector=p.vector, payload=p.payload
+            )
+        )
+    if new_points:
+        client.upsert(collection_name=dst_collection, points=new_points)
+    return f"Moved {len(new_points)} new points from '{src_collection}' to '{dst_collection}'."
