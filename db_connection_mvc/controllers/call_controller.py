@@ -52,6 +52,10 @@ async def save_call_info(
 
         # 파일 저장
         file_path = os.path.join(UPLOAD_DIR, file.filename)
+        # 파일명이 중복될 경우 (1) 반복 추가
+        while os.path.exists(file_path):
+            base, ext = os.path.splitext(os.path.basename(file_path))
+            file_path = os.path.join(UPLOAD_DIR, f"{base}(1){ext}")
         try:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)

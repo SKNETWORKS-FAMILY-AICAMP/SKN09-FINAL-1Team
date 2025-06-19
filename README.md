@@ -64,7 +64,14 @@
   <img src="https://github.com/user-attachments/assets/79db4aad-9fa6-44b0-bbed-713088275a65" width="300"/>
 </p>
 
- 워라벨 메이트는 조직 내부 구성원의 워크라이프 밸런스 향상을 목표로 한 LLM 기반 업무 자동화 시스템입니다. 일상 업무에서 시간을 많이 소모하는 작업들을 인공지능으로 자동화하여, 직원들이 보다 핵심 업무에 집중하고 업무 효율을 높일 수 있도록 도와줍니다. 주요 기능으로 **회의록 자동 작성 및 요약 (NoteMate)**, **사내 문서 기반 질의 응답 (ChatMate)**, **반복 민원 자동 응답 처리 (QueryMate)**, **전화 상담 녹취 분석 (CallMate)** 의 네 가지 모듈을 제공합니다. 각 모듈은 최신 **대규모 언어 모델(LLM)** 과 사내 데이터를 활용하여 자연어 처리 작업을 수행하며, 이를 통해 업무 생산성과 정확성을 높이고 업무 시간 단축에 기여합니다. 
+ 워라벨 메이트는 조직 내부 구성원의 워크라이프 밸런스 향상을 목표로 한 LLM 기반 업무 자동화 시스템입니다. 일상 업무에서 시간을 많이 소모하는 작업들을 인공지능으로 자동화하여, 직원들이 보다 핵심 업무에 집중하고 업무 효율을 높일 수 있도록 도와줍니다. 주요 기능으로 
+ * **회의록 자동 작성 및 요약 (NoteMate)** <br> 
+ * **사내 문서 기반 질의 응답 (ChatMate)** <br> 
+ * **반복 민원 자동 응답 처리 (QueryMate)** <br> 
+ * **전화 상담 녹취 분석 (CallMate)**
+
+ 네 가지 모듈을 제공합니다. 각 모듈은 최신 **대규모 언어 모델(LLM)** 과 사내 데이터를 활용하여 자연어 처리 작업을 수행하며, 이를 통해 **업무 생산성과 정확성**을 높이고 업무 시간 단축에 기여합니다. 
+
 
 ## 2) 필요성 및 배경
 
@@ -91,8 +98,8 @@
 
 #### 문서 응답 정확도 강화
 
-- GPT-4에 RAG를 추가하면 응답 충실도가 13% 증가하고, 환상적 답변(hallucination) 비율은 절반으로 감소 [^3]  
-- LLM이 최신 사내 문서를 참조하게 되어 **허위 정보(hallucination)**가 줄어듦 [^4][^5]
+- GPT-4에 RAG를 추가하면 응답 충실도가 13% 증가하고, 허위 정보(hallucination) 비율은 절반으로 감소 [^3]  
+- LLM이 최신 사내 문서를 참조하게 되어 허위 정보(hallucination)가 줄어듦 [^4][^5]
 
 #### 엔터프라이즈에 최적화된 정보 대응
 
@@ -110,8 +117,8 @@
 
 #### 기업 내부 자료 증가 및 비정형화
 
-- 문서, 채팅 기록, 규정 등의 비정형 데이터 증가  
-- 키워드 검색 방식의 한계를 RAG가 극복  
+- 문서, 채팅 기록, 규정 등의 **비정형 데이터** 증가  
+  - 키워드 검색 방식의 한계를 RAG가 극복  
 - 데이터 임베딩 기반 유사도 검색으로 **정확한 문서 추출** 가능 [^8]
 
 #### 기술 성숙도 상승
@@ -132,7 +139,7 @@
 
 ## 3) 목표
 
-‘WLB Mate’는 조직 내부 구성원의 워라밸 향상을 위해 반복적이고 수작업 기반의 행정 업무를 LLM 기반 인공지능 시스템으로 자동화하는 것을 주요 목표로 합니다.
+‘WLB Mate’는 조직 내부 구성원의 워라밸 향상을 위해 **반복적이고 수작업 기반의 행정 업무를 LLM 기반 인공지능 시스템으로 자동화하는 것**을 주요 목표로 합니다.
 
 - 실시간 문서 검색 + 정확한 질의응답 시스템 구축
   - 비정형 사내 문서(HWP, PDF 등)에서 유사 정보를 검색하고,
@@ -169,25 +176,27 @@
   - WhisperX 기반 음성 인식 → 회의 전체 음성 텍스트로 변환
   - 텍스트 요약 및 회의록 자동 작성
   - 회의록 요약본 자동 생성 및 이메일 전송
-  - 참여자 이메일 수정 후 회의 요약본 전송 가능
-  - **예외 흐름 대응**: 정보 미입력 시 에러 메시지 안내 / 중도 종료 시 녹취 미저장 처리
+
+- **예외 흐름 대응**: 정보 미입력 시 에러 메시지 안내 / 중도 종료 시 녹취 미저장 처리
  
 #### ChatMate (지식 도우미)
 - **챗봇 기반 실시간 문서 질의응답 시스템**:
-  - 메인페이지 → 챗봇 메뉴 클릭 → 질의 입력 시 AI 응답 생성
+  - 질의 입력 시 AI 응답 생성
   - 질의 유형 분석 → 정확한 응답 제공 (LangChain + Qwen 2.5 기반)
   - 과거 대화 히스토리 리스트 및 상세 내역 조회 가능
-  - 파일 업로드 기능으로 문서 기반 질의 대응
-  - **예외 흐름 대응**: 챗봇 내 검색 불가 시 메시지로 안내
+  - **파일 업로드 기능으로 문서 기반 질의 대응**
+
+- **예외 흐름 대응**: 챗봇 내 검색 불가 시 메시지로 안내
 
 #### QueryMate (민원 도우미)
 - **반복 민원 자동 응답 초안 생성 및 검수 프로세스**:
   - 민원 게시판 접속 → 민원 검색 및 상세 내용 조회
-  - 답변 초안 작성 → 작성 완료 후 확인 버튼 클릭 시 등록
+  - 답변 초안 작성 → 작성 완료 후 등록 버튼 클릭 시 등록
   - 등록된 답변에 대해 수정/삭제 가능
   - AI 답변 초안 확인 → 승인, 수정, 거부 기능 제공
   - 승인 시 게시판 등록 / 거부 시 목록에서 제거
-  - **예외 흐름 대응**: 검색 조건 미충족 시 안내 메시지 출력
+  
+- **예외 흐름 대응**: 검색 조건 미충족 시 안내 메시지 출력
 
 #### CallMate (콜 도우미)
 - **고객센터 등의 전화 상담 녹취 텍스트 변환하고 질문/응답 쌍 추출**:
@@ -195,23 +204,23 @@
   - LLM 분석으로 모범답안 자동 생성
   - 게시물로 등록되며, 상세 조회 및 출력 가능
   - 답변에 대한 AI의 피드백과 모법 답변 -> 상담 품질 개선
-  - **예외 흐름 대응**: 상담사 권한 없을 시 접근 불가 처리 / 검색 결과 없음 시 안내 출력
+- **예외 흐름 대응**: 상담사 권한 없을 시 접근 불가 처리 / 검색 결과 없음 시 안내 출력
 ---
 # 3. 기술 스택
 
-| 분류 | 기술 | 설명 |
-|------|------|------|
-| **Frontend** | <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" alt="Vite"> <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black"> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black"> <img src="https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white"> | React 기반 SPA 및 번들링, Nginx 리버스 프록시 구성 |
-| **Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white"> <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white"> | REST API 서버 (`fast_api.py`, `main.py`) |
-| **LLM 모델** | <img src="https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white"> <img src="https://img.shields.io/badge/Qwen2.5-6E56CF?logo=alibabacloud&logoColor=white"> | 로컬 LLM 구동 및 프롬프트 처리 |
-| **RAG 프레임워크** | <img src="https://img.shields.io/badge/LangChain-000000?logo=langchain&logoColor=white"> | 문서 검색 기반 RAG 처리 및 LLM 연동 |
-| **STT (음성 인식)** | <img src="https://img.shields.io/badge/WhisperX-FF6B6B?logo=OpenAI&logoColor=white"> | 회의/콜 녹음 텍스트 변환 |
-| **벡터DB** | <img src="https://img.shields.io/badge/Qdrant-FF4C4C?logo=qdrant&logoColor=white"> | 문서 벡터화 및 유사도 검색 저장소 |
-| **문서 임베딩** | <img src="https://img.shields.io/badge/SBERT-all--MiniLM--L6--v2-blue"> | Sentence Transformers 기반 텍스트 임베딩 |
-| **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP-olefile-FF990"> | 비정형 문서 구조 파싱 및 JSON 저장 |
-| **데이터 저장소** | <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Qdrant_Client-FF4C4C?logo=qdrant&logoColor=white"> | 원문 및 전처리 파일 로컬 저장 |
-| **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> | 모든 서비스 도커 컨테이너화 및 자동 실행 스크립트 포함 |
-| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> | 프론트에서 사용자 흐름에 따라 백엔드/LLM 개별 호출. |
+| 분류 | 기술 |
+|------|------|
+| **Frontend** | <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" alt="Vite"> <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black"> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black"> <img src="https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white"> | 
+| **Backend** | <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white"> <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white"> |
+| **LLM 모델** | <img src="https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white"> <img src="https://img.shields.io/badge/Qwen2.5-6E56CF?logo=alibabacloud&logoColor=white"> |
+| **RAG 프레임워크** | <img src="https://img.shields.io/badge/LangChain-000000?logo=langchain&logoColor=white"> |
+| **STT (음성 인식)** | <img src="https://img.shields.io/badge/WhisperX-FF6B6B?logo=OpenAI&logoColor=white"> |
+| **벡터DB** | <img src="https://img.shields.io/badge/Qdrant-FF4C4C?logo=qdrant&logoColor=white"> |
+| **문서 임베딩** | <img src="https://img.shields.io/badge/SBERT-all--MiniLM--L6--v2-blue"> |
+| **데이터 전처리** | <img src="https://img.shields.io/badge/PyMuPDF-00599C?logo=python&logoColor=white"> <img src="https://img.shields.io/badge/HWP-olefile-FF990"> |
+| **데이터 저장소** | <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Qdrant_Client-FF4C4C?logo=qdrant&logoColor=white"> |
+| **배포 환경** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/Shell%20Script-4EAA25?logo=gnu-bash&logoColor=white"> |
+| **API 연동** | <img src="https://img.shields.io/badge/REST%20API-6DB33F?logo=api&logoColor=white"> |
 
 
 
@@ -264,17 +273,17 @@ SKN09-FINAL-1Team/
 │   │   ├── call_controller.py
 │   │   ├── email_controller.py
 │   │   ├── employee_controller.py
-│   │   ├── query_controller.py
-│   │   └── __pycache__/
+│   │   └── query_controller.py
+│   │   
 │   ├── models/
 │   │   ├── __init__.py
-│   │   ├── database.py
-│   │   └── __pycache__/
+│   │   └── database.py
+│   │   
 │   └── services/
 │       ├── __init__.py
 │       ├── call_service.py
-│       ├── employee_service.py
-│       └── __pycache__/
+│       └── employee_service.py
+│       
 ├── model_hosting/
 │   ├── .env
 │   ├── Dockerfile
@@ -702,4 +711,3 @@ https://github.com/user-attachments/assets/02523717-e1e4-4366-b9ae-f630aa39c129
 [^8]: Wikipedia: RAG 정보  https://en.wikipedia.org/wiki/Retrieval-augmented_generation
 [^9]: Pinecone Serverless 아키텍처 – 벡터 DB + RAG 상용화  https://www.pinecone.io/blog/serverless-architecture/
 [^10]: WSJ: RAG 지속 확장 전략 – AI 기업 권고   https://www.wsj.com/articles/how-a-decades-old-technology-and-a-paper-from-meta-created-an-ai-industry-standard-354a810e 
-
