@@ -36,8 +36,8 @@ def search_vectors(request: SearchRequest):
 
 
 @qdrant_router.delete("/api/delete_vectors")
-def delete_vectors(collection_name):
-    collection_name = "qdrant_temp"
+def delete_vectors(collection_name = "qdrant_temp"):
+    collection_name = collection_name
     deleted = delete_collection(collection_name)
     if deleted:
         return {"message": f"Collection '{collection_name}' has been deleted."}

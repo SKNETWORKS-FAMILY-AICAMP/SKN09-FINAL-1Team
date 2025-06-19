@@ -552,7 +552,7 @@ def create_vectors(collection_name: str):
 
 
 @router.delete("/delete_vectors")
-def delete_conn_vectors(collection_name: str = Query(..., description="삭제할 Qdrant 컬렉션 이름")):
+def delete_conn_vectors(collection_name="qdrant_temp"):
     delete_vectors(collection_name)
     print(f"컬렉션 삭제: {collection_name}")
     print(f"!! {collection_name} 컬렉션 삭제")

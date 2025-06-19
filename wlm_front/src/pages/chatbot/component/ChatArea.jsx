@@ -131,7 +131,7 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
 
   const handleRemoveFile = async (index) => {
     try {
-      await fetch("/model/delete_temp_vectors?collection_name=qdrant_temp", {
+      await fetch("/model/delete_vectors", {
         method: 'DELETE',
       });
       console.log("Qdrant 컬렉션 삭제 완료");
