@@ -78,6 +78,7 @@ async def ask(
 
     # Ensure current_messages is a list and append the new HumanMessage
     current_messages = list(current_messages)
+    question = clean_korean_only(question)
     current_messages.append(HumanMessage(content=question))
 
     if files:
