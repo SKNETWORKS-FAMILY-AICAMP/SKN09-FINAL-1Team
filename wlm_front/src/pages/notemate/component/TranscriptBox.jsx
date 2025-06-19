@@ -245,11 +245,11 @@ const TranscriptBox = forwardRef((props, ref) => {
       {/* 변환 텍스트 영역 */}
       <textarea
         className="form-item"
-        value={liveText}
+        value={step === 'transcripted' ? transcript : liveText}
         onChange={(e) => setTranscript(e.target.value)}
         placeholder="변환된 텍스트"
         rows={10}
-        readOnly
+        readOnly={step === 'summarized' || step === 'recording' || isUploading}
       />
 
       <div className="button-row">
@@ -263,7 +263,7 @@ const TranscriptBox = forwardRef((props, ref) => {
         <button
           className="transcript-btn"
           onClick={handleSummarize}
-          disabled={!transcript || isSummarizing}
+          disabled={!transcript || isSummarizing || step === 'summarized'}
           style={{ marginRight: isSummarizing ? '8px' : 0 }}
         >
           요약
@@ -282,7 +282,7 @@ const TranscriptBox = forwardRef((props, ref) => {
         onChange={(e) => setSummary(e.target.value)}
         placeholder="요약 결과"
         rows={10}
-        disabled={step !== 'summarized'}
+        readOnly={true}
       />
 
       <button
