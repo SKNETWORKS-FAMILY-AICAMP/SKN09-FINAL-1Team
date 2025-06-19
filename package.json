@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "crypto-js": "^4.2.0",
-    "react-icons": "^5.5.0",
-    "react-media-recorder": "^1.7.1"
-  }
-}

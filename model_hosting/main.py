@@ -30,7 +30,3 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/model")
-
-
-### uvicorn main:app --reload
-# uvicorn main:app --reload --port 8001

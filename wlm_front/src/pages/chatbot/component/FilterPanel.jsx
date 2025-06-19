@@ -71,9 +71,6 @@ const FilterPanel = ({
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       )}
-      {/* <div style={{ textAlign: 'center', marginTop: '0.8rem' }}>
-        <button className={styles.searchBtn}>검색</button>
-      </div> */}
     </div>
   );
 };

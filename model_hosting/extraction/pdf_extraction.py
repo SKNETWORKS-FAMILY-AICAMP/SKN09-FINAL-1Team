@@ -22,20 +22,6 @@ class PDFExtraction:
                 })
                 
         return result
-
-    # def extract_tables(self, table):
-    #     if not table or not table[0]:
-    #         return ""
-    #     # 헤더와 구분선
-    #     header = "| " + " | ".join(table[0]) + " |"
-    #     separator = "| " + " | ".join(['---'] * len(table[0])) + " |"
-
-
-    #     # 데이터 행 나중에 주석 풀기
-    #     # table의 row[i]가 str이 아닌 경우 str로 변환 후 rows로 담기
-    #     rows = ["| " + " | ".join([str(cell) for cell in row]) + " |" for row in table[1:]]
-    #     # rows = ["| " + " | ".join(row) + " |" for row in table[1:]]
-    #     return "\n".join([header, separator] + rows)
     
     def extract_tables(self, table):
         if not table or not table[0]:

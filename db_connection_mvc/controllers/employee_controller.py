@@ -30,27 +30,6 @@ class EmployeeCreate(BaseModel):
 class PasswordResetRequest(BaseModel):
     newPassword: str
 
-
-# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# @router.post("/verify-password")
-# async def verify_password(request: Request, password_request: PasswordRequest):
-#     employee = request.session.get("employee")
-#     if not employee:
-#         raise HTTPException(status_code=401, detail="로그인된 사용자가 없습니다.")
-        
-#     emp_code = employee["emp_code"]
-    
-#     emp_pwd_info = await employee_service.get_emp_pwd(emp_code)
-#     if not emp_pwd_info:
-#         raise HTTPException(status_code=401, detail="비밀번호 정보를 찾을 수 없습니다.")
-
-#     hashed_pwd = emp_pwd_info.get("emp_pwd")
-#     if not pwd_context.verify(password_request.password, hashed_pwd):
-#         raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
-    
-#     return {"message": "비밀번호 확인 성공"}
-
 @router.get("/employees")
 async def get_all_employees():
     return await employee_service.get_all_employees()

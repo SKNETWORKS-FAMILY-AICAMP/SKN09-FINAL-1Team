@@ -43,8 +43,6 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
-        console.log("Login 성공 응답:", data);
 
         if (data.employee) {
           const userData = {

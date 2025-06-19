@@ -6,16 +6,13 @@ from datetime import date, datetime
 
 load_dotenv()
 
-
 class Database:
     def __init__(self):
         self.db_config = {
             "host": os.environ.get("MY_DB_HOST", ""),
-            # "host": os.environ.get("MY_DB_HOST", "localhost"),
             "port": int(os.environ.get("MY_DB_PORT", 3306)),
             "user": os.environ.get("MY_DB_USER", "wlb_mate"),
             "password": os.environ.get("MY_DB_PASSWORD", ""),
-            # "password": os.environ.get("MY_DB_PASSWORD", "1234"),
             "database": os.environ.get("MY_DB_NAME", "wlb_mate"),
             "charset": os.environ.get("MY_DB_CHARSET", "utf8mb4"),
         }

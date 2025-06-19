@@ -134,7 +134,6 @@ const ChatArea = ({ chatNo, setChatNo, newChat, onFirstMessageSent }) => {
       await fetch("/model/delete_vectors", {
         method: 'DELETE',
       });
-      console.log("Qdrant 컬렉션 삭제 완료");
     } catch (err) {
       console.error("Qdrant 컬렉션 삭제 실패:", err);
     }

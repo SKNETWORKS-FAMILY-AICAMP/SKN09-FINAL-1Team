@@ -46,21 +46,12 @@ async def ask(
     question: str = Form(...),
     files: List[UploadFile] = File(None)
 ):
-    
-    # 디버깅용 세션 로그 출력
-    print("🔍 request.session =", request.session)
-    print("🔍 session.get('employee') =", request.session.get("employee"))
-    print("🔍 request.cookies =", request.cookies)
 
     form = await request.form()
     new_chat_flag = form.get("new_chat", "false").lower() == "true"
 
-    print("=>new_chat =", form.get("new_chat"))
-    print("=>chat_no =", form.get("chat_no"))
-
     employee = request.session.get("employee")
     if not employee or "emp_code" not in employee:
-        print("❌ 세션 인증 실패 - 401 반환")
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
     user_id = employee["emp_code"]
@@ -93,7 +84,6 @@ async def ask(
         document_texts = []
         filenames = []
 
-        print("!! 파일 입력됨")
         for file in files[:5]:  # 최대 5개 처리
             suffix = os.path.splitext(file.filename)[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -106,7 +96,6 @@ async def ask(
             pages = extractor.extract_text()
             os.remove(tmp_path)
 
-            print("!! 텍스트 추출 완료")
             text = "\n\n".join([p['text'] for p in pages])
             document_texts.append((file.filename, text))
             filenames.append(file.filename)
@@ -117,9 +106,7 @@ async def ask(
 
 
         context_texts = search_vectors(SearchRequest(question=question, collection_name="qdrant_temp"))
-        print(context_texts)
         context = "\n".join(context_texts if isinstance(context_texts, list) else [context_texts])
-        print(context)
 
         # 웹 검색 모드: 첫 번째 파일 기준으로 검색어 추출
         if mode == "web_search":
@@ -229,10 +216,6 @@ async def miniask(input: QuestionInput):
 
     # 벡터 검색
     raw_results = search_vectors(SearchRequest(question=question, collection_name="wlmmate_all"))
-
-    # raw_results = search_resp.json().get("result", [])
-    # if isinstance(raw_results, str):
-    #     raw_results = [raw_results]
 
     context_text = "\n\n".join([r for r in raw_results if isinstance(r, str) and r.strip()])
 
@@ -577,8 +560,3 @@ async def check_session(request: Request):
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
     
     return {"employee": request.session["employee"]}
-
-
-
-### uvicorn main:app --reload
- 
