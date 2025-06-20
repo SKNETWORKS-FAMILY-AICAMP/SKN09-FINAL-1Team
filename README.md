@@ -682,23 +682,6 @@ https://github.com/user-attachments/assets/02523717-e1e4-4366-b9ae-f630aa39c129
 
 
 
-
-
-
-
---- 
-# 14. 회고 
-- 김영서:
-
-- 이광운:
-
-- 이윤재:
-
-- 이재혁:
-
-- 최재동:
-
-
 --- 
 ### 참고 및 출처
 [^1]: "Meet 10 AI trailblazers…" – Business Insider (JPMorgan, PwC, UPS 사례) https://www.businessinsider.com/ai-leaders-pwc-mastercard-accenture-ikea-tech-adoption-growth-strategy-2025-5
